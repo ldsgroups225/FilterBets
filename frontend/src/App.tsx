@@ -12,6 +12,8 @@ import { FixturesPage } from "./pages/FixturesPage"
 import { FixtureDetailPage } from "./pages/FixtureDetailPage"
 import { FiltersPage } from "./pages/FiltersPage"
 import { FilterDetailPage } from "./pages/FilterDetailPage"
+import { FilterBuilderPage } from "./pages/FilterBuilderPage"
+import { FilterEditPage } from "./pages/FilterEditPage"
 import { NotFound } from "./pages/NotFound"
 
 function App() {
@@ -65,11 +67,31 @@ function App() {
             }
           />
           <Route
+            path="/filters/new"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <FilterBuilderPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/filters/:id"
             element={
               <ProtectedRoute>
                 <Layout>
                   <FilterDetailPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/filters/:id/edit"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <FilterEditPage />
                 </Layout>
               </ProtectedRoute>
             }

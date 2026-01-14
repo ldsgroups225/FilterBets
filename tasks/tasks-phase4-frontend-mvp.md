@@ -137,17 +137,17 @@
   - [x] 6.7 Add toggle active/inactive filter functionality
   - [x] 6.8 Create FilterDetailPage showing filter info and matches
 
-- [ ] 7.0 Filter Builder
-  - [ ] 7.1 Define filter field options (field name, type, operators)
-  - [ ] 7.2 Create RuleRow component (field, operator, value inputs)
-  - [ ] 7.3 Create FilterBuilder component with add/remove rules
-  - [ ] 7.4 Implement bet type selector (home_win, away_win, draw, over_2_5, under_2_5)
-  - [ ] 7.5 Implement dynamic value inputs based on field type
-  - [ ] 7.6 Add form validation with zod and react-hook-form
-  - [ ] 7.7 Create FilterBuilderPage for new filters
-  - [ ] 7.8 Create filter edit mode (pre-populate form)
-  - [ ] 7.9 Add matching fixtures preview count
-  - [ ] 7.10 Test filter creation end-to-end
+- [x] 7.0 Filter Builder
+  - [x] 7.1 Define filter field options (field name, type, operators)
+  - [x] 7.2 Create RuleRow component (field, operator, value inputs)
+  - [x] 7.3 Create FilterBuilder component with add/remove rules
+  - [x] 7.4 Implement bet type selector (home_win, away_win, draw, over_2_5, under_2_5)
+  - [x] 7.5 Implement dynamic value inputs based on field type
+  - [x] 7.6 Add form validation with zod and react-hook-form
+  - [x] 7.7 Create FilterBuilderPage for new filters
+  - [x] 7.8 Create filter edit mode (pre-populate form)
+  - [x] 7.9 Add matching fixtures preview count
+  - [x] 7.10 Test filter creation end-to-end
 
 - [ ] 8.0 Backtest Feature
   - [ ] 8.1 Create backtest types (BacktestRequest, BacktestResponse)
