@@ -61,3 +61,58 @@ class BacktestSummary(BaseModel):
     run_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class StreakInfo(BaseModel):
+    """Streak information for wins/losses."""
+
+    current_streak: int = Field(..., description="Current streak (positive=wins, negative=losses)")
+    longest_winning_streak: int = Field(..., description="Longest winning streak")
+    longest_losing_streak: int = Field(..., description="Longest losing streak")
+
+
+class MonthlyBreakdown(BaseModel):
+    """Monthly performance breakdown."""
+
+    month: str = Field(..., description="Month in YYYY-MM format")
+    matches: int = Field(..., description="Number of matches")
+    wins: int = Field(..., description="Number of wins")
+    losses: int = Field(..., description="Number of losses")
+    profit: float = Field(..., description="Profit for the month")
+    win_rate: float = Field(..., description="Win rate percentage")
+
+
+class DrawdownInfo(BaseModel):
+    """Drawdown analysis."""
+
+    max_drawdown: float = Field(..., description="Maximum drawdown in stake units")
+    max_drawdown_pct: float = Field(..., description="Maximum drawdown as percentage")
+    current_drawdown: float = Field(..., description="Current drawdown")
+    peak_balance: float = Field(..., description="Peak balance achieved")
+
+
+class ProfitPoint(BaseModel):
+    """Single point in profit curve."""
+
+    match_number: int = Field(..., description="Sequential match number")
+    cumulative_profit: float = Field(..., description="Cumulative profit at this point")
+    date: datetime | None = Field(None, description="Match date")
+
+
+class BacktestAnalytics(BaseModel):
+    """Enhanced analytics for backtest results."""
+
+    streaks: StreakInfo
+    monthly_breakdown: list[MonthlyBreakdown]
+    drawdown: DrawdownInfo
+    profit_curve: list[ProfitPoint] = Field(
+        ..., max_length=1000, description="Profit curve data (max 1000 points)"
+    )
+
+
+class EnhancedBacktestResponse(BacktestResponse):
+    """Enhanced backtest response with analytics."""
+
+    analytics: BacktestAnalytics | None = Field(
+        None, description="Detailed analytics (optional)"
+    )

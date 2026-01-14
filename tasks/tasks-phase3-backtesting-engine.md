@@ -81,14 +81,14 @@
   - [x] 2.9 Add `GET /teams/{id}/computed-stats` endpoint
   - [x] 2.10 Create `backend/tests/test_stats_calculator.py` with unit tests
 
-- [ ] 3.0 Enhanced Backtest Analytics
-  - [ ] 3.1 Update `backend/app/schemas/backtest.py` with BacktestAnalytics schema
-  - [ ] 3.2 Add `calculate_streaks()` method to BacktestService
-  - [ ] 3.3 Add `calculate_monthly_breakdown()` method to BacktestService
-  - [ ] 3.4 Add `calculate_drawdown()` method to BacktestService
-  - [ ] 3.5 Add `generate_profit_curve()` method to BacktestService
-  - [ ] 3.6 Update `run_backtest()` to include analytics in response
-  - [ ] 3.7 Create `backend/tests/test_backtest_analytics.py` with analytics tests
+- [x] 3.0 Enhanced Backtest Analytics
+  - [x] 3.1 Update `backend/app/schemas/backtest.py` with BacktestAnalytics schema
+  - [x] 3.2 Add `calculate_streaks()` method to BacktestService
+  - [x] 3.3 Add `calculate_monthly_breakdown()` method to BacktestService
+  - [x] 3.4 Add `calculate_drawdown()` method to BacktestService
+  - [x] 3.5 Add `generate_profit_curve()` method to BacktestService
+  - [x] 3.6 Update `run_backtest()` to include analytics in response
+  - [x] 3.7 Create `backend/tests/test_backtest_analytics.py` with analytics tests
 
 - [ ] 4.0 Extended Filter Criteria
   - [ ] 4.1 Update `backend/app/schemas/filter.py` allowed_fields with new criteria
