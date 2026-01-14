@@ -73,18 +73,18 @@
 
 ## Tasks
 
-- [ ] 0.0 Create feature branch
-  - [ ] 0.1 Create and checkout branch `feature/phase4-frontend-mvp`
+- [x] 0.0 Create feature branch
+  - [x] 0.1 Create and checkout branch `feature/phase4-frontend-mvp`
 
-- [ ] 1.0 Project Setup & Configuration
-  - [ ] 1.1 Initialize Vite + React + TypeScript project in `frontend/`
-  - [ ] 1.2 Configure Tailwind CSS with custom theme colors
-  - [ ] 1.3 Initialize shadcn/ui and add base components (button, input, card, table)
-  - [ ] 1.4 Configure TanStack Query provider
-  - [ ] 1.5 Set up React Router with route definitions
-  - [ ] 1.6 Create API client with axios and interceptors
-  - [ ] 1.7 Set up environment variables (.env) for API base URL
-  - [ ] 1.8 Add additional shadcn components (select, dialog, sheet, tabs, badge, skeleton, toast)
+- [x] 1.0 Project Setup & Configuration
+  - [x] 1.1 Initialize Vite + React + TypeScript project in `frontend/`
+  - [x] 1.2 Configure Tailwind CSS with custom theme colors
+  - [x] 1.3 Initialize shadcn/ui and add base components (button, input, card, table)
+  - [x] 1.4 Configure TanStack Query provider
+  - [x] 1.5 Set up React Router with route definitions
+  - [x] 1.6 Create API client with axios and interceptors
+  - [x] 1.7 Set up environment variables (.env) for API base URL
+  - [x] 1.8 Add additional shadcn components (select, dialog, sheet, tabs, badge, skeleton, toast)
 
 - [ ] 2.0 Authentication System
   - [ ] 2.1 Create auth types (User, LoginRequest, RegisterRequest, AuthResponse)
