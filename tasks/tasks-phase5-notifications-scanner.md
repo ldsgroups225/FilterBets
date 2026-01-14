@@ -91,17 +91,17 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 4.7 Implement `run_full_scan()` - orchestrates full scan for all users, returns scan stats
   - [x] 4.8 Add scanner config to settings: lookahead_hours, max_notifications_per_scan
 
-- [ ] 5.0 Notification System
-  - [ ] 5.1 Create `backend/app/tasks/notification_tasks.py` module
-  - [ ] 5.2 Implement `format_notification_message()` - formats match data into Telegram message template
-  - [ ] 5.3 Implement `send_filter_alert` Celery task - sends single notification via Telegram API
-  - [ ] 5.4 Add rate limiting logic (max 30 msgs/sec) using Redis token bucket
-  - [ ] 5.5 Implement retry logic with exponential backoff for failed sends
-  - [ ] 5.6 Update FilterMatch.notification_sent on successful delivery
-  - [ ] 5.7 Create `backend/app/tasks/scanner_tasks.py` with `run_pre_match_scanner` task
-  - [ ] 5.8 Update `backend/app/tasks/celery_app.py` - add scanner schedule (2x, 4x, 6x daily options)
-  - [ ] 5.9 Add notification_tasks to Celery include list
-  - [ ] 5.10 Configure task routing: scanner tasks to 'scanner' queue, notification tasks to 'notifications' queue
+- [x] 5.0 Notification System
+  - [x] 5.1 Create `backend/app/tasks/notification_tasks.py` module
+  - [x] 5.2 Implement `format_notification_message()` - formats match data into Telegram message template
+  - [x] 5.3 Implement `send_filter_alert` Celery task - sends single notification via Telegram API
+  - [x] 5.4 Add rate limiting logic (max 30 msgs/sec) using Redis token bucket
+  - [x] 5.5 Implement retry logic with exponential backoff for failed sends
+  - [x] 5.6 Update FilterMatch.notification_sent on successful delivery
+  - [x] 5.7 Create `backend/app/tasks/scanner_tasks.py` with `run_pre_match_scanner` task
+  - [x] 5.8 Update `backend/app/tasks/celery_app.py` - add scanner schedule (2x, 4x, 6x daily options)
+  - [x] 5.9 Add notification_tasks to Celery include list
+  - [x] 5.10 Configure task routing: scanner tasks to 'scanner' queue, notification tasks to 'notifications' queue
 
 - [ ] 6.0 API Endpoints
   - [ ] 6.1 Create `backend/app/schemas/telegram.py` - TelegramLinkResponse, TelegramStatusResponse

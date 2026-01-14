@@ -15,6 +15,8 @@ celery_app = Celery(
     include=[
         "app.tasks.stats_tasks",
         "app.tasks.backtest_tasks",
+        "app.tasks.notification_tasks",
+        "app.tasks.scanner_tasks",
     ],
 )
 
@@ -40,10 +42,45 @@ celery_app.conf.beat_schedule = {
         "schedule": crontab(hour=2, minute=0),  # Run daily at 2 AM UTC
         "options": {"expires": 3600},  # Expire after 1 hour if not picked up
     },
+    # Pre-match scanner - 2x daily (default for free users)
+    "pre-match-scanner-morning": {
+        "task": "app.tasks.scanner_tasks.run_pre_match_scanner",
+        "schedule": crontab(hour=8, minute=0),  # 8 AM UTC
+        "options": {"expires": 1800},  # Expire after 30 minutes
+    },
+    "pre-match-scanner-afternoon": {
+        "task": "app.tasks.scanner_tasks.run_pre_match_scanner",
+        "schedule": crontab(hour=14, minute=0),  # 2 PM UTC
+        "options": {"expires": 1800},
+    },
+    # Additional scans for premium users (4x daily)
+    "pre-match-scanner-late-morning": {
+        "task": "app.tasks.scanner_tasks.run_pre_match_scanner",
+        "schedule": crontab(hour=11, minute=0),  # 11 AM UTC
+        "options": {"expires": 1800},
+    },
+    "pre-match-scanner-evening": {
+        "task": "app.tasks.scanner_tasks.run_pre_match_scanner",
+        "schedule": crontab(hour=21, minute=0),  # 9 PM UTC
+        "options": {"expires": 1800},
+    },
+    # Additional scans for premium users (6x daily)
+    "pre-match-scanner-early-morning": {
+        "task": "app.tasks.scanner_tasks.run_pre_match_scanner",
+        "schedule": crontab(hour=2, minute=30),  # 2:30 AM UTC
+        "options": {"expires": 1800},
+    },
+    "pre-match-scanner-late-afternoon": {
+        "task": "app.tasks.scanner_tasks.run_pre_match_scanner",
+        "schedule": crontab(hour=17, minute=0),  # 5 PM UTC
+        "options": {"expires": 1800},
+    },
 }
 
 # Optional: Configure task routes for different queues
 celery_app.conf.task_routes = {
     "app.tasks.stats_tasks.*": {"queue": "stats"},
     "app.tasks.backtest_tasks.*": {"queue": "backtest"},
+    "app.tasks.scanner_tasks.*": {"queue": "scanner"},
+    "app.tasks.notification_tasks.*": {"queue": "notifications"},
 }
