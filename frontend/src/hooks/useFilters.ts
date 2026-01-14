@@ -5,7 +5,8 @@ import {
   createFilter,
   updateFilter,
   deleteFilter,
-  getActiveFiltersCount
+  getActiveFiltersCount,
+  toggleFilterAlerts
 } from '@/services/filters'
 import type { CreateFilterRequest, UpdateFilterRequest } from '@/types/filter'
 
@@ -62,6 +63,19 @@ export function useDeleteFilter() {
     mutationFn: (id: number) => deleteFilter(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['filters'] })
+    },
+  })
+}
+
+export function useToggleFilterAlerts() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, enabled }: { id: number; enabled: boolean }) =>
+      toggleFilterAlerts(id, enabled),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['filters'] })
+      queryClient.invalidateQueries({ queryKey: ['filters', variables.id] })
     },
   })
 }

@@ -119,14 +119,14 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 6.13 Add `PATCH /filters/{id}/alerts` endpoint to filters router - enable/disable alerts
   - [x] 6.14 Register all new routers in `backend/app/main.py`
 
-- [ ] 7.0 Frontend Telegram Integration
-  - [ ] 7.1 Create `frontend/src/services/api/telegram.ts` - API client functions
-  - [ ] 7.2 Create `frontend/src/hooks/useTelegramStatus.ts` - hook for fetching/polling status
-  - [ ] 7.3 Create `frontend/src/components/TelegramLinkButton.tsx` - button that opens deep link
-  - [ ] 7.4 Create `frontend/src/components/TelegramStatus.tsx` - shows linked status with unlink option
-  - [ ] 7.5 Update Settings page to include Telegram linking section
-  - [ ] 7.6 Add alert toggle to filter list/detail pages
-  - [ ] 7.7 Show "Link Telegram first" message if user tries to enable alerts without linked account
+- [x] 7.0 Frontend Telegram Integration
+  - [x] 7.1 Create `frontend/src/services/api/telegram.ts` - API client functions
+  - [x] 7.2 Create `frontend/src/hooks/useTelegramStatus.ts` - hook for fetching/polling status
+  - [x] 7.3 Create `frontend/src/components/TelegramLinkButton.tsx` - button that opens deep link
+  - [x] 7.4 Create `frontend/src/components/TelegramStatus.tsx` - shows linked status with unlink option
+  - [x] 7.5 Update Settings page to include Telegram linking section
+  - [x] 7.6 Add alert toggle to filter list/detail pages
+  - [x] 7.7 Show "Link Telegram first" message if user tries to enable alerts without linked account
 
 - [ ] 8.0 Testing & Documentation
   - [ ] 8.1 Write unit tests for TelegramService (token generation, validation, linking)

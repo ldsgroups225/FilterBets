@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { IconFilter, IconTrash, IconEdit, IconToggleLeft, IconToggleRight } from '@tabler/icons-react'
+import { IconFilter, IconTrash, IconEdit, IconToggleLeft, IconToggleRight, IconBell, IconBellOff } from '@tabler/icons-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -14,17 +14,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { useTelegramStatus } from '@/hooks/useTelegramStatus'
 import type { Filter } from '@/types/filter'
 
 interface FilterCardProps {
   filter: Filter
   onDelete: (id: number) => void
   onToggleActive: (id: number, isActive: boolean) => void
+  onToggleAlerts?: (id: number, enabled: boolean) => void
 }
 
-export function FilterCard({ filter, onDelete, onToggleActive }: FilterCardProps) {
+export function FilterCard({ filter, onDelete, onToggleActive, onToggleAlerts }: FilterCardProps) {
   const navigate = useNavigate()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const { data: telegramStatus } = useTelegramStatus()
 
   const handleDelete = () => {
     onDelete(filter.id)
@@ -33,6 +36,14 @@ export function FilterCard({ filter, onDelete, onToggleActive }: FilterCardProps
 
   const handleToggleActive = () => {
     onToggleActive(filter.id, !filter.is_active)
+  }
+
+  const handleToggleAlerts = () => {
+    if (!telegramStatus?.linked) {
+      // Show message to link Telegram first
+      return
+    }
+    onToggleAlerts?.(filter.id, !filter.alerts_enabled)
   }
 
   return (
@@ -63,9 +74,19 @@ export function FilterCard({ filter, onDelete, onToggleActive }: FilterCardProps
                 <div className="font-medium mt-1">{filter.rules.length} condition(s)</div>
               </div>
               <div>
-                <span className="text-muted-foreground">Status:</span>
-                <div className="font-medium mt-1">
-                  {filter.is_active ? 'Active' : 'Inactive'}
+                <span className="text-muted-foreground">Alerts:</span>
+                <div className="font-medium mt-1 flex items-center gap-1">
+                  {filter.alerts_enabled ? (
+                    <>
+                      <IconBell className="h-3 w-3" />
+                      Enabled
+                    </>
+                  ) : (
+                    <>
+                      <IconBellOff className="h-3 w-3" />
+                      Disabled
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -79,6 +100,25 @@ export function FilterCard({ filter, onDelete, onToggleActive }: FilterCardProps
                 onClick={() => navigate(`/filters/${filter.id}`)}
               >
                 View Details
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleToggleAlerts}
+                title={
+                  !telegramStatus?.linked
+                    ? 'Link Telegram first to enable alerts'
+                    : filter.alerts_enabled
+                      ? 'Disable alerts'
+                      : 'Enable alerts'
+                }
+                disabled={!telegramStatus?.linked}
+              >
+                {filter.alerts_enabled ? (
+                  <IconBell className="h-4 w-4" />
+                ) : (
+                  <IconBellOff className="h-4 w-4" />
+                )}
               </Button>
               <Button
                 variant="outline"

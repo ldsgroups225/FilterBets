@@ -35,3 +35,11 @@ export const getActiveFiltersCount = async (): Promise<number> => {
   const response = await getFilters()
   return response.items.filter(f => f.is_active).length
 }
+
+// Toggle filter alerts
+export const toggleFilterAlerts = async (id: number, enabled: boolean): Promise<Filter> => {
+  const response = await apiClient.patch<Filter>(`/api/v1/filters/${id}/alerts`, {
+    alerts_enabled: enabled
+  })
+  return response.data
+}
