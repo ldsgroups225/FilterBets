@@ -124,4 +124,4 @@
   - [x] 6.6 Test enhanced backtest with analytics (covered in tests)
   - [x] 6.7 Test async backtest job flow (covered in tests)
   - [x] 6.8 Update API documentation (auto-generated via FastAPI)
-  - [ ] 6.9 Commit changes: `feat: add Phase 3 backtesting engine & stats calculator`
+  - [x] 6.9 Commit changes: `feat: add Phase 3 backtesting engine & stats calculator`
