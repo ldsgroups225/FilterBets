@@ -68,18 +68,18 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 2.6 Implement `unlink_telegram_account()` - clears telegram_chat_id and telegram_verified
   - [x] 2.7 Implement `get_deep_link_url()` - returns `https://t.me/{bot_username}?start={token}`
 
-- [ ] 3.0 Telegram Bot Implementation
-  - [ ] 3.1 Add `python-telegram-bot>=20.0` to backend dependencies in pyproject.toml
-  - [ ] 3.2 Create `backend/app/bot/__init__.py` module
-  - [ ] 3.3 Create `backend/app/bot/telegram_bot.py` with bot application setup
-  - [ ] 3.4 Implement `/start {token}` handler - validates token, links account, sends confirmation
-  - [ ] 3.5 Implement `/start` handler (no token) - sends welcome message with instructions
-  - [ ] 3.6 Implement `/status` handler - shows linked account email (masked) and active filter count
-  - [ ] 3.7 Implement `/filters` handler - lists user's active filters with alert status
-  - [ ] 3.8 Implement `/unlink` handler - unlinks Telegram from account with confirmation
-  - [ ] 3.9 Implement `/help` handler - shows available commands
-  - [ ] 3.10 Create `backend/app/bot/run_bot.py` entry point script for running bot as separate process
-  - [ ] 3.11 Add bot service to docker-compose.yml
+- [x] 3.0 Telegram Bot Implementation
+  - [x] 3.1 Add `python-telegram-bot>=20.0` to backend dependencies in pyproject.toml
+  - [x] 3.2 Create `backend/app/bot/__init__.py` module
+  - [x] 3.3 Create `backend/app/bot/telegram_bot.py` with bot application setup
+  - [x] 3.4 Implement `/start {token}` handler - validates token, links account, sends confirmation
+  - [x] 3.5 Implement `/start` handler (no token) - sends welcome message with instructions
+  - [x] 3.6 Implement `/status` handler - shows linked account email (masked) and active filter count
+  - [x] 3.7 Implement `/filters` handler - lists user's active filters with alert status
+  - [x] 3.8 Implement `/unlink` handler - unlinks Telegram from account with confirmation
+  - [x] 3.9 Implement `/help` handler - shows available commands
+  - [x] 3.10 Create `backend/app/bot/run_bot.py` entry point script for running bot as separate process
+  - [x] 3.11 Add bot service to docker-compose.yml
 
 - [ ] 4.0 Pre-Match Scanner Service
   - [ ] 4.1 Create `backend/app/services/scanner_service.py` with PreMatchScanner class

@@ -66,6 +66,65 @@ services:
     depends_on:
       - backend
 
+  # Celery Worker
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: filterbets-celery-worker
+    restart: unless-stopped
+    command: poetry run celery -A app.tasks.celery_app worker --loglevel=info
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://filterbets:filterbets@db:5432/filterbets
+      - DATABASE_URL_SYNC=postgresql://filterbets:filterbets@db:5432/filterbets
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Celery Beat Scheduler
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: filterbets-celery-beat
+    restart: unless-stopped
+    command: poetry run celery -A app.tasks.celery_app beat --loglevel=info
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://filterbets:filterbets@db:5432/filterbets
+      - DATABASE_URL_SYNC=postgresql://filterbets:filterbets@db:5432/filterbets
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Telegram Bot
+  telegram-bot:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: filterbets-telegram-bot
+    restart: unless-stopped
+    command: poetry run python -m app.bot.run_bot
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://filterbets:filterbets@db:5432/filterbets
+      - REDIS_URL=redis://redis:6379/0
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_BOT_USERNAME=${TELEGRAM_BOT_USERNAME:-FilterBetsBot}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
 volumes:
   postgres_data:
   redis_data:
