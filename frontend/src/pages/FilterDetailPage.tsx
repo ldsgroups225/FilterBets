@@ -24,8 +24,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { BacktestForm } from '@/components/filters/BacktestForm'
+import { BacktestResults } from '@/components/filters/BacktestResults'
 import { useFilter, useDeleteFilter, useUpdateFilter } from '@/hooks/useFilters'
+import { runBacktest } from '@/services/backtest'
 import { toast } from 'sonner'
+import type { BacktestRequest, BacktestResponse } from '@/types/backtest'
 
 export function FilterDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -37,6 +41,8 @@ export function FilterDetailPage() {
   const updateMutation = useUpdateFilter()
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [backtestResult, setBacktestResult] = useState<BacktestResponse | null>(null)
+  const [isRunningBacktest, setIsRunningBacktest] = useState(false)
 
   const handleDelete = async () => {
     try {
@@ -61,6 +67,20 @@ export function FilterDetailPage() {
     } catch (err) {
       toast.error('Failed to update filter')
       console.error('Update error:', err)
+    }
+  }
+
+  const handleRunBacktest = async (data: BacktestRequest) => {
+    setIsRunningBacktest(true)
+    try {
+      const result = await runBacktest(filterId, data)
+      setBacktestResult(result)
+      toast.success('Backtest completed successfully')
+    } catch (err) {
+      toast.error('Failed to run backtest')
+      console.error('Backtest error:', err)
+    } finally {
+      setIsRunningBacktest(false)
     }
   }
 
@@ -209,21 +229,23 @@ export function FilterDetailPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <IconChartBar className="h-5 w-5" />
-            Backtest Results
+            Backtest
           </CardTitle>
           <CardDescription>
             Test this filter against historical data to evaluate performance
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8">
-            <p className="text-muted-foreground mb-4">
-              Backtesting feature will be available soon
-            </p>
-            <Button variant="outline" disabled>
-              Run Backtest
-            </Button>
-          </div>
+          {backtestResult ? (
+            <div className="space-y-4">
+              <BacktestResults result={backtestResult} />
+              <Button variant="outline" onClick={() => setBacktestResult(null)}>
+                Run New Backtest
+              </Button>
+            </div>
+          ) : (
+            <BacktestForm onSubmit={handleRunBacktest} isLoading={isRunningBacktest} />
+          )}
         </CardContent>
       </Card>
 

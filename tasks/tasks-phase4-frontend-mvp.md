@@ -149,17 +149,17 @@
   - [x] 7.9 Add matching fixtures preview count
   - [x] 7.10 Test filter creation end-to-end
 
-- [ ] 8.0 Backtest Feature
-  - [ ] 8.1 Create backtest types (BacktestRequest, BacktestResponse)
-  - [ ] 8.2 Create backtest API service function
-  - [ ] 8.3 Create BacktestForm component (seasons, stake inputs)
-  - [ ] 8.4 Create BacktestResults component (metrics display)
-  - [ ] 8.5 Display win/loss/push counts and win rate
-  - [ ] 8.6 Display profit and ROI percentage
-  - [ ] 8.7 Display streak information
-  - [ ] 8.8 Create monthly breakdown table
-  - [ ] 8.9 Add loading state during backtest execution
-  - [ ] 8.10 Integrate backtest into FilterDetailPage
+- [x] 8.0 Backtest Feature
+  - [x] 8.1 Create backtest types (BacktestRequest, BacktestResponse)
+  - [x] 8.2 Create backtest API service function
+  - [x] 8.3 Create BacktestForm component (seasons, stake inputs)
+  - [x] 8.4 Create BacktestResults component (metrics display)
+  - [x] 8.5 Display win/loss/push counts and win rate
+  - [x] 8.6 Display profit and ROI percentage
+  - [x] 8.7 Display streak information
+  - [x] 8.8 Create monthly breakdown table
+  - [x] 8.9 Add loading state during backtest execution
+  - [x] 8.10 Integrate backtest into FilterDetailPage
 
 - [ ] 9.0 Polish & Testing
   - [ ] 9.1 Add toast notifications for success/error feedback
