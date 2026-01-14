@@ -10,6 +10,7 @@ from app.models.backtest_result import BacktestResult
 from app.models.filter import Filter
 from app.models.fixture import Fixture
 from app.schemas.backtest import (
+    BacktestAnalytics,
     BacktestRequest,
     BacktestResponse,
     BetType,
@@ -18,7 +19,6 @@ from app.schemas.backtest import (
     MonthlyBreakdown,
     ProfitPoint,
     StreakInfo,
-    BacktestAnalytics,
 )
 from app.services.filter_engine import FilterEngine
 

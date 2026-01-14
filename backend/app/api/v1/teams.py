@@ -17,7 +17,6 @@ from app.services.stats_calculator import (
     get_head_to_head,
     get_team_stats_for_match,
 )
-from app.services.team_stats_calculator import TeamStatsCalculator
 
 router = APIRouter(prefix="/teams", tags=["teams"])
 

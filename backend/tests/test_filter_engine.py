@@ -390,8 +390,9 @@ class TestFilterEngineComputedStats:
     @pytest.fixture
     async def setup_stats_data(self, db_session: AsyncSession):
         """Set up test data with computed stats."""
-        from app.models.team_computed_stats import TeamComputedStats
         from decimal import Decimal
+
+        from app.models.team_computed_stats import TeamComputedStats
 
         # Create league
         league = League(

@@ -1,7 +1,8 @@
 """Tests for enhanced backtest analytics."""
 
-import pytest
 from datetime import datetime, timedelta
+
+import pytest
 
 from app.models.filter import Filter
 from app.models.fixture import Fixture

@@ -1,10 +1,10 @@
 """BacktestJob model for async backtest job tracking."""
 
+import uuid
 from datetime import datetime
 from typing import Any
-import uuid
 
-from sqlalchemy import String, Integer, DateTime, ForeignKey, Text
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -32,11 +32,11 @@ class BacktestJob(Base):
     progress: Mapped[int] = mapped_column(Integer, default=0)  # 0-100
     result: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
-    
+
     # Request parameters
     bet_type: Mapped[str] = mapped_column(String(20), nullable=False)
     seasons: Mapped[str] = mapped_column(String(100), nullable=False)  # Comma-separated
-    
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     started_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

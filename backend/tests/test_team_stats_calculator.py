@@ -1,13 +1,13 @@
 """Tests for team statistics calculator service."""
 
-import pytest
-from decimal import Decimal
 from datetime import datetime, timedelta
+from decimal import Decimal
+
+import pytest
 
 from app.models.fixture import Fixture
 from app.models.league import League
 from app.models.team import Team
-from app.models.team_computed_stats import TeamComputedStats
 from app.services.team_stats_calculator import TeamStatsCalculator
 
 

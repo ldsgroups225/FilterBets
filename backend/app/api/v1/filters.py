@@ -228,7 +228,6 @@ async def run_backtest(
 
     # If async mode, create job and dispatch to Celery
     if async_mode:
-        from datetime import datetime
         from uuid import uuid4
 
         # Create backtest job

@@ -1,15 +1,15 @@
 """Tests for async backtest job management."""
 
-import pytest
 from datetime import datetime, timedelta
 from uuid import uuid4
+
+import pytest
 
 from app.models.backtest_job import BacktestJob
 from app.models.filter import Filter
 from app.models.fixture import Fixture
 from app.models.league import League
 from app.models.team import Team
-from app.schemas.backtest import BetType
 
 
 class TestBacktestJobs:
