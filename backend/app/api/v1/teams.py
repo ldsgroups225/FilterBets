@@ -8,8 +8,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_db
 from app.models.team import Team
+from app.models.team_computed_stats import TeamComputedStats
 from app.schemas.fixture import FixtureResponse
 from app.schemas.team import TeamFormResponse, TeamResponse, TeamStatsResponse
+from app.schemas.team_stats import ComputedStatsResponse
 from app.services.stats_calculator import (
     calculate_team_form,
     get_head_to_head,
@@ -122,3 +124,39 @@ async def get_head_to_head_matches(
     fixtures = await get_head_to_head(db, team1_id, team2_id, limit)
 
     return [FixtureResponse.model_validate(fixture) for fixture in fixtures]
+
+
+@router.get("/{team_id}/computed-stats", response_model=ComputedStatsResponse)
+async def get_team_computed_stats(
+    team_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    season_type: Annotated[int, Query(description="Season year")] = 2024,
+) -> ComputedStatsResponse:
+    """Get pre-computed team statistics for a season.
+
+    Args:
+        team_id: Team ESPN ID
+        db: Database session
+        season_type: Season year (default: 2024)
+
+    Returns:
+        Pre-computed team statistics
+
+    Raises:
+        HTTPException: 404 if stats not found
+    """
+    result = await db.execute(
+        select(TeamComputedStats).where(
+            TeamComputedStats.team_id == team_id,
+            TeamComputedStats.season_type == season_type,
+        )
+    )
+    stats = result.scalar_one_or_none()
+
+    if not stats:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Computed stats not found for team {team_id} in season {season_type}",
+        )
+
+    return ComputedStatsResponse.model_validate(stats)

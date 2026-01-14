@@ -9,7 +9,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.backtest_result import BacktestResult
 from app.models.filter import Filter
 from app.models.fixture import Fixture
-from app.schemas.backtest import BacktestRequest, BacktestResponse, BetType
+from app.schemas.backtest import (
+    BacktestAnalytics,
+    BacktestRequest,
+    BacktestResponse,
+    BetType,
+    DrawdownInfo,
+    EnhancedBacktestResponse,
+    MonthlyBreakdown,
+    ProfitPoint,
+    StreakInfo,
+)
 from app.services.filter_engine import FilterEngine
 
 
@@ -24,23 +34,24 @@ class BacktestService:
         self.filter_engine = FilterEngine(db)
 
     async def run_backtest(
-        self, filter_obj: Filter, request: BacktestRequest
-    ) -> BacktestResponse:
+        self, filter_obj: Filter, request: BacktestRequest, include_analytics: bool = False
+    ) -> BacktestResponse | EnhancedBacktestResponse:
         """
         Run a backtest for a filter against historical data.
 
         Args:
             filter_obj: Filter to backtest
             request: Backtest parameters
+            include_analytics: Whether to include detailed analytics
 
         Returns:
-            BacktestResponse with results
+            BacktestResponse or EnhancedBacktestResponse with results
         """
         # Check for cached result
         cached_result = await self._get_cached_result(
             filter_obj.id, request.bet_type, request.seasons
         )
-        if cached_result:
+        if cached_result and not include_analytics:
             return BacktestResponse(
                 filter_id=filter_obj.id,
                 bet_type=cached_result.bet_type,
@@ -65,6 +76,15 @@ class BacktestService:
 
         # Calculate metrics
         response = self._calculate_metrics(filter_obj.id, request, results)
+
+        # Add analytics if requested
+        if include_analytics:
+            analytics = self._generate_analytics(results, fixtures)
+            enhanced_response = EnhancedBacktestResponse(
+                **response.model_dump(),
+                analytics=analytics,
+            )
+            return enhanced_response
 
         # Cache the result
         await self._cache_result(filter_obj.id, request, response)
@@ -254,6 +274,215 @@ class BacktestService:
     def _parse_seasons(self, seasons_str: str) -> list[int]:
         """Parse comma-separated seasons string to list."""
         return [int(s) for s in seasons_str.split(",")]
+
+    def _generate_analytics(
+        self, results: list[dict[str, Any]], fixtures: list[Fixture]
+    ) -> BacktestAnalytics:
+        """Generate detailed analytics from backtest results."""
+        streaks = self.calculate_streaks(results)
+        monthly = self.calculate_monthly_breakdown(results, fixtures)
+        drawdown = self.calculate_drawdown(results)
+        profit_curve = self.generate_profit_curve(results, fixtures)
+
+        return BacktestAnalytics(
+            streaks=streaks,
+            monthly_breakdown=monthly,
+            drawdown=drawdown,
+            profit_curve=profit_curve,
+        )
+
+    def calculate_streaks(self, results: list[dict[str, Any]]) -> StreakInfo:
+        """Calculate winning and losing streaks.
+
+        Args:
+            results: List of bet results
+
+        Returns:
+            StreakInfo with streak statistics
+        """
+        if not results:
+            return StreakInfo(
+                current_streak=0,
+                longest_winning_streak=0,
+                longest_losing_streak=0,
+            )
+
+        current_streak = 0
+        longest_winning_streak = 0
+        longest_losing_streak = 0
+        temp_win_streak = 0
+        temp_loss_streak = 0
+
+        for result in results:
+            outcome = result["outcome"]
+
+            if outcome == "win":
+                temp_win_streak += 1
+                temp_loss_streak = 0
+                current_streak = temp_win_streak
+                longest_winning_streak = max(longest_winning_streak, temp_win_streak)
+
+            elif outcome == "loss":
+                temp_loss_streak += 1
+                temp_win_streak = 0
+                current_streak = -temp_loss_streak
+                longest_losing_streak = max(longest_losing_streak, temp_loss_streak)
+
+            # Pushes don't affect streaks
+
+        return StreakInfo(
+            current_streak=current_streak,
+            longest_winning_streak=longest_winning_streak,
+            longest_losing_streak=longest_losing_streak,
+        )
+
+    def calculate_monthly_breakdown(
+        self, results: list[dict[str, Any]], fixtures: list[Fixture]
+    ) -> list[MonthlyBreakdown]:
+        """Calculate monthly performance breakdown.
+
+        Args:
+            results: List of bet results
+            fixtures: List of fixtures
+
+        Returns:
+            List of MonthlyBreakdown objects
+        """
+        if not results or not fixtures:
+            return []
+
+        # Create fixture lookup
+        fixture_map = {f.id: f for f in fixtures}
+
+        # Group results by month
+        monthly_data: dict[str, dict[str, Any]] = {}
+
+        for result in results:
+            fixture = fixture_map.get(result["fixture_id"])
+            if not fixture or not fixture.match_date:
+                continue
+
+            month_key = fixture.match_date.strftime("%Y-%m")
+
+            if month_key not in monthly_data:
+                monthly_data[month_key] = {
+                    "matches": 0,
+                    "wins": 0,
+                    "losses": 0,
+                    "profit": 0.0,
+                }
+
+            monthly_data[month_key]["matches"] += 1
+            monthly_data[month_key]["profit"] += result["profit"]
+
+            if result["outcome"] == "win":
+                monthly_data[month_key]["wins"] += 1
+            elif result["outcome"] == "loss":
+                monthly_data[month_key]["losses"] += 1
+
+        # Convert to list of MonthlyBreakdown
+        breakdown = []
+        for month, data in sorted(monthly_data.items()):
+            evaluated = data["wins"] + data["losses"]
+            win_rate = (data["wins"] / evaluated * 100) if evaluated > 0 else 0.0
+
+            breakdown.append(
+                MonthlyBreakdown(
+                    month=month,
+                    matches=data["matches"],
+                    wins=data["wins"],
+                    losses=data["losses"],
+                    profit=round(data["profit"], 2),
+                    win_rate=round(win_rate, 2),
+                )
+            )
+
+        return breakdown
+
+    def calculate_drawdown(self, results: list[dict[str, Any]]) -> DrawdownInfo:
+        """Calculate drawdown statistics.
+
+        Args:
+            results: List of bet results
+
+        Returns:
+            DrawdownInfo with drawdown statistics
+        """
+        if not results:
+            return DrawdownInfo(
+                max_drawdown=0.0,
+                max_drawdown_pct=0.0,
+                current_drawdown=0.0,
+                peak_balance=0.0,
+            )
+
+        balance = 0.0
+        peak_balance = 0.0
+        max_drawdown = 0.0
+        current_drawdown = 0.0
+
+        for result in results:
+            balance += result["profit"]
+
+            # Update peak
+            if balance > peak_balance:
+                peak_balance = balance
+                current_drawdown = 0.0
+            else:
+                current_drawdown = peak_balance - balance
+                max_drawdown = max(max_drawdown, current_drawdown)
+
+        # Calculate percentage drawdown
+        max_drawdown_pct = (
+            (max_drawdown / peak_balance * 100) if peak_balance > 0 else 0.0
+        )
+
+        return DrawdownInfo(
+            max_drawdown=round(max_drawdown, 2),
+            max_drawdown_pct=round(max_drawdown_pct, 2),
+            current_drawdown=round(current_drawdown, 2),
+            peak_balance=round(peak_balance, 2),
+        )
+
+    def generate_profit_curve(
+        self, results: list[dict[str, Any]], fixtures: list[Fixture]
+    ) -> list[ProfitPoint]:
+        """Generate profit curve data points.
+
+        Args:
+            results: List of bet results
+            fixtures: List of fixtures
+
+        Returns:
+            List of ProfitPoint objects (max 1000 points)
+        """
+        if not results:
+            return []
+
+        # Create fixture lookup
+        fixture_map = {f.id: f for f in fixtures}
+
+        cumulative_profit = 0.0
+        profit_points = []
+
+        for idx, result in enumerate(results, 1):
+            cumulative_profit += result["profit"]
+            fixture = fixture_map.get(result["fixture_id"])
+
+            profit_points.append(
+                ProfitPoint(
+                    match_number=idx,
+                    cumulative_profit=round(cumulative_profit, 2),
+                    date=fixture.match_date if fixture else None,
+                )
+            )
+
+        # Downsample if too many points (keep every nth point)
+        if len(profit_points) > 1000:
+            step = len(profit_points) // 1000
+            profit_points = profit_points[::step][:1000]
+
+        return profit_points
 
     async def invalidate_cache(self, filter_id: int) -> None:
         """Invalidate all cached results for a filter."""
