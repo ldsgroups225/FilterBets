@@ -380,3 +380,276 @@ class TestFilterEngineDatabase:
         matches = await engine.find_matching_fixtures(rules, limit=5)
 
         assert len(matches) == 5
+
+
+
+@pytest.mark.asyncio
+class TestFilterEngineComputedStats:
+    """Test filter engine with computed stats fields."""
+
+    @pytest.fixture
+    async def setup_stats_data(self, db_session: AsyncSession):
+        """Set up test data with computed stats."""
+        from app.models.team_computed_stats import TeamComputedStats
+        from decimal import Decimal
+
+        # Create league
+        league = League(
+            league_id=1,
+            season_type=2024,
+            year=2024,
+            season_name="2024",
+            league_name="Test League",
+        )
+        db_session.add(league)
+
+        # Create teams
+        team1 = Team(team_id=1, name="Team1", display_name="Team One")
+        team2 = Team(team_id=2, name="Team2", display_name="Team Two")
+        db_session.add_all([team1, team2])
+        await db_session.commit()
+
+        # Create computed stats for team1
+        stats1 = TeamComputedStats(
+            team_id=1,
+            season_type=2024,
+            matches_played=10,
+            wins=6,
+            draws=2,
+            losses=2,
+            goals_scored=20,
+            goals_conceded=10,
+            goals_scored_avg=Decimal("2.00"),
+            goals_conceded_avg=Decimal("1.00"),
+            clean_sheets=4,
+            clean_sheet_pct=Decimal("40.00"),
+            failed_to_score=1,
+            failed_to_score_pct=Decimal("10.00"),
+            points=20,
+            points_per_game=Decimal("2.00"),
+            home_matches=5,
+            home_wins=4,
+            home_draws=1,
+            home_losses=0,
+            home_goals_scored_avg=Decimal("2.50"),
+            home_goals_conceded_avg=Decimal("0.80"),
+            away_matches=5,
+            away_wins=2,
+            away_draws=1,
+            away_losses=2,
+            away_goals_scored_avg=Decimal("1.50"),
+            away_goals_conceded_avg=Decimal("1.20"),
+            form_last5_wins=3,
+            form_last5_draws=1,
+            form_last5_losses=1,
+            form_last5_points=10,
+            form_last5_goals_scored=8,
+            form_last5_goals_conceded=5,
+            form_last10_wins=6,
+            form_last10_draws=2,
+            form_last10_losses=2,
+            form_last10_points=20,
+        )
+
+        # Create computed stats for team2
+        stats2 = TeamComputedStats(
+            team_id=2,
+            season_type=2024,
+            matches_played=10,
+            wins=3,
+            draws=3,
+            losses=4,
+            goals_scored=12,
+            goals_conceded=15,
+            goals_scored_avg=Decimal("1.20"),
+            goals_conceded_avg=Decimal("1.50"),
+            clean_sheets=2,
+            clean_sheet_pct=Decimal("20.00"),
+            failed_to_score=3,
+            failed_to_score_pct=Decimal("30.00"),
+            points=12,
+            points_per_game=Decimal("1.20"),
+            home_matches=5,
+            home_wins=2,
+            home_draws=2,
+            home_losses=1,
+            home_goals_scored_avg=Decimal("1.40"),
+            home_goals_conceded_avg=Decimal("1.20"),
+            away_matches=5,
+            away_wins=1,
+            away_draws=1,
+            away_losses=3,
+            away_goals_scored_avg=Decimal("1.00"),
+            away_goals_conceded_avg=Decimal("1.80"),
+            form_last5_wins=2,
+            form_last5_draws=1,
+            form_last5_losses=2,
+            form_last5_points=7,
+            form_last5_goals_scored=6,
+            form_last5_goals_conceded=7,
+            form_last10_wins=3,
+            form_last10_draws=3,
+            form_last10_losses=4,
+            form_last10_points=12,
+        )
+
+        db_session.add_all([stats1, stats2])
+
+        # Create fixture
+        fixture = Fixture(
+            event_id=1001,
+            league_id=1,
+            season_type=2024,
+            match_date=datetime(2024, 3, 15),
+            home_team_id=1,
+            away_team_id=2,
+            status_id=1,
+        )
+        db_session.add(fixture)
+        await db_session.commit()
+
+        return {"fixture": fixture, "team1": team1, "team2": team2}
+
+    async def test_filter_by_home_team_form_wins_last5(
+        self, db_session: AsyncSession, setup_stats_data
+    ):
+        """Test filtering by home team form wins (last 5 games)."""
+        engine = FilterEngine(db_session)
+
+        rules = [{"field": "home_team_form_wins_last5", "operator": ">=", "value": 3}]
+
+        fixtures = await engine.find_matching_fixtures(rules)
+
+        assert len(fixtures) == 1
+        assert fixtures[0].home_team_id == 1
+
+    async def test_filter_by_home_team_goals_avg(
+        self, db_session: AsyncSession, setup_stats_data
+    ):
+        """Test filtering by home team goals average."""
+        engine = FilterEngine(db_session)
+
+        rules = [{"field": "home_team_goals_avg", "operator": ">", "value": 1.5}]
+
+        fixtures = await engine.find_matching_fixtures(rules)
+
+        assert len(fixtures) == 1
+        assert fixtures[0].home_team_id == 1
+
+    async def test_filter_by_away_team_goals_avg(
+        self, db_session: AsyncSession, setup_stats_data
+    ):
+        """Test filtering by away team goals average."""
+        engine = FilterEngine(db_session)
+
+        rules = [{"field": "away_team_goals_avg", "operator": "<", "value": 1.5}]
+
+        fixtures = await engine.find_matching_fixtures(rules)
+
+        assert len(fixtures) == 1
+        assert fixtures[0].away_team_id == 2
+
+    async def test_filter_by_home_team_clean_sheet_pct(
+        self, db_session: AsyncSession, setup_stats_data
+    ):
+        """Test filtering by home team clean sheet percentage."""
+        engine = FilterEngine(db_session)
+
+        rules = [{"field": "home_team_clean_sheet_pct", "operator": ">=", "value": 30}]
+
+        fixtures = await engine.find_matching_fixtures(rules)
+
+        assert len(fixtures) == 1
+        assert fixtures[0].home_team_id == 1
+
+    async def test_filter_by_total_expected_goals(
+        self, db_session: AsyncSession, setup_stats_data
+    ):
+        """Test filtering by total expected goals (computed field)."""
+        engine = FilterEngine(db_session)
+
+        # home_goals_scored_avg (2.50) + away_goals_scored_avg (1.00) = 3.50
+        rules = [{"field": "total_expected_goals", "operator": ">", "value": 3.0}]
+
+        fixtures = await engine.find_matching_fixtures(rules)
+
+        assert len(fixtures) == 1
+
+    async def test_filter_by_multiple_stats_criteria(
+        self, db_session: AsyncSession, setup_stats_data
+    ):
+        """Test filtering with multiple computed stats criteria."""
+        engine = FilterEngine(db_session)
+
+        rules = [
+            {"field": "home_team_form_wins_last5", "operator": ">=", "value": 3},
+            {"field": "away_team_form_wins_last5", "operator": "<=", "value": 2},
+            {"field": "home_team_points_per_game", "operator": ">", "value": 1.5},
+        ]
+
+        fixtures = await engine.find_matching_fixtures(rules)
+
+        assert len(fixtures) == 1
+        assert fixtures[0].home_team_id == 1
+        assert fixtures[0].away_team_id == 2
+
+    async def test_filter_no_stats_available(self, db_session: AsyncSession):
+        """Test filtering when no computed stats are available."""
+        # Create fixture without stats
+        league = League(
+            league_id=99,
+            season_type=2025,
+            year=2025,
+            season_name="2025",
+            league_name="New League",
+        )
+        team1 = Team(team_id=99, name="NewTeam1", display_name="New Team 1")
+        team2 = Team(team_id=100, name="NewTeam2", display_name="New Team 2")
+        db_session.add_all([league, team1, team2])
+
+        fixture = Fixture(
+            event_id=9999,
+            league_id=99,
+            season_type=2025,
+            match_date=datetime(2025, 1, 1),
+            home_team_id=99,
+            away_team_id=100,
+            status_id=1,
+        )
+        db_session.add(fixture)
+        await db_session.commit()
+
+        engine = FilterEngine(db_session)
+
+        rules = [{"field": "home_team_goals_avg", "operator": ">", "value": 1.0}]
+
+        fixtures = await engine.find_matching_fixtures(rules)
+
+        # Should return no fixtures since stats don't exist
+        assert len(fixtures) == 0
+
+    async def test_filter_by_home_team_home_goals_avg(
+        self, db_session: AsyncSession, setup_stats_data
+    ):
+        """Test filtering by home team's home goals average."""
+        engine = FilterEngine(db_session)
+
+        rules = [{"field": "home_team_home_goals_avg", "operator": ">", "value": 2.0}]
+
+        fixtures = await engine.find_matching_fixtures(rules)
+
+        assert len(fixtures) == 1
+        assert fixtures[0].home_team_id == 1
+
+    async def test_filter_by_away_team_away_goals_avg(
+        self, db_session: AsyncSession, setup_stats_data
+    ):
+        """Test filtering by away team's away goals average."""
+        engine = FilterEngine(db_session)
+
+        rules = [{"field": "away_team_away_goals_avg", "operator": "<", "value": 1.5}]
+
+        fixtures = await engine.find_matching_fixtures(rules)
+
+        assert len(fixtures) == 1
+        assert fixtures[0].away_team_id == 2

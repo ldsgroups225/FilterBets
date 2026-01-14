@@ -90,16 +90,16 @@
   - [x] 3.6 Update `run_backtest()` to include analytics in response
   - [x] 3.7 Create `backend/tests/test_backtest_analytics.py` with analytics tests
 
-- [ ] 4.0 Extended Filter Criteria
-  - [ ] 4.1 Update `backend/app/schemas/filter.py` allowed_fields with new criteria
-  - [ ] 4.2 Update FilterEngine to join with team_computed_stats table
-  - [ ] 4.3 Implement `_build_stats_condition()` for computed stats fields
-  - [ ] 4.4 Add support for `home_team_form_wins_last5` filter
-  - [ ] 4.5 Add support for `home_team_goals_avg` filter
-  - [ ] 4.6 Add support for `away_team_goals_avg` filter
-  - [ ] 4.7 Add support for `total_expected_goals` filter (computed field)
-  - [ ] 4.8 Add support for `home_team_clean_sheet_pct` filter
-  - [ ] 4.9 Update filter tests for new criteria
+- [x] 4.0 Extended Filter Criteria
+  - [x] 4.1 Update `backend/app/schemas/filter.py` allowed_fields with new criteria
+  - [x] 4.2 Update FilterEngine to join with team_computed_stats table
+  - [x] 4.3 Implement `_build_stats_condition()` for computed stats fields
+  - [x] 4.4 Add support for `home_team_form_wins_last5` filter
+  - [x] 4.5 Add support for `home_team_goals_avg` filter
+  - [x] 4.6 Add support for `away_team_goals_avg` filter
+  - [x] 4.7 Add support for `total_expected_goals` filter (computed field)
+  - [x] 4.8 Add support for `home_team_clean_sheet_pct` filter
+  - [x] 4.9 Update filter tests for new criteria
 
 - [ ] 5.0 Celery Setup & Async Backtests
   - [ ] 5.1 Create `backend/app/tasks/__init__.py` package

@@ -52,6 +52,28 @@ class FilterCreate(BaseModel):
             "home_score",
             "away_score",
             "total_goals",
+            # Home team computed stats
+            "home_team_form_wins_last5",
+            "home_team_form_wins_last10",
+            "home_team_form_points_last5",
+            "home_team_form_points_last10",
+            "home_team_goals_avg",
+            "home_team_goals_conceded_avg",
+            "home_team_home_goals_avg",
+            "home_team_clean_sheet_pct",
+            "home_team_points_per_game",
+            # Away team computed stats
+            "away_team_form_wins_last5",
+            "away_team_form_wins_last10",
+            "away_team_form_points_last5",
+            "away_team_form_points_last10",
+            "away_team_goals_avg",
+            "away_team_goals_conceded_avg",
+            "away_team_away_goals_avg",
+            "away_team_clean_sheet_pct",
+            "away_team_points_per_game",
+            # Computed fields
+            "total_expected_goals",
         }
 
         for condition in v:
@@ -88,6 +110,28 @@ class FilterUpdate(BaseModel):
             "home_score",
             "away_score",
             "total_goals",
+            # Home team computed stats
+            "home_team_form_wins_last5",
+            "home_team_form_wins_last10",
+            "home_team_form_points_last5",
+            "home_team_form_points_last10",
+            "home_team_goals_avg",
+            "home_team_goals_conceded_avg",
+            "home_team_home_goals_avg",
+            "home_team_clean_sheet_pct",
+            "home_team_points_per_game",
+            # Away team computed stats
+            "away_team_form_wins_last5",
+            "away_team_form_wins_last10",
+            "away_team_form_points_last5",
+            "away_team_form_points_last10",
+            "away_team_goals_avg",
+            "away_team_goals_conceded_avg",
+            "away_team_away_goals_avg",
+            "away_team_clean_sheet_pct",
+            "away_team_points_per_game",
+            # Computed fields
+            "total_expected_goals",
         }
 
         for condition in v:
