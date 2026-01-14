@@ -52,6 +52,9 @@ class Fixture(Base):
     team_stats: Mapped[list["TeamStats"]] = relationship(  # noqa: F821
         "TeamStats", back_populates="fixture"
     )
+    filter_matches: Mapped[list["FilterMatch"]] = relationship(  # noqa: F821
+        "FilterMatch", back_populates="fixture", cascade="all, delete-orphan"
+    )
 
     @property
     def is_finished(self) -> bool:

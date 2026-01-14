@@ -66,7 +66,7 @@ pnpm preview
 
 ## Project Structure
 
-```
+```text
 frontend/
 ├── src/
 │   ├── api/              # API client configuration
@@ -89,28 +89,33 @@ frontend/
 ## Key Features
 
 ### Authentication
+
 - JWT-based authentication with auto-refresh
 - Protected routes with auth guards
 - Login and registration pages
 
 ### Dashboard
+
 - Today's fixtures overview
 - Active filters count
 - Quick actions for creating filters
 
 ### Fixtures
+
 - Searchable and filterable fixtures list
 - Date range and league filters
 - Detailed fixture view with odds and team stats
 - Responsive table with pagination
 
 ### Filters
+
 - Create and manage betting filter strategies
 - Dynamic rule builder with field/operator/value inputs
 - Filter activation/deactivation
 - Delete with confirmation
 
 ### Backtesting
+
 - Run backtests against historical data
 - Comprehensive results with analytics
 - Win/loss/push breakdown
