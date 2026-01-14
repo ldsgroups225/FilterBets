@@ -86,17 +86,17 @@
   - [x] 1.7 Set up environment variables (.env) for API base URL
   - [x] 1.8 Add additional shadcn components (select, dialog, sheet, tabs, badge, skeleton, toast)
 
-- [ ] 2.0 Authentication System
-  - [ ] 2.1 Create auth types (User, LoginRequest, RegisterRequest, AuthResponse)
-  - [ ] 2.2 Create auth API service functions (login, register, refresh, getMe)
-  - [ ] 2.3 Create AuthContext with user state and auth methods
-  - [ ] 2.4 Create useAuth hook for accessing auth context
-  - [ ] 2.5 Implement token storage and auto-refresh logic
-  - [ ] 2.6 Create ProtectedRoute component for auth guards
-  - [ ] 2.7 Create LoginPage with form validation
-  - [ ] 2.8 Create RegisterPage with form validation
-  - [ ] 2.9 Add 401 response interceptor to redirect to login
-  - [ ] 2.10 Test authentication flow end-to-end
+- [x] 2.0 Authentication System
+  - [x] 2.1 Create auth types (User, LoginRequest, RegisterRequest, AuthResponse)
+  - [x] 2.2 Create auth API service functions (login, register, refresh, getMe)
+  - [x] 2.3 Create AuthContext with user state and auth methods
+  - [x] 2.4 Create useAuth hook for accessing auth context
+  - [x] 2.5 Implement token storage and auto-refresh logic
+  - [x] 2.6 Create ProtectedRoute component for auth guards
+  - [x] 2.7 Create LoginPage with form validation
+  - [x] 2.8 Create RegisterPage with form validation
+  - [x] 2.9 Add 401 response interceptor to redirect to login
+  - [x] 2.10 Test authentication flow end-to-end
 
 - [ ] 3.0 Layout & Navigation
   - [ ] 3.1 Create Header component with logo and user menu

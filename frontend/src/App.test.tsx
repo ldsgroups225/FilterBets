@@ -1,8 +1,21 @@
-import { describe, it, expect } from "vitest"
+import { describe, it, expect, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import App from "./App"
+
+// Mock the auth hook
+vi.mock("@/hooks/useAuth", () => ({
+  useAuth: () => ({
+    user: null,
+    isAuthenticated: false,
+    isLoading: false,
+    login: vi.fn(),
+    register: vi.fn(),
+    logout: vi.fn(),
+    refreshToken: vi.fn(),
+  }),
+}))
 
 const createTestQueryClient = () =>
   new QueryClient({
@@ -24,9 +37,10 @@ const renderApp = (initialRoute = "/") => {
 }
 
 describe("App", () => {
-  it("renders home page by default", () => {
+  it("redirects to login when accessing home page unauthenticated", () => {
     renderApp()
-    expect(screen.getByRole("heading", { name: /Dashboard/i })).toBeInTheDocument()
+    // Should redirect to login since user is not authenticated
+    expect(screen.getByRole("button", { name: /Sign in/i })).toBeInTheDocument()
   })
 
   it("renders login page on /login route", () => {
