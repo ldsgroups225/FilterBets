@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from app.api.v1 import auth, filters, fixtures, leagues, teams
+from app.api.v1 import auth, backtest, filters, fixtures, leagues, teams
 
 api_router = APIRouter()
 
@@ -12,3 +12,4 @@ api_router.include_router(leagues.router)
 api_router.include_router(teams.router)
 api_router.include_router(fixtures.router)
 api_router.include_router(filters.router)
+api_router.include_router(backtest.router)

@@ -101,19 +101,19 @@
   - [x] 4.8 Add support for `home_team_clean_sheet_pct` filter
   - [x] 4.9 Update filter tests for new criteria
 
-- [ ] 5.0 Celery Setup & Async Backtests
-  - [ ] 5.1 Create `backend/app/tasks/__init__.py` package
-  - [ ] 5.2 Create `backend/app/tasks/celery_app.py` with Celery configuration
-  - [ ] 5.3 Update `backend/app/config.py` with Redis/Celery settings
-  - [ ] 5.4 Create `backend/app/tasks/stats_tasks.py` with refresh_all_team_stats task
-  - [ ] 5.5 Create `backend/app/tasks/backtest_tasks.py` with run_async_backtest task
-  - [ ] 5.6 Configure Celery Beat schedule for daily stats refresh
-  - [ ] 5.7 Create `backend/app/schemas/backtest_job.py` with job schemas
-  - [ ] 5.8 Create `backend/app/api/v1/backtest.py` with job management endpoints
-  - [ ] 5.9 Add `GET /backtest/jobs` endpoint to list user's jobs
-  - [ ] 5.10 Add `GET /backtest/jobs/{job_id}` endpoint for job status
-  - [ ] 5.11 Update `POST /filters/{id}/backtest` to support async parameter
-  - [ ] 5.12 Create `backend/tests/test_backtest_jobs.py` with job tests
+- [x] 5.0 Celery Setup & Async Backtests
+  - [x] 5.1 Create `backend/app/tasks/__init__.py` package
+  - [x] 5.2 Create `backend/app/tasks/celery_app.py` with Celery configuration
+  - [x] 5.3 Update `backend/app/config.py` with Redis/Celery settings
+  - [x] 5.4 Create `backend/app/tasks/stats_tasks.py` with refresh_all_team_stats task
+  - [x] 5.5 Create `backend/app/tasks/backtest_tasks.py` with run_async_backtest task
+  - [x] 5.6 Configure Celery Beat schedule for daily stats refresh
+  - [x] 5.7 Create `backend/app/schemas/backtest_job.py` with job schemas
+  - [x] 5.8 Create `backend/app/api/v1/backtest.py` with job management endpoints
+  - [x] 5.9 Add `GET /backtest/jobs` endpoint to list user's jobs
+  - [x] 5.10 Add `GET /backtest/jobs/{job_id}` endpoint for job status
+  - [x] 5.11 Update `POST /filters/{id}/backtest` to support async parameter
+  - [x] 5.12 Create `backend/tests/test_backtest_jobs.py` with job tests
 
 - [ ] 6.0 Integration & Testing
   - [ ] 6.1 Run full test suite: `poetry run pytest tests/ -v --cov=app`

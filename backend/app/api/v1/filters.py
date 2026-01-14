@@ -7,14 +7,17 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
+from app.models.backtest_job import BacktestJob
 from app.models.filter import Filter
 from app.models.user import User
 from app.schemas.backtest import BacktestRequest, BacktestResponse
+from app.schemas.backtest_job import BacktestJobResponse
 from app.schemas.common import PaginatedResponse
 from app.schemas.filter import FilterCreate, FilterResponse, FilterUpdate
 from app.schemas.fixture import FixtureResponse
 from app.services.backtest import BacktestService
 from app.services.filter_engine import FilterEngine
+from app.tasks.backtest_tasks import run_async_backtest
 from app.utils.pagination import paginate
 
 router = APIRouter(prefix="/filters", tags=["filters"])
@@ -188,13 +191,14 @@ async def get_filter_matches(
     return fixtures  # type: ignore[return-value]
 
 
-@router.post("/{filter_id}/backtest", response_model=BacktestResponse)
+@router.post("/{filter_id}/backtest", response_model=BacktestResponse | BacktestJobResponse)
 async def run_backtest(
     filter_id: int,
     request: BacktestRequest,
+    async_mode: bool = Query(False, description="Run backtest asynchronously"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
-) -> BacktestResponse:
+) -> BacktestResponse | BacktestJobResponse:
     """Run a backtest on a filter against historical data.
 
     Evaluates the filter's performance by applying it to historical matches
@@ -207,6 +211,10 @@ async def run_backtest(
     - `over_2_5`: Total goals over 2.5
     - `under_2_5`: Total goals under 2.5
 
+    **Modes:**
+    - `async_mode=False` (default): Synchronous execution, returns results immediately
+    - `async_mode=True`: Asynchronous execution via Celery, returns job ID for status tracking
+
     Results are cached for 24 hours.
     """
     # Get filter
@@ -218,6 +226,36 @@ async def run_backtest(
     if not filter_obj:
         raise HTTPException(status_code=404, detail="Filter not found")
 
-    # Run backtest
+    # If async mode, create job and dispatch to Celery
+    if async_mode:
+        from datetime import datetime
+        from uuid import uuid4
+
+        # Create backtest job
+        job = BacktestJob(
+            job_id=uuid4(),
+            user_id=current_user.id,
+            filter_id=filter_id,
+            status="pending",
+            progress=0,
+            bet_type=request.bet_type.value,
+            seasons=",".join(str(s) for s in request.seasons),
+        )
+        db.add(job)
+        await db.commit()
+        await db.refresh(job)
+
+        # Dispatch to Celery
+        run_async_backtest.delay(
+            job_id=str(job.job_id),
+            filter_id=filter_id,
+            bet_type=request.bet_type.value,
+            seasons=request.seasons,
+            stake=request.stake,
+        )
+
+        return BacktestJobResponse.model_validate(job)
+
+    # Synchronous execution
     backtest_service = BacktestService(db)
     return await backtest_service.run_backtest(filter_obj, request)

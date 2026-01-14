@@ -40,6 +40,13 @@ class Settings(BaseSettings):
     # Redis
     redis_url: str = "redis://localhost:6379/0"
 
+    # Celery
+    celery_broker_url: str = "redis://localhost:6379/1"
+    celery_result_backend: str = "redis://localhost:6379/2"
+    celery_task_track_started: bool = True
+    celery_task_time_limit: int = 3600  # 1 hour
+    celery_task_soft_time_limit: int = 3300  # 55 minutes
+
     # Security
     secret_key: str = "your-secret-key-change-in-production"
     allowed_origins: str = "http://localhost:5173,http://localhost:3000"
