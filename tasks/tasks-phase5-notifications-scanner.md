@@ -128,12 +128,12 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 7.6 Add alert toggle to filter list/detail pages
   - [x] 7.7 Show "Link Telegram first" message if user tries to enable alerts without linked account
 
-- [ ] 8.0 Testing & Documentation
-  - [ ] 8.1 Write unit tests for TelegramService (token generation, validation, linking)
-  - [ ] 8.2 Write unit tests for PreMatchScanner service
-  - [ ] 8.3 Write unit tests for notification formatting
-  - [ ] 8.4 Write integration tests for Telegram API endpoints
-  - [ ] 8.5 Write integration tests for scanner endpoints
-  - [ ] 8.6 Add bot startup instructions to README
-  - [ ] 8.7 Document environment variables for Telegram configuration
-  - [ ] 8.8 Run full test suite and fix any failures: `cd backend && poetry run pytest tests/ -v`
+- [x] 8.0 Testing & Documentation
+  - [x] 8.1 Write unit tests for TelegramService (token generation, validation, linking)
+  - [x] 8.2 Write unit tests for PreMatchScanner service
+  - [x] 8.3 Write unit tests for notification formatting
+  - [x] 8.4 Write integration tests for Telegram API endpoints
+  - [x] 8.5 Write integration tests for scanner endpoints
+  - [x] 8.6 Add bot startup instructions to README
+  - [x] 8.7 Document environment variables for Telegram configuration
+  - [x] 8.8 Run full test suite and fix any failures: `cd backend && poetry run pytest tests/ -v`

@@ -27,6 +27,42 @@ A football betting analytics platform with AI-powered predictions, backtesting, 
 - Docker & Docker Compose
 - Python 3.12+ with Poetry
 - Node.js 20+ with pnpm
+- Telegram Bot Token (for notifications)
+
+### Environment Setup
+
+1. **Create a Telegram Bot** (for notifications feature):
+   - Open Telegram and search for [@BotFather](https://t.me/botfather)
+   - Send `/newbot` and follow the instructions
+   - Save the bot token provided
+   - Send `/setcommands` to BotFather and set these commands:
+
+     ```text
+     start - Link your Telegram account
+     status - Check your account status
+     filters - List your active filters
+     unlink - Unlink your Telegram account
+     help - Show available commands
+     ```
+
+2. **Configure Environment Variables**:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   Edit `.env` and add your Telegram bot credentials:
+
+   ```env
+   # Telegram Bot Configuration
+   TELEGRAM_BOT_TOKEN=your_bot_token_here
+   TELEGRAM_BOT_USERNAME=YourBotUsername
+   TELEGRAM_LINK_TOKEN_TTL=1800  # 30 minutes
+   
+   # Scanner Configuration
+   SCANNER_LOOKAHEAD_HOURS=24
+   SCANNER_MAX_NOTIFICATIONS_PER_SCAN=1000
+   ```
 
 ### Using Docker (Recommended)
 
@@ -46,9 +82,52 @@ make logs
 ```
 
 Services will be available at:
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:8000
-- API Docs: http://localhost:8000/docs
+
+- Frontend: <http://localhost:5173>
+- Backend API: <http://localhost:8000>
+- API Docs: <http://localhost:8000/docs>
+
+The following services will run automatically:
+
+- **Backend API** - FastAPI application
+- **Frontend** - React development server
+- **PostgreSQL** - Database (port 5433)
+- **Redis** - Cache and message broker
+- **Celery Worker** - Background task processor
+- **Celery Beat** - Task scheduler for periodic scans
+- **Telegram Bot** - Notification bot (requires TELEGRAM_BOT_TOKEN)
+
+### Telegram Bot Setup
+
+The Telegram bot runs as a separate service and handles:
+
+- Account linking via deep links
+- Real-time match notifications
+- Filter status queries
+
+**To start the bot manually** (if not using Docker):
+
+```bash
+cd backend
+poetry run python -m app.bot.run_bot
+```
+
+**Bot Commands**:
+
+- `/start` - Link your Telegram account (use the link from Settings page)
+- `/status` - View your linked account and active filters
+- `/filters` - List all your active filters with alert status
+- `/unlink` - Unlink your Telegram account
+- `/help` - Show available commands
+
+**Linking Your Account**:
+
+1. Log in to FilterBets web app
+2. Go to Settings page
+3. Click "Link Telegram" button
+4. You'll be redirected to Telegram
+5. Click "Start" in the bot chat
+6. Your account is now linked!
 
 ### Local Development
 
@@ -90,7 +169,7 @@ make typecheck   # Type checking
 
 ## Project Structure
 
-```
+```text
 filterbets/
 ├── backend/           # FastAPI backend
 │   ├── app/           # Application code
@@ -117,8 +196,9 @@ filterbets/
 ## API Documentation
 
 Once the backend is running, visit:
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+
+- Swagger UI: <http://localhost:8000/docs>
+- ReDoc: <http://localhost:8000/redoc>
 
 ## License
 
