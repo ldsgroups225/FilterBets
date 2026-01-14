@@ -1,16 +1,21 @@
 """Application configuration using Pydantic Settings."""
 
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Get the root directory (parent of backend/)
+ROOT_DIR = Path(__file__).parent.parent.parent
+ENV_FILE = ROOT_DIR / ".env"
 
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=str(ENV_FILE),
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
@@ -39,9 +44,10 @@ class Settings(BaseSettings):
     secret_key: str = "your-secret-key-change-in-production"
     allowed_origins: str = "http://localhost:5173,http://localhost:3000"
 
-    # JWT (for future use)
+    # JWT
+    jwt_secret_key: str = "your-jwt-secret-key-change-in-production"
     jwt_algorithm: str = "HS256"
-    jwt_access_token_expire_minutes: int = 15
+    jwt_access_token_expire_minutes: int = 30
     jwt_refresh_token_expire_days: int = 7
 
     def get_allowed_origins_list(self) -> list[str]:

@@ -5,9 +5,9 @@ from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
-async def test_root_endpoint(async_client: AsyncClient) -> None:
+async def test_root_endpoint(client: AsyncClient) -> None:
     """Test the root endpoint returns API info."""
-    response = await async_client.get("/")
+    response = await client.get("/")
     assert response.status_code == 200
 
     data = response.json()
@@ -20,9 +20,9 @@ async def test_root_endpoint(async_client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_health_endpoint(async_client: AsyncClient) -> None:
+async def test_health_endpoint(client: AsyncClient) -> None:
     """Test the health endpoint returns status."""
-    response = await async_client.get("/health")
+    response = await client.get("/health")
     assert response.status_code == 200
 
     data = response.json()
@@ -34,16 +34,16 @@ async def test_health_endpoint(async_client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_docs_endpoint(async_client: AsyncClient) -> None:
+async def test_docs_endpoint(client: AsyncClient) -> None:
     """Test the OpenAPI docs endpoint is accessible."""
-    response = await async_client.get("/docs")
+    response = await client.get("/docs")
     assert response.status_code == 200
 
 
 @pytest.mark.asyncio
-async def test_openapi_schema(async_client: AsyncClient) -> None:
+async def test_openapi_schema(client: AsyncClient) -> None:
     """Test the OpenAPI schema endpoint."""
-    response = await async_client.get("/openapi.json")
+    response = await client.get("/openapi.json")
     assert response.status_code == 200
 
     data = response.json()
