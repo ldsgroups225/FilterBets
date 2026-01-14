@@ -8,6 +8,8 @@ import { ProtectedRoute } from "./components/layout/ProtectedRoute"
 import { Home } from "./pages/Home"
 import { Login } from "./pages/Login"
 import { RegisterPage } from "./pages/RegisterPage"
+import { FixturesPage } from "./pages/FixturesPage"
+import { FixtureDetailPage } from "./pages/FixtureDetailPage"
 import { NotFound } from "./pages/NotFound"
 
 function App() {
@@ -35,7 +37,17 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout>
-                  <div>Fixtures Page (Coming Soon)</div>
+                  <FixturesPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/fixtures/:id"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <FixtureDetailPage />
                 </Layout>
               </ProtectedRoute>
             }

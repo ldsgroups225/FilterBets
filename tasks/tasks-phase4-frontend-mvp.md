@@ -115,17 +115,17 @@
   - [x] 4.5 Integrate with fixtures API (today's fixtures)
   - [x] 4.6 Integrate with filters API (user's filters count)
 
-- [ ] 5.0 Fixtures Feature
-  - [ ] 5.1 Create fixture types (Fixture, FixtureListResponse)
-  - [ ] 5.2 Create fixtures API service functions
-  - [ ] 5.3 Create useFixtures hook with TanStack Query
-  - [ ] 5.4 Create FixturesTable component with TanStack Table
-  - [ ] 5.5 Add pagination to fixtures table
-  - [ ] 5.6 Add date range filter to fixtures page
-  - [ ] 5.7 Add league filter dropdown to fixtures page
-  - [ ] 5.8 Create FixturesPage combining filters and table
-  - [ ] 5.9 Create FixtureDetailPage with match info
-  - [ ] 5.10 Display team statistics on fixture detail
+- [x] 5.0 Fixtures Feature
+  - [x] 5.1 Create fixture types (Fixture, FixtureListResponse)
+  - [x] 5.2 Create fixtures API service functions
+  - [x] 5.3 Create useFixtures hook with TanStack Query
+  - [x] 5.4 Create FixturesTable component with TanStack Table
+  - [x] 5.5 Add pagination to fixtures table
+  - [x] 5.6 Add date range filter to fixtures page
+  - [x] 5.7 Add league filter dropdown to fixtures page
+  - [x] 5.8 Create FixturesPage combining filters and table
+  - [x] 5.9 Create FixtureDetailPage with match info
+  - [x] 5.10 Display team statistics on fixture detail
 
 - [ ] 6.0 Filters List & Management
   - [ ] 6.1 Create filter types (Filter, FilterRule, CreateFilterRequest)

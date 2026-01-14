@@ -21,18 +21,18 @@ export function Home() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button asChild>
-            <Link to="/filters/new">
+          <Link to="/filters/new">
+            <Button>
               <IconPlus className="h-4 w-4 mr-2" />
               Create Filter
-            </Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link to="/fixtures">
+            </Button>
+          </Link>
+          <Link to="/fixtures">
+            <Button variant="outline">
               <IconCalendar className="h-4 w-4 mr-2" />
               View Fixtures
-            </Link>
-          </Button>
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -134,11 +134,11 @@ export function Home() {
                 </div>
               ))}
               {todayFixtures.length > 5 && (
-                <Button variant="outline" className="w-full" asChild>
-                  <Link to="/fixtures">
+                <Link to="/fixtures" className="block">
+                  <Button variant="outline" className="w-full">
                     View all {todayFixtures.length} fixtures
-                  </Link>
-                </Button>
+                  </Button>
+                </Link>
               )}
             </div>
           </CardContent>
