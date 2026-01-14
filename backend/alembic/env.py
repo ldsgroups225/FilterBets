@@ -12,7 +12,17 @@ from app.config import get_settings
 from app.database import Base
 
 # Import all models here so Alembic can detect them
-# from app.models import *  # noqa: F401, F403
+from app.models import (  # noqa: F401
+    BacktestResult,
+    Filter,
+    Fixture,
+    League,
+    Standing,
+    Team,
+    TeamStats,
+    User,
+    Venue,
+)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

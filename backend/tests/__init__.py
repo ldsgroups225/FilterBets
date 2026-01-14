@@ -1,1 +1,1 @@
-"""FilterBets Backend Tests."""
+"""Test suite for FilterBets backend."""
