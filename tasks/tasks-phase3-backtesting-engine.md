@@ -69,17 +69,17 @@
   - [x] 1.6 Run migrations: `alembic upgrade head`
   - [x] 1.7 Add database indexes for performance
 
-- [ ] 2.0 Statistics Calculator Service
-  - [ ] 2.1 Create `backend/app/schemas/team_stats.py` with ComputedStatsResponse schema
-  - [ ] 2.2 Enhance `backend/app/services/stats_calculator.py` with full implementation
-  - [ ] 2.3 Implement `calculate_team_overall_stats()` method
-  - [ ] 2.4 Implement `calculate_team_home_stats()` method
-  - [ ] 2.5 Implement `calculate_team_away_stats()` method
-  - [ ] 2.6 Implement `calculate_team_form(n_games)` method for last N games
-  - [ ] 2.7 Implement `refresh_team_stats(team_id)` to update computed stats
-  - [ ] 2.8 Implement `refresh_all_team_stats()` for batch processing
-  - [ ] 2.9 Add `GET /teams/{id}/computed-stats` endpoint
-  - [ ] 2.10 Create `backend/tests/test_stats_calculator.py` with unit tests
+- [x] 2.0 Statistics Calculator Service
+  - [x] 2.1 Create `backend/app/schemas/team_stats.py` with ComputedStatsResponse schema
+  - [x] 2.2 Enhance `backend/app/services/stats_calculator.py` with full implementation
+  - [x] 2.3 Implement `calculate_team_overall_stats()` method
+  - [x] 2.4 Implement `calculate_team_home_stats()` method
+  - [x] 2.5 Implement `calculate_team_away_stats()` method
+  - [x] 2.6 Implement `calculate_team_form(n_games)` method for last N games
+  - [x] 2.7 Implement `refresh_team_stats(team_id)` to update computed stats
+  - [x] 2.8 Implement `refresh_all_team_stats()` for batch processing
+  - [x] 2.9 Add `GET /teams/{id}/computed-stats` endpoint
+  - [x] 2.10 Create `backend/tests/test_stats_calculator.py` with unit tests
 
 - [ ] 3.0 Enhanced Backtest Analytics
   - [ ] 3.1 Update `backend/app/schemas/backtest.py` with BacktestAnalytics schema
