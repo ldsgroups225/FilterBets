@@ -98,14 +98,14 @@
   - [x] 2.9 Add 401 response interceptor to redirect to login
   - [x] 2.10 Test authentication flow end-to-end
 
-- [ ] 3.0 Layout & Navigation
-  - [ ] 3.1 Create Header component with logo and user menu
-  - [ ] 3.2 Create Sidebar component with navigation links
-  - [ ] 3.3 Create Layout component combining Header and Sidebar
-  - [ ] 3.4 Add responsive sidebar (collapsible on mobile)
-  - [ ] 3.5 Create loading spinner component
-  - [ ] 3.6 Create error boundary component
-  - [ ] 3.7 Style active navigation links
+- [x] 3.0 Layout & Navigation
+  - [x] 3.1 Create Header component with logo and user menu
+  - [x] 3.2 Create Sidebar component with navigation links
+  - [x] 3.3 Create Layout component combining Header and Sidebar
+  - [x] 3.4 Add responsive sidebar (collapsible on mobile)
+  - [x] 3.5 Create loading spinner component
+  - [x] 3.6 Create error boundary component
+  - [x] 3.7 Style active navigation links
 
 - [ ] 4.0 Dashboard Page
   - [ ] 4.1 Create DashboardPage component

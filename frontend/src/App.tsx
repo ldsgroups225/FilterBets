@@ -2,7 +2,8 @@ import { Routes, Route } from "react-router-dom"
 
 import { AuthProvider } from "./contexts/AuthContext"
 import { Toaster } from "./components/ui/sonner"
-import { Header } from "./components/layout/Header"
+import { ErrorBoundary } from "./components/layout/ErrorBoundary"
+import { Layout } from "./components/layout/Layout"
 import { ProtectedRoute } from "./components/layout/ProtectedRoute"
 import { Home } from "./pages/Home"
 import { Login } from "./pages/Login"
@@ -11,27 +12,51 @@ import { NotFound } from "./pages/NotFound"
 
 function App() {
   return (
-    <AuthProvider>
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container py-6">
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
+    <ErrorBoundary>
+      <AuthProvider>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<RegisterPage />} />
+
+          {/* Protected routes with layout */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Layout>
                   <Home />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/fixtures"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <div>Fixtures Page (Coming Soon)</div>
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/filters"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <div>Filters Page (Coming Soon)</div>
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 404 */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
         <Toaster />
-      </div>
-    </AuthProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   )
 }
 

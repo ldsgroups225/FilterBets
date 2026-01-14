@@ -1,49 +1,82 @@
-import { Link } from "react-router-dom"
-import { IconActivity, IconLogout } from "@tabler/icons-react"
+import { Link, NavLink } from "react-router-dom"
+import { IconActivity, IconLogout, IconMenu2 } from "@tabler/icons-react"
 import { useAuth } from "@/hooks/useAuth"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
-export function Header() {
+interface HeaderProps {
+  onMobileMenuToggle?: () => void
+}
+
+export function Header({ onMobileMenuToggle }: HeaderProps) {
   const { isAuthenticated, user, logout } = useAuth()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
+        {/* Mobile menu button */}
+        {isAuthenticated && onMobileMenuToggle && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="mr-2 md:hidden"
+            onClick={onMobileMenuToggle}
+          >
+            <IconMenu2 className="h-5 w-5" />
+          </Button>
+        )}
+
         <div className="mr-4 flex">
           <Link to="/" className="mr-6 flex items-center space-x-2">
             <IconActivity className="h-6 w-6 text-primary" />
             <span className="font-bold">FilterBets</span>
           </Link>
           {isAuthenticated && (
-            <nav className="flex items-center space-x-6 text-sm font-medium">
-              <Link
+            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+              <NavLink
                 to="/"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
+                end
+                className={({ isActive }) =>
+                  cn(
+                    "transition-colors hover:text-foreground/80",
+                    isActive ? "text-foreground" : "text-foreground/60"
+                  )
+                }
               >
                 Dashboard
-              </Link>
-              <Link
+              </NavLink>
+              <NavLink
                 to="/fixtures"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
+                className={({ isActive }) =>
+                  cn(
+                    "transition-colors hover:text-foreground/80",
+                    isActive ? "text-foreground" : "text-foreground/60"
+                  )
+                }
               >
                 Fixtures
-              </Link>
-              <Link
+              </NavLink>
+              <NavLink
                 to="/filters"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
+                className={({ isActive }) =>
+                  cn(
+                    "transition-colors hover:text-foreground/80",
+                    isActive ? "text-foreground" : "text-foreground/60"
+                  )
+                }
               >
                 Filters
-              </Link>
+              </NavLink>
             </nav>
           )}
         </div>
         <div className="flex flex-1 items-center justify-end space-x-2">
           {isAuthenticated ? (
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">{user?.email}</span>
+            <div className="flex items-center gap-2 md:gap-4">
+              <span className="hidden sm:inline text-sm text-muted-foreground">{user?.email}</span>
               <Button variant="outline" size="sm" onClick={logout}>
-                <IconLogout className="h-4 w-4 mr-2" />
-                Logout
+                <IconLogout className="h-4 w-4 md:mr-2" />
+                <span className="hidden md:inline">Logout</span>
               </Button>
             </div>
           ) : (
