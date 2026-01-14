@@ -103,21 +103,21 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 5.9 Add notification_tasks to Celery include list
   - [x] 5.10 Configure task routing: scanner tasks to 'scanner' queue, notification tasks to 'notifications' queue
 
-- [ ] 6.0 API Endpoints
-  - [ ] 6.1 Create `backend/app/schemas/telegram.py` - TelegramLinkResponse, TelegramStatusResponse
-  - [ ] 6.2 Create `backend/app/schemas/notification.py` - NotificationHistoryItem, NotificationListResponse
-  - [ ] 6.3 Create `backend/app/schemas/scanner.py` - ScannerStatusResponse, ScanTriggerResponse
-  - [ ] 6.4 Create `backend/app/api/v1/telegram.py` router
-  - [ ] 6.5 Implement `POST /auth/telegram/generate-link` - generates deep link URL for current user
-  - [ ] 6.6 Implement `GET /auth/telegram/status` - returns Telegram link status
-  - [ ] 6.7 Implement `DELETE /auth/telegram/unlink` - unlinks Telegram account
-  - [ ] 6.8 Create `backend/app/api/v1/notifications.py` router
-  - [ ] 6.9 Implement `GET /notifications` - paginated notification history for current user
-  - [ ] 6.10 Create `backend/app/api/v1/scanner.py` router
-  - [ ] 6.11 Implement `GET /scanner/status` - returns last scan time and stats
-  - [ ] 6.12 Implement `POST /scanner/trigger` - manually triggers scan (admin only)
-  - [ ] 6.13 Add `PATCH /filters/{id}/alerts` endpoint to filters router - enable/disable alerts
-  - [ ] 6.14 Register all new routers in `backend/app/main.py`
+- [x] 6.0 API Endpoints
+  - [x] 6.1 Create `backend/app/schemas/telegram.py` - TelegramLinkResponse, TelegramStatusResponse
+  - [x] 6.2 Create `backend/app/schemas/notification.py` - NotificationHistoryItem, NotificationListResponse
+  - [x] 6.3 Create `backend/app/schemas/scanner.py` - ScannerStatusResponse, ScanTriggerResponse
+  - [x] 6.4 Create `backend/app/api/v1/telegram.py` router
+  - [x] 6.5 Implement `POST /auth/telegram/generate-link` - generates deep link URL for current user
+  - [x] 6.6 Implement `GET /auth/telegram/status` - returns Telegram link status
+  - [x] 6.7 Implement `DELETE /auth/telegram/unlink` - unlinks Telegram account
+  - [x] 6.8 Create `backend/app/api/v1/notifications.py` router
+  - [x] 6.9 Implement `GET /notifications` - paginated notification history for current user
+  - [x] 6.10 Create `backend/app/api/v1/scanner.py` router
+  - [x] 6.11 Implement `GET /scanner/status` - returns last scan time and stats
+  - [x] 6.12 Implement `POST /scanner/trigger` - manually triggers scan (admin only)
+  - [x] 6.13 Add `PATCH /filters/{id}/alerts` endpoint to filters router - enable/disable alerts
+  - [x] 6.14 Register all new routers in `backend/app/main.py`
 
 - [ ] 7.0 Frontend Telegram Integration
   - [ ] 7.1 Create `frontend/src/services/api/telegram.ts` - API client functions

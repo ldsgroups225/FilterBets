@@ -28,6 +28,10 @@ tags_metadata = [
         "description": "User authentication: registration, login, token refresh",
     },
     {
+        "name": "telegram",
+        "description": "Telegram account linking and notifications",
+    },
+    {
         "name": "leagues",
         "description": "Football leagues and competitions",
     },
@@ -42,6 +46,14 @@ tags_metadata = [
     {
         "name": "filters",
         "description": "User-defined filter strategies for betting analysis",
+    },
+    {
+        "name": "notifications",
+        "description": "Notification history and management",
+    },
+    {
+        "name": "scanner",
+        "description": "Pre-match scanner status and control",
     },
 ]
 

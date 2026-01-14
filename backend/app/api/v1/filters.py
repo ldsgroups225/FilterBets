@@ -258,3 +258,40 @@ async def run_backtest(
     # Synchronous execution
     backtest_service = BacktestService(db)
     return await backtest_service.run_backtest(filter_obj, request)
+
+
+@router.patch("/{filter_id}/alerts", response_model=FilterResponse)
+async def toggle_filter_alerts(
+    filter_id: int,
+    alerts_enabled: bool = Query(..., description="Enable or disable alerts"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> Filter:
+    """Enable or disable Telegram alerts for a filter.
+
+    Requires Telegram to be linked to the user account.
+    Only the filter owner can modify alert settings.
+    """
+    # Check if user has Telegram linked
+    if alerts_enabled and not current_user.telegram_verified:
+        raise HTTPException(
+            status_code=400,
+            detail="Telegram account must be linked before enabling alerts",
+        )
+
+    # Get filter
+    result = await db.execute(
+        select(Filter).where(Filter.id == filter_id, Filter.user_id == current_user.id)
+    )
+    filter_obj = result.scalar_one_or_none()
+
+    if not filter_obj:
+        raise HTTPException(status_code=404, detail="Filter not found")
+
+    # Update alerts_enabled
+    filter_obj.alerts_enabled = alerts_enabled
+    await db.commit()
+    await db.refresh(filter_obj)
+
+    return filter_obj
+
