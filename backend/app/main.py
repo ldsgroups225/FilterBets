@@ -5,6 +5,7 @@ from typing import Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi_mcp import FastApiMCP
 
 from app.api.v1 import api_router
 from app.config import get_settings
@@ -112,6 +113,10 @@ app.add_middleware(
 
 # Include API v1 router
 app.include_router(api_router, prefix="/api/v1")
+
+# Create and mount the MCP server
+mcp = FastApiMCP(app)
+mcp.mount()
 
 
 @app.get("/", tags=["Root"])
