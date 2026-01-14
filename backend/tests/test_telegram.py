@@ -1,7 +1,8 @@
 """Tests for Telegram service and API endpoints."""
 
-import pytest
 from unittest.mock import AsyncMock, patch
+
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User

@@ -1,17 +1,14 @@
 """Tests for notification tasks and formatting."""
 
-import pytest
 from datetime import datetime
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from app.tasks.notification_tasks import (
     format_notification_message,
     send_filter_alert,
 )
-from app.models.fixture import Fixture
-from app.models.filter import Filter
-from app.models.team import Team
-from app.models.league import League
 
 
 @pytest.fixture

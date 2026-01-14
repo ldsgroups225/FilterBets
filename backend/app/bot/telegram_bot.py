@@ -1,7 +1,6 @@
 """Telegram bot implementation for FilterBets."""
 
 import logging
-from typing import Any
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -223,7 +222,7 @@ async def filters_command(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             )
 
         message_lines.append(
-            f"\n💡 Enable/disable alerts from the FilterBets app."
+            "\n💡 Enable/disable alerts from the FilterBets app."
         )
 
         await update.message.reply_text(

@@ -17,7 +17,7 @@ from app.utils.pagination import paginate
 router = APIRouter(prefix="/fixtures", tags=["fixtures"])
 
 
-@router.get("", response_model=PaginatedResponse[FixtureResponse])
+@router.get("", response_model=PaginatedResponse[FixtureResponse], operation_id="list_fixtures")
 async def get_fixtures(
     db: Annotated[AsyncSession, Depends(get_db)],
     league_id: Annotated[int | None, Query(description="Filter by league ID")] = None,
@@ -73,7 +73,7 @@ async def get_fixtures(
     )
 
 
-@router.get("/today", response_model=PaginatedResponse[FixtureResponse])
+@router.get("/today", response_model=PaginatedResponse[FixtureResponse], operation_id="get_today_fixtures")
 async def get_today_fixtures(
     db: Annotated[AsyncSession, Depends(get_db)],
     page: Annotated[int, Query(ge=1)] = 1,
@@ -111,7 +111,7 @@ async def get_today_fixtures(
     )
 
 
-@router.get("/upcoming", response_model=PaginatedResponse[FixtureResponse])
+@router.get("/upcoming", response_model=PaginatedResponse[FixtureResponse], operation_id="get_upcoming_fixtures")
 async def get_upcoming_fixtures(
     db: Annotated[AsyncSession, Depends(get_db)],
     days: Annotated[int, Query(ge=1, le=30, description="Number of days ahead")] = 7,
@@ -151,7 +151,7 @@ async def get_upcoming_fixtures(
     )
 
 
-@router.get("/{fixture_id}", response_model=FixtureDetailResponse)
+@router.get("/{fixture_id}", response_model=FixtureDetailResponse, operation_id="get_fixture_detail")
 async def get_fixture_detail(
     fixture_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],

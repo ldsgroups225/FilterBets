@@ -17,7 +17,7 @@ from app.utils.pagination import paginate
 router = APIRouter(prefix="/leagues", tags=["leagues"])
 
 
-@router.get("", response_model=PaginatedResponse[LeagueResponse])
+@router.get("", response_model=PaginatedResponse[LeagueResponse], operation_id="list_leagues")
 async def get_leagues(
     db: Annotated[AsyncSession, Depends(get_db)],
     page: Annotated[int, Query(ge=1)] = 1,
@@ -42,7 +42,7 @@ async def get_leagues(
     )
 
 
-@router.get("/{league_id}", response_model=LeagueResponse)
+@router.get("/{league_id}", response_model=LeagueResponse, operation_id="get_league")
 async def get_league(
     league_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -68,7 +68,7 @@ async def get_league(
     return LeagueResponse.model_validate(league)
 
 
-@router.get("/{league_id}/teams", response_model=PaginatedResponse[TeamResponse])
+@router.get("/{league_id}/teams", response_model=PaginatedResponse[TeamResponse], operation_id="get_league_teams")
 async def get_league_teams(
     league_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],

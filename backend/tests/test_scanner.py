@@ -1,14 +1,15 @@
 """Tests for PreMatchScanner service."""
 
-import pytest
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, patch
+
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.user import User, ScanFrequency
 from app.models.filter import Filter
-from app.models.fixture import Fixture
 from app.models.filter_match import FilterMatch
+from app.models.fixture import Fixture
+from app.models.user import ScanFrequency, User
 from app.services.scanner_service import PreMatchScanner, ScanStats
 
 

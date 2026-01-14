@@ -15,7 +15,7 @@ from app.schemas.backtest_job import BacktestJobList, BacktestJobResponse, Backt
 router = APIRouter(prefix="/backtest", tags=["backtest"])
 
 
-@router.get("/jobs", response_model=BacktestJobList)
+@router.get("/jobs", response_model=BacktestJobList, operation_id="list_backtest_jobs")
 async def list_backtest_jobs(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],
@@ -66,7 +66,7 @@ async def list_backtest_jobs(
     )
 
 
-@router.get("/jobs/{job_id}", response_model=BacktestJobStatus)
+@router.get("/jobs/{job_id}", response_model=BacktestJobStatus, operation_id="get_backtest_job_status")
 async def get_backtest_job_status(
     job_id: UUID,
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -115,7 +115,7 @@ async def get_backtest_job_status(
     )
 
 
-@router.delete("/jobs/{job_id}")
+@router.delete("/jobs/{job_id}", operation_id="cancel_backtest_job")
 async def cancel_backtest_job(
     job_id: UUID,
     db: Annotated[AsyncSession, Depends(get_db)],

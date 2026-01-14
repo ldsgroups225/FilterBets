@@ -36,7 +36,8 @@ celery -A tasks.celery_app worker --loglevel=info  # Run Celery worker
 celery -A tasks.celery_app beat --loglevel=info    # Run Celery scheduler
 
 # MCP Server (API Testing via LLM)
-# FastAPI-MCP exposes all endpoints at /mcp for LLM integration
+# FastAPI-MCP exposes read-only endpoints at /mcp for LLM integration
+# Auth and destructive operations are excluded for safety
 # Use this to test endpoints after completing tasks
 
 # Frontend (React)

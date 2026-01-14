@@ -1,11 +1,12 @@
 """FastAPI application entry point."""
 
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from typing import Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi_mcp import FastApiMCP
+from fastapi_mcp import FastApiMCP  # type: ignore[import-untyped]
 
 from app.api.v1 import api_router
 from app.config import get_settings
@@ -56,11 +57,15 @@ tags_metadata = [
         "name": "scanner",
         "description": "Pre-match scanner status and control",
     },
+    {
+        "name": "backtest",
+        "description": "Backtest job status and management",
+    },
 ]
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):  # noqa: ARG001
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:  # noqa: ARG001
     """Application lifespan handler for startup and shutdown events."""
     # Startup
     yield
@@ -115,8 +120,31 @@ app.add_middleware(
 app.include_router(api_router, prefix="/api/v1")
 
 # Create and mount the MCP server
-mcp = FastApiMCP(app)
-mcp.mount()
+# Best practices from official docs:
+# - Use descriptive name and description for LLM context
+# - Exclude dangerous operations (PUT/DELETE) for safety
+# - Include full response schemas for better LLM understanding
+# - Use HTTP transport (recommended over SSE)
+mcp = FastApiMCP(
+    app,
+    name="FilterBets API",
+    description=(
+        "Football betting analytics API with filters, backtesting, and match data. "
+        "Use this to query fixtures, leagues, teams, and test filter strategies."
+    ),
+    # Include full JSON schema in tool descriptions for better LLM understanding
+    describe_full_response_schema=True,
+    describe_all_responses=True,
+    # Exclude dangerous write/delete operations for safety (LLMs are non-deterministic)
+    exclude_tags=["auth", "telegram"],
+    # Exclude specific destructive operations
+    exclude_operations=[
+        "delete_filter",
+        "update_filter",
+        "toggle_filter_alerts",
+    ],
+)
+mcp.mount_http()
 
 
 @app.get("/", tags=["Root"])

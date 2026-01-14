@@ -1,7 +1,6 @@
 """Scanner API endpoints."""
 
 import logging
-from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,10 +15,10 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/scanner", tags=["scanner"])
 
 
-@router.get("/status", response_model=ScannerStatusResponse)
+@router.get("/status", response_model=ScannerStatusResponse, operation_id="get_scanner_status")
 async def get_scanner_status(
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),  # noqa: ARG001
+    db: AsyncSession = Depends(get_db),  # noqa: ARG001
 ) -> ScannerStatusResponse:
     """Get scanner status and last run statistics.
 
@@ -45,10 +44,10 @@ async def get_scanner_status(
     )
 
 
-@router.post("/trigger", response_model=ScanTriggerResponse)
+@router.post("/trigger", response_model=ScanTriggerResponse, operation_id="trigger_scanner")
 async def trigger_scanner(
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db),  # noqa: ARG001
 ) -> ScanTriggerResponse:
     """Manually trigger a scanner run (admin only).
 

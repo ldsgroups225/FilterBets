@@ -2,9 +2,8 @@
 
 import logging
 from datetime import datetime, timedelta
-from typing import Any
 
-from sqlalchemy import and_, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings

@@ -23,7 +23,7 @@ from app.utils.pagination import paginate
 router = APIRouter(prefix="/filters", tags=["filters"])
 
 
-@router.post("", response_model=FilterResponse, status_code=201)
+@router.post("", response_model=FilterResponse, status_code=201, operation_id="create_filter")
 async def create_filter(
     filter_data: FilterCreate,
     db: AsyncSession = Depends(get_db),
@@ -54,7 +54,7 @@ async def create_filter(
     return filter_obj
 
 
-@router.get("", response_model=PaginatedResponse[FilterResponse])
+@router.get("", response_model=PaginatedResponse[FilterResponse], operation_id="list_filters")
 async def list_filters(
     page: int = Query(1, ge=1, description="Page number"),
     per_page: int = Query(20, ge=1, le=100, description="Items per page"),
@@ -78,7 +78,7 @@ async def list_filters(
     return PaginatedResponse(items=items, meta=meta)
 
 
-@router.get("/{filter_id}", response_model=FilterResponse)
+@router.get("/{filter_id}", response_model=FilterResponse, operation_id="get_filter")
 async def get_filter(
     filter_id: int,
     db: AsyncSession = Depends(get_db),
@@ -99,7 +99,7 @@ async def get_filter(
     return filter_obj
 
 
-@router.put("/{filter_id}", response_model=FilterResponse)
+@router.put("/{filter_id}", response_model=FilterResponse, operation_id="update_filter")
 async def update_filter(
     filter_id: int,
     filter_data: FilterUpdate,
@@ -135,7 +135,7 @@ async def update_filter(
     return filter_obj
 
 
-@router.delete("/{filter_id}", status_code=204)
+@router.delete("/{filter_id}", status_code=204, operation_id="delete_filter")
 async def delete_filter(
     filter_id: int,
     db: AsyncSession = Depends(get_db),
@@ -158,7 +158,7 @@ async def delete_filter(
     await db.commit()
 
 
-@router.get("/{filter_id}/matches", response_model=list[FixtureResponse])
+@router.get("/{filter_id}/matches", response_model=list[FixtureResponse], operation_id="get_filter_matches")
 async def get_filter_matches(
     filter_id: int,
     date_from: date | None = Query(None, description="Start date for filtering"),
@@ -191,7 +191,7 @@ async def get_filter_matches(
     return fixtures  # type: ignore[return-value]
 
 
-@router.post("/{filter_id}/backtest", response_model=BacktestResponse | BacktestJobResponse)
+@router.post("/{filter_id}/backtest", response_model=BacktestResponse | BacktestJobResponse, operation_id="run_filter_backtest")
 async def run_backtest(
     filter_id: int,
     request: BacktestRequest,
@@ -260,7 +260,7 @@ async def run_backtest(
     return await backtest_service.run_backtest(filter_obj, request)
 
 
-@router.patch("/{filter_id}/alerts", response_model=FilterResponse)
+@router.patch("/{filter_id}/alerts", response_model=FilterResponse, operation_id="toggle_filter_alerts")
 async def toggle_filter_alerts(
     filter_id: int,
     alerts_enabled: bool = Query(..., description="Enable or disable alerts"),
