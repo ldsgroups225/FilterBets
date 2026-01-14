@@ -3,15 +3,9 @@ import type { AuthResponse, LoginRequest, RegisterRequest, User } from '@/types/
 
 // Login user
 export const login = async (credentials: LoginRequest): Promise<AuthResponse> => {
-  // FastAPI OAuth2 expects form data
-  const formData = new URLSearchParams()
-  formData.append('username', credentials.email)
-  formData.append('password', credentials.password)
-
-  const response = await apiClient.post<AuthResponse>('/api/v1/auth/login', formData, {
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
+  const response = await apiClient.post<AuthResponse>('/api/v1/auth/login', {
+    email: credentials.email,
+    password: credentials.password,
   })
   return response.data
 }

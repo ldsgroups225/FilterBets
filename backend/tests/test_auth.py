@@ -17,12 +17,14 @@ class TestRegistration:
         )
         assert response.status_code == 201
         data = response.json()
-        assert data["email"] == "test@example.com"
-        assert data["is_active"] is True
-        assert data["is_superuser"] is False
-        assert "id" in data
-        assert "password" not in data
-        assert "password_hash" not in data
+        # Response now includes tokens and user info
+        assert "access_token" in data
+        assert "refresh_token" in data
+        assert data["token_type"] == "bearer"
+        assert data["user"]["email"] == "test@example.com"
+        assert "id" in data["user"]
+        assert "password" not in data["user"]
+        assert "password_hash" not in data["user"]
 
     async def test_register_duplicate_email(
         self, client: AsyncClient, db_session: AsyncSession
@@ -62,7 +64,7 @@ class TestLogin:
     async def test_login_success(
         self, client: AsyncClient, db_session: AsyncSession
     ) -> None:
-        """Test successful login returns tokens."""
+        """Test successful login returns tokens and user info."""
         # Create user
         await create_user(db_session, "user@example.com", "password123")
 
@@ -76,6 +78,7 @@ class TestLogin:
         assert "access_token" in data
         assert "refresh_token" in data
         assert data["token_type"] == "bearer"
+        assert data["user"]["email"] == "user@example.com"
 
     async def test_login_wrong_password(
         self, client: AsyncClient, db_session: AsyncSession

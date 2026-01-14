@@ -25,6 +25,26 @@ class Token(BaseModel):
     token_type: str = Field(default="bearer", description="Token type")
 
 
+class UserInToken(BaseModel):
+    """Schema for user info in auth response."""
+
+    id: int
+    email: str
+    createdAt: str = Field(..., alias="created_at")
+    updatedAt: str = Field(..., alias="updated_at")
+
+    model_config = {"from_attributes": True, "populate_by_name": True}
+
+
+class AuthResponse(BaseModel):
+    """Schema for authentication response with tokens and user."""
+
+    access_token: str = Field(..., description="JWT access token")
+    refresh_token: str = Field(..., description="JWT refresh token")
+    token_type: str = Field(default="bearer", description="Token type")
+    user: UserInToken = Field(..., description="Authenticated user info")
+
+
 class TokenData(BaseModel):
     """Schema for decoded token data."""
 
