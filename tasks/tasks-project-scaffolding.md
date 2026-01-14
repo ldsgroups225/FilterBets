@@ -96,64 +96,64 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 1.13 Configure ruff in `pyproject.toml` (linting rules, line length, target version)
   - [x] 1.14 Configure mypy in `pyproject.toml` (strict mode, async plugins)
   - [x] 1.15 Configure pytest in `pyproject.toml` (asyncio mode, coverage)
-  - [ ] 1.16 Verify backend runs locally with `poetry install && poetry run uvicorn app.main:app --reload` (pending network connectivity)
+  - [x] 1.16 Verify backend runs locally with `poetry install && poetry run uvicorn app.main:app --reload`
 
 - [ ] 2.0 Set up Frontend Foundation (React + Vite)
-  - [ ] 2.1 Initialize Vite project with React + TypeScript template in `frontend/`
-  - [ ] 2.2 Configure `frontend/package.json` with pnpm and all dependencies
-  - [ ] 2.3 Install and configure Tailwind CSS (`tailwind.config.js`, `postcss.config.js`)
-  - [ ] 2.4 Add Tailwind directives to `frontend/src/index.css`
-  - [ ] 2.5 Initialize shadcn/ui and install base components (button, card, input)
-  - [ ] 2.6 Create `frontend/src/lib/utils.ts` with `cn` helper function
-  - [ ] 2.7 Configure TanStack Query in `frontend/src/main.tsx`
-  - [ ] 2.8 Set up React Router in `frontend/src/App.tsx` with route definitions
-  - [ ] 2.9 Create `frontend/src/api/client.ts` with axios instance and request/response interceptors
-  - [ ] 2.10 Create `frontend/src/components/layout/Header.tsx` placeholder component
-  - [ ] 2.11 Create `frontend/src/pages/Home.tsx` with basic dashboard placeholder
-  - [ ] 2.12 Create `frontend/src/pages/Login.tsx` with login form placeholder
-  - [ ] 2.13 Create `frontend/src/pages/NotFound.tsx` with 404 message
-  - [ ] 2.14 Configure ESLint with `frontend/eslint.config.js` (flat config)
-  - [ ] 2.15 Create `frontend/.prettierrc` with formatting rules
-  - [ ] 2.16 Configure Vitest in `frontend/vite.config.ts`
-  - [ ] 2.17 Create `frontend/Dockerfile` with multi-stage build (node build, nginx serve)
-  - [ ] 2.18 Create `frontend/nginx.conf` for SPA routing
-  - [ ] 2.19 Update `frontend/tsconfig.json` with strict mode and path aliases
-  - [ ] 2.20 Verify frontend runs locally with `pnpm install && pnpm dev`
+  - [x] 2.1 Initialize Vite project with React + TypeScript template in `frontend/`
+  - [x] 2.2 Configure `frontend/package.json` with pnpm and all dependencies
+  - [x] 2.3 Install and configure Tailwind CSS (`tailwind.config.js`, `postcss.config.js`)
+  - [x] 2.4 Add Tailwind directives to `frontend/src/index.css`
+  - [x] 2.5 Initialize shadcn/ui and install base components (button, card, input)
+  - [x] 2.6 Create `frontend/src/lib/utils.ts` with `cn` helper function
+  - [x] 2.7 Configure TanStack Query in `frontend/src/main.tsx`
+  - [x] 2.8 Set up React Router in `frontend/src/App.tsx` with route definitions
+  - [x] 2.9 Create `frontend/src/api/client.ts` with axios instance and request/response interceptors
+  - [x] 2.10 Create `frontend/src/components/layout/Header.tsx` placeholder component
+  - [x] 2.11 Create `frontend/src/pages/Home.tsx` with basic dashboard placeholder
+  - [x] 2.12 Create `frontend/src/pages/Login.tsx` with login form placeholder
+  - [x] 2.13 Create `frontend/src/pages/NotFound.tsx` with 404 message
+  - [x] 2.14 Configure ESLint with `frontend/eslint.config.js` (flat config)
+  - [x] 2.15 Create `frontend/.prettierrc` with formatting rules
+  - [x] 2.16 Configure Vitest in `frontend/vite.config.ts`
+  - [x] 2.17 Create `frontend/Dockerfile` with multi-stage build (node build, nginx serve)
+  - [x] 2.18 Create `frontend/nginx.conf` for SPA routing
+  - [x] 2.19 Update `frontend/tsconfig.json` with strict mode and path aliases
+  - [x] 2.20 Verify frontend runs locally with `pnpm install && pnpm dev`
 
-- [ ] 3.0 Set up Docker Infrastructure
-  - [ ] 3.1 Create `docker-compose.yml` with services: db (postgres), redis, backend, frontend
-  - [ ] 3.2 Configure PostgreSQL service with persistent volume and health check
-  - [ ] 3.3 Configure Redis service with health check
-  - [ ] 3.4 Configure backend service with volume mount for hot-reload and depends_on
-  - [ ] 3.5 Configure frontend service with volume mount for hot-reload
-  - [ ] 3.6 Create `docker-compose.prod.yml` for production-like environment
-  - [ ] 3.7 Create `.env.example` with all required environment variables
-  - [ ] 3.8 Create `.dockerignore` files for backend and frontend
-  - [ ] 3.9 Verify `docker-compose up` starts all services successfully
+- [x] 3.0 Set up Docker Infrastructure
+  - [x] 3.1 Create `docker-compose.yml` with services: db (postgres), redis, backend, frontend
+  - [x] 3.2 Configure PostgreSQL service with persistent volume and health check
+  - [x] 3.3 Configure Redis service with health check
+  - [x] 3.4 Configure backend service with volume mount for hot-reload and depends_on
+  - [x] 3.5 Configure frontend service with volume mount for hot-reload
+  - [x] 3.6 Create `docker-compose.prod.yml` for production-like environment
+  - [x] 3.7 Create `.env.example` with all required environment variables
+  - [x] 3.8 Create `.dockerignore` files for backend and frontend
+  - [x] 3.9 Verify `docker-compose up` starts all services successfully
 
-- [ ] 4.0 Set up CI/CD Pipeline (GitHub Actions)
-  - [ ] 4.1 Create `.github/workflows/` directory
-  - [ ] 4.2 Create `.github/workflows/ci.yml` with trigger on push/PR to main
-  - [ ] 4.3 Add job for backend linting (`ruff check backend/`)
-  - [ ] 4.4 Add job for backend type checking (`mypy backend/`)
-  - [ ] 4.5 Add job for backend tests (`pytest backend/tests/`)
-  - [ ] 4.6 Add job for frontend linting (`pnpm lint`)
-  - [ ] 4.7 Add job for frontend type checking (`pnpm typecheck`)
-  - [ ] 4.8 Add job for frontend tests (`pnpm test`)
-  - [ ] 4.9 Configure dependency caching (Poetry cache, pnpm cache)
-  - [ ] 4.10 Add PostgreSQL service container for backend tests
+- [x] 4.0 Set up CI/CD Pipeline (GitHub Actions)
+  - [x] 4.1 Create `.github/workflows/` directory
+  - [x] 4.2 Create `.github/workflows/ci.yml` with trigger on push/PR to main
+  - [x] 4.3 Add job for backend linting (`ruff check backend/`)
+  - [x] 4.4 Add job for backend type checking (`mypy backend/`)
+  - [x] 4.5 Add job for backend tests (`pytest backend/tests/`)
+  - [x] 4.6 Add job for frontend linting (`pnpm lint`)
+  - [x] 4.7 Add job for frontend type checking (`pnpm typecheck`)
+  - [x] 4.8 Add job for frontend tests (`pnpm test`)
+  - [x] 4.9 Configure dependency caching (Poetry cache, pnpm cache)
+  - [x] 4.10 Add PostgreSQL service container for backend tests
 
-- [ ] 5.0 Create Project Configuration & Documentation
-  - [ ] 5.1 Create `Makefile` with targets: up, down, build, migrate, test, lint, logs
-  - [ ] 5.2 Update root `.gitignore` with comprehensive patterns (venv, node_modules, .env, **pycache**, etc.)
-  - [ ] 5.3 Update `README.md` with project overview, setup instructions, and available commands
-  - [ ] 5.4 Create `.pre-commit-config.yaml` for pre-commit hooks (ruff, mypy, eslint)
+- [x] 5.0 Create Project Configuration & Documentation
+  - [x] 5.1 Create `Makefile` with targets: up, down, build, migrate, test, lint, logs
+  - [x] 5.2 Update root `.gitignore` with comprehensive patterns (venv, node_modules, .env, **pycache**, etc.)
+  - [x] 5.3 Update `README.md` with project overview, setup instructions, and available commands
+  - [x] 5.4 Create `.pre-commit-config.yaml` for pre-commit hooks (ruff, mypy, eslint)
 
-- [ ] 6.0 Verify Full Stack Integration
-  - [ ] 6.1 Run `make up` and verify all containers start without errors
-  - [ ] 6.2 Verify backend health check at `http://localhost:8000/health`
-  - [ ] 6.3 Verify frontend loads at `http://localhost:5173`
-  - [ ] 6.4 Verify frontend can call backend API (CORS working)
-  - [ ] 6.5 Run `make test` and verify all tests pass
-  - [ ] 6.6 Run `make lint` and verify no linting errors
-  - [ ] 6.7 Commit all changes with message `feat: add project scaffolding with FastAPI, React, and Docker`
+- [x] 6.0 Verify Full Stack Integration
+  - [x] 6.1 Run `make up` and verify all containers start without errors
+  - [x] 6.2 Verify backend health check at `http://localhost:8000/health`
+  - [x] 6.3 Verify frontend loads at `http://localhost:5173`
+  - [x] 6.4 Verify frontend can call backend API (CORS working)
+  - [x] 6.5 Run `make test` and verify all tests pass
+  - [x] 6.6 Run `make lint` and verify no linting errors
+  - [x] 6.7 Commit all changes with message `feat: add project scaffolding with FastAPI, React, and Docker`
