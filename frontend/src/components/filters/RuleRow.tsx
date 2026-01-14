@@ -22,7 +22,8 @@ interface RuleRowProps {
 export function RuleRow({ rule, index, onChange, onRemove }: RuleRowProps) {
   const fieldConfig = getFieldConfig(rule.field)
 
-  const handleFieldChange = (field: string) => {
+  const handleFieldChange = (field: string | null) => {
+    if (!field) return
     const config = getFieldConfig(field)
     const defaultOperator = config?.operators[0] || '='
     onChange(index, {
@@ -32,7 +33,8 @@ export function RuleRow({ rule, index, onChange, onRemove }: RuleRowProps) {
     })
   }
 
-  const handleOperatorChange = (operator: string) => {
+  const handleOperatorChange = (operator: string | null) => {
+    if (!operator) return
     onChange(index, {
       ...rule,
       operator: operator as FilterRule['operator'],
@@ -77,11 +79,12 @@ export function RuleRow({ rule, index, onChange, onRemove }: RuleRowProps) {
 
     // In operator with select - multiple values
     if (rule.operator === 'in' && fieldConfig.type === 'select' && fieldConfig.options) {
+      const currentValues = Array.isArray(rule.value) ? (rule.value as string[]) : []
       return (
         <Select
-          value={Array.isArray(rule.value) ? rule.value[0] : ''}
+          value={currentValues[0] || ''}
           onValueChange={(value) => {
-            const currentValues = Array.isArray(rule.value) ? rule.value : []
+            if (!value) return
             if (!currentValues.includes(value)) {
               handleValueChange([...currentValues, value])
             }
@@ -89,8 +92,8 @@ export function RuleRow({ rule, index, onChange, onRemove }: RuleRowProps) {
         >
           <SelectTrigger className="w-48">
             <SelectValue>
-              {Array.isArray(rule.value) && rule.value.length > 0
-                ? `${rule.value.length} selected`
+              {currentValues.length > 0
+                ? `${currentValues.length} selected`
                 : 'Select values'}
             </SelectValue>
           </SelectTrigger>
@@ -110,7 +113,7 @@ export function RuleRow({ rule, index, onChange, onRemove }: RuleRowProps) {
       return (
         <Select
           value={typeof rule.value === 'string' ? rule.value : ''}
-          onValueChange={handleValueChange}
+          onValueChange={(value) => value && handleValueChange(value)}
         >
           <SelectTrigger className="w-48">
             <SelectValue />

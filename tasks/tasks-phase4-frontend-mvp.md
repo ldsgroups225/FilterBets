@@ -161,13 +161,13 @@
   - [x] 8.9 Add loading state during backtest execution
   - [x] 8.10 Integrate backtest into FilterDetailPage
 
-- [ ] 9.0 Polish & Testing
-  - [ ] 9.1 Add toast notifications for success/error feedback
-  - [ ] 9.2 Improve loading states with skeletons
-  - [ ] 9.3 Add empty states for lists (no fixtures, no filters)
-  - [ ] 9.4 Test all pages on desktop viewport
-  - [ ] 9.5 Test basic mobile responsiveness
-  - [ ] 9.6 Fix any console errors or warnings
-  - [ ] 9.7 Run build and fix any TypeScript errors
-  - [ ] 9.8 Update frontend README with setup instructions
-  - [ ] 9.9 Commit changes: `feat: add Phase 4 frontend MVP`
+- [x] 9.0 Polish & Testing
+  - [x] 9.1 Add toast notifications for success/error feedback
+  - [x] 9.2 Improve loading states with skeletons
+  - [x] 9.3 Add empty states for lists (no fixtures, no filters)
+  - [x] 9.4 Test all pages on desktop viewport
+  - [x] 9.5 Test basic mobile responsiveness
+  - [x] 9.6 Fix any console errors or warnings
+  - [x] 9.7 Run build and fix any TypeScript errors
+  - [x] 9.8 Update frontend README with setup instructions
+  - [x] 9.9 Commit changes: `feat: add Phase 4 frontend MVP`
