@@ -1,52 +1,42 @@
-import { useQuery } from "@tanstack/react-query"
-import { IconActivity, IconTrendingUp, IconFilter, IconBell } from "@tabler/icons-react"
+import { Link } from 'react-router-dom'
+import { IconActivity, IconTrendingUp, IconFilter, IconBell, IconPlus, IconCalendar } from "@tabler/icons-react"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { checkHealth } from "@/api/client"
+import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useTodayFixtures } from "@/hooks/useFixtures"
+import { useActiveFiltersCount } from "@/hooks/useFilters"
 
 export function Home() {
-  const { data: health, isLoading } = useQuery({
-    queryKey: ["health"],
-    queryFn: checkHealth,
-    retry: false,
-  })
+  const { data: todayFixtures, isLoading: fixturesLoading } = useTodayFixtures()
+  const { data: activeFiltersCount, isLoading: filtersLoading } = useActiveFiltersCount()
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welcome to FilterBets - Your football betting analytics platform
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Welcome to FilterBets - Your football betting analytics platform
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Link to="/filters/new">
+            <Button>
+              <IconPlus className="h-4 w-4 mr-2" />
+              Create Filter
+            </Button>
+          </Link>
+          <Link to="/fixtures">
+            <Button variant="outline">
+              <IconCalendar className="h-4 w-4 mr-2" />
+              View Fixtures
+            </Button>
+          </Link>
+        </div>
       </div>
 
-      {/* API Status */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">API Status</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-2">
-            <div
-              className={`h-2 w-2 rounded-full ${isLoading
-                ? "bg-yellow-500"
-                : health?.status === "healthy"
-                  ? "bg-green-500"
-                  : "bg-red-500"
-                }`}
-            />
-            <span className="text-sm">
-              {isLoading
-                ? "Checking..."
-                : health?.status === "healthy"
-                  ? `Connected (DB: ${health.database})`
-                  : "Disconnected"}
-            </span>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Feature Cards */}
+      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -54,8 +44,14 @@ export function Home() {
             <IconActivity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">--</div>
-            <p className="text-xs text-muted-foreground">Fixtures available</p>
+            {fixturesLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{todayFixtures?.length || 0}</div>
+                <p className="text-xs text-muted-foreground">Fixtures available</p>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -65,8 +61,14 @@ export function Home() {
             <IconFilter className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">--</div>
-            <p className="text-xs text-muted-foreground">Scanning for matches</p>
+            {filtersLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{activeFiltersCount || 0}</div>
+                <p className="text-xs text-muted-foreground">Scanning for matches</p>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -92,6 +94,56 @@ export function Home() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Today's Matches */}
+      {todayFixtures && todayFixtures.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Today's Matches</CardTitle>
+            <CardDescription>
+              {todayFixtures.length} fixture{todayFixtures.length !== 1 ? 's' : ''} scheduled for today
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {todayFixtures.slice(0, 5).map((fixture) => (
+                <div
+                  key={fixture.id}
+                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{fixture.home_team_name}</span>
+                      <span className="text-muted-foreground">vs</span>
+                      <span className="font-medium">{fixture.away_team_name}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-1">
+                      {fixture.league_name} • {new Date(fixture.match_date).toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </div>
+                  </div>
+                  {fixture.home_odds && fixture.draw_odds && fixture.away_odds && (
+                    <div className="flex gap-2 text-sm">
+                      <span className="px-2 py-1 rounded bg-muted">{fixture.home_odds.toFixed(2)}</span>
+                      <span className="px-2 py-1 rounded bg-muted">{fixture.draw_odds.toFixed(2)}</span>
+                      <span className="px-2 py-1 rounded bg-muted">{fixture.away_odds.toFixed(2)}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+              {todayFixtures.length > 5 && (
+                <Link to="/fixtures" className="block">
+                  <Button variant="outline" className="w-full">
+                    View all {todayFixtures.length} fixtures
+                  </Button>
+                </Link>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Getting Started */}
       <Card>

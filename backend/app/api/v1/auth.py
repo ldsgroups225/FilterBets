@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
 from app.models.user import User
-from app.schemas.auth import RefreshTokenRequest, Token, UserCreate, UserLogin
+from app.schemas.auth import AuthResponse, RefreshTokenRequest, UserCreate, UserInToken, UserLogin
 from app.schemas.user import UserResponse
 from app.services.auth import (
     authenticate_user,
@@ -21,19 +21,36 @@ from app.utils.security import decode_token
 router = APIRouter()
 
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+def create_auth_response(user: User) -> AuthResponse:
+    """Create an AuthResponse with tokens and user info."""
+    tokens = create_tokens(user)
+    user_info = UserInToken(
+        id=user.id,
+        email=user.email,
+        created_at=user.created_at.isoformat(),
+        updated_at=user.updated_at.isoformat(),
+    )
+    return AuthResponse(
+        access_token=tokens.access_token,
+        refresh_token=tokens.refresh_token,
+        token_type=tokens.token_type,
+        user=user_info,
+    )
+
+
+@router.post("/register", response_model=AuthResponse, status_code=status.HTTP_201_CREATED)
 async def register(
     user_data: UserCreate,
     session: Annotated[AsyncSession, Depends(get_db)],
-) -> User:
-    """Register a new user account.
+) -> AuthResponse:
+    """Register a new user account and return tokens.
 
     Args:
         user_data: User registration data
         session: Database session
 
     Returns:
-        Created user object
+        Auth response with tokens and user info
 
     Raises:
         HTTPException: If email already registered
@@ -48,14 +65,14 @@ async def register(
 
     # Create new user
     user = await create_user(session, user_data.email, user_data.password)
-    return user
+    return create_auth_response(user)
 
 
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=AuthResponse)
 async def login(
     credentials: UserLogin,
     session: Annotated[AsyncSession, Depends(get_db)],
-) -> Token:
+) -> AuthResponse:
     """Authenticate user and return JWT tokens.
 
     Args:
@@ -63,7 +80,7 @@ async def login(
         session: Database session
 
     Returns:
-        JWT access and refresh tokens
+        Auth response with tokens and user info
 
     Raises:
         HTTPException: If credentials are invalid
@@ -76,14 +93,14 @@ async def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    return create_tokens(user)
+    return create_auth_response(user)
 
 
-@router.post("/refresh", response_model=Token)
+@router.post("/refresh", response_model=AuthResponse)
 async def refresh_token(
     refresh_data: RefreshTokenRequest,
     session: Annotated[AsyncSession, Depends(get_db)],
-) -> Token:
+) -> AuthResponse:
     """Refresh access token using refresh token.
 
     Args:
@@ -91,7 +108,7 @@ async def refresh_token(
         session: Database session
 
     Returns:
-        New JWT access and refresh tokens
+        New auth response with tokens and user info
 
     Raises:
         HTTPException: If refresh token is invalid
@@ -121,7 +138,7 @@ async def refresh_token(
         raise credentials_exception
 
     # Create new tokens
-    return create_tokens(user)
+    return create_auth_response(user)
 
 
 @router.get("/me", response_model=UserResponse)
