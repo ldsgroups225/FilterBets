@@ -81,15 +81,15 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 3.10 Create `backend/app/bot/run_bot.py` entry point script for running bot as separate process
   - [x] 3.11 Add bot service to docker-compose.yml
 
-- [ ] 4.0 Pre-Match Scanner Service
-  - [ ] 4.1 Create `backend/app/services/scanner_service.py` with PreMatchScanner class
-  - [ ] 4.2 Implement `get_upcoming_fixtures()` - fetches fixtures in next N hours (configurable)
-  - [ ] 4.3 Implement `get_users_with_active_alerts()` - fetches users with verified Telegram and active filter alerts
-  - [ ] 4.4 Implement `scan_filters_for_user()` - applies user's filters to upcoming fixtures using FilterEngine
-  - [ ] 4.5 Implement `get_new_matches()` - filters out already-notified filter+fixture combinations
-  - [ ] 4.6 Implement `record_filter_match()` - inserts into filter_matches table
-  - [ ] 4.7 Implement `run_full_scan()` - orchestrates full scan for all users, returns scan stats
-  - [ ] 4.8 Add scanner config to settings: lookahead_hours, max_notifications_per_scan
+- [x] 4.0 Pre-Match Scanner Service
+  - [x] 4.1 Create `backend/app/services/scanner_service.py` with PreMatchScanner class
+  - [x] 4.2 Implement `get_upcoming_fixtures()` - fetches fixtures in next N hours (configurable)
+  - [x] 4.3 Implement `get_users_with_active_alerts()` - fetches users with verified Telegram and active filter alerts
+  - [x] 4.4 Implement `scan_filters_for_user()` - applies user's filters to upcoming fixtures using FilterEngine
+  - [x] 4.5 Implement `get_new_matches()` - filters out already-notified filter+fixture combinations
+  - [x] 4.6 Implement `record_filter_match()` - inserts into filter_matches table
+  - [x] 4.7 Implement `run_full_scan()` - orchestrates full scan for all users, returns scan stats
+  - [x] 4.8 Add scanner config to settings: lookahead_hours, max_notifications_per_scan
 
 - [ ] 5.0 Notification System
   - [ ] 5.1 Create `backend/app/tasks/notification_tasks.py` module
