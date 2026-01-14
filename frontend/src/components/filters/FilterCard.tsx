@@ -35,15 +35,6 @@ export function FilterCard({ filter, onDelete, onToggleActive }: FilterCardProps
     onToggleActive(filter.id, !filter.is_active)
   }
 
-  const betTypeLabels: Record<string, string> = {
-    home_win: 'Home Win',
-    away_win: 'Away Win',
-    draw: 'Draw',
-    over_2_5: 'Over 2.5',
-    under_2_5: 'Under 2.5',
-    btts: 'BTTS',
-  }
-
   return (
     <>
       <Card className="hover:shadow-md transition-shadow">
@@ -68,14 +59,14 @@ export function FilterCard({ filter, onDelete, onToggleActive }: FilterCardProps
             {/* Filter Info */}
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="text-muted-foreground">Bet Type:</span>
-                <div className="font-medium mt-1">
-                  {betTypeLabels[filter.bet_type] || filter.bet_type}
-                </div>
-              </div>
-              <div>
                 <span className="text-muted-foreground">Rules:</span>
                 <div className="font-medium mt-1">{filter.rules.length} condition(s)</div>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Status:</span>
+                <div className="font-medium mt-1">
+                  {filter.is_active ? 'Active' : 'Inactive'}
+                </div>
               </div>
             </div>
 

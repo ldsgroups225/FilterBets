@@ -82,7 +82,6 @@ export function FilterEditPage() {
         initialData={{
           name: filter.name,
           description: filter.description || '',
-          bet_type: filter.bet_type,
           rules: filter.rules,
           is_active: filter.is_active,
         }}

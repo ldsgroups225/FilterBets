@@ -4,23 +4,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { RuleRow } from './RuleRow'
-import { BET_TYPES } from '@/lib/filterFields'
 import type { FilterRule, CreateFilterRequest } from '@/types/filter'
 
 interface FilterBuilderProps {
   initialData?: {
     name: string
     description: string
-    bet_type: string
     rules: FilterRule[]
     is_active: boolean
   }
@@ -37,11 +28,10 @@ export function FilterBuilder({
 }: FilterBuilderProps) {
   const [name, setName] = useState(initialData?.name || '')
   const [description, setDescription] = useState(initialData?.description || '')
-  const [betType, setBetType] = useState(initialData?.bet_type || 'home_win')
   const [rules, setRules] = useState<FilterRule[]>(
     initialData?.rules || [
       {
-        field: 'home_odds',
+        field: 'home_team_goals_avg',
         operator: '>=',
         value: 1.5,
       },
@@ -54,7 +44,7 @@ export function FilterBuilder({
     setRules([
       ...rules,
       {
-        field: 'home_odds',
+        field: 'home_team_goals_avg',
         operator: '>=',
         value: 1.5,
       },
@@ -119,7 +109,6 @@ export function FilterBuilder({
     onSubmit({
       name: name.trim(),
       description: description.trim() || undefined,
-      bet_type: betType,
       rules,
       is_active: isActive,
     })
@@ -143,7 +132,7 @@ export function FilterBuilder({
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., High Home Odds Filter"
+              placeholder="e.g., High Scoring Teams Filter"
               maxLength={100}
             />
             {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
@@ -163,25 +152,6 @@ export function FilterBuilder({
             {errors.description && (
               <p className="text-sm text-destructive">{errors.description}</p>
             )}
-          </div>
-
-          {/* Bet Type */}
-          <div className="space-y-2">
-            <Label htmlFor="bet-type">
-              Bet Type <span className="text-destructive">*</span>
-            </Label>
-            <Select value={betType} onValueChange={setBetType}>
-              <SelectTrigger id="bet-type">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {BET_TYPES.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
           {/* Active Status */}

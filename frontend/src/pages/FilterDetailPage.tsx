@@ -64,15 +64,6 @@ export function FilterDetailPage() {
     }
   }
 
-  const betTypeLabels: Record<string, string> = {
-    home_win: 'Home Win',
-    away_win: 'Away Win',
-    draw: 'Draw',
-    over_2_5: 'Over 2.5 Goals',
-    under_2_5: 'Under 2.5 Goals',
-    btts: 'Both Teams to Score',
-  }
-
   const operatorLabels: Record<string, string> = {
     '=': 'equals',
     '!=': 'not equals',
@@ -165,23 +156,15 @@ export function FilterDetailPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <span className="text-sm text-muted-foreground">Bet Type</span>
-              <div className="font-medium mt-1">
-                {betTypeLabels[filter.bet_type] || filter.bet_type}
-              </div>
+              <span className="text-sm text-muted-foreground">Rules Count</span>
+              <div className="font-medium mt-1">{filter.rules.length} conditions</div>
             </div>
             <div>
               <span className="text-sm text-muted-foreground">Created</span>
               <div className="font-medium mt-1">
                 {format(new Date(filter.created_at), 'MMM dd, yyyy')}
-              </div>
-            </div>
-            <div>
-              <span className="text-sm text-muted-foreground">Last Updated</span>
-              <div className="font-medium mt-1">
-                {format(new Date(filter.updated_at), 'MMM dd, yyyy')}
               </div>
             </div>
           </div>
