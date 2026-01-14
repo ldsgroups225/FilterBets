@@ -59,14 +59,14 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 1.5 Create Alembic migration for FilterMatch table and User.scan_frequency
   - [x] 1.6 Run migration and verify schema: `cd backend && poetry run alembic upgrade head`
 
-- [ ] 2.0 Telegram Deep Link Authentication
-  - [ ] 2.1 Add Telegram config settings to `backend/app/config.py`: bot_token, bot_username, link_token_ttl
-  - [ ] 2.2 Create `backend/app/services/telegram_service.py` with TelegramService class
-  - [ ] 2.3 Implement `generate_link_token()` - creates UUID token, stores in Redis with 30-min TTL
-  - [ ] 2.4 Implement `validate_link_token()` - validates token exists and not expired
-  - [ ] 2.5 Implement `link_telegram_account()` - links chat_id to user, deletes token, sets telegram_verified=True
-  - [ ] 2.6 Implement `unlink_telegram_account()` - clears telegram_chat_id and telegram_verified
-  - [ ] 2.7 Implement `get_deep_link_url()` - returns `https://t.me/{bot_username}?start={token}`
+- [x] 2.0 Telegram Deep Link Authentication
+  - [x] 2.1 Add Telegram config settings to `backend/app/config.py`: bot_token, bot_username, link_token_ttl
+  - [x] 2.2 Create `backend/app/services/telegram_service.py` with TelegramService class
+  - [x] 2.3 Implement `generate_link_token()` - creates UUID token, stores in Redis with 30-min TTL
+  - [x] 2.4 Implement `validate_link_token()` - validates token exists and not expired
+  - [x] 2.5 Implement `link_telegram_account()` - links chat_id to user, deletes token, sets telegram_verified=True
+  - [x] 2.6 Implement `unlink_telegram_account()` - clears telegram_chat_id and telegram_verified
+  - [x] 2.7 Implement `get_deep_link_url()` - returns `https://t.me/{bot_username}?start={token}`
 
 - [ ] 3.0 Telegram Bot Implementation
   - [ ] 3.1 Add `python-telegram-bot>=20.0` to backend dependencies in pyproject.toml

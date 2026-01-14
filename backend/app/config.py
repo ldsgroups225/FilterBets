@@ -57,6 +57,11 @@ class Settings(BaseSettings):
     jwt_access_token_expire_minutes: int = 30
     jwt_refresh_token_expire_days: int = 7
 
+    # Telegram Bot
+    telegram_bot_token: str = ""
+    telegram_bot_username: str = "FilterBetsBot"
+    telegram_link_token_ttl: int = 1800  # 30 minutes in seconds
+
     def get_allowed_origins_list(self) -> list[str]:
         """Get allowed origins as a list."""
         return [origin.strip() for origin in self.allowed_origins.split(",")]
