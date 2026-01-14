@@ -127,15 +127,15 @@
   - [x] 5.9 Create FixtureDetailPage with match info
   - [x] 5.10 Display team statistics on fixture detail
 
-- [ ] 6.0 Filters List & Management
-  - [ ] 6.1 Create filter types (Filter, FilterRule, CreateFilterRequest)
-  - [ ] 6.2 Create filters API service functions (list, get, create, update, delete)
-  - [ ] 6.3 Create useFilters hooks with TanStack Query
-  - [ ] 6.4 Create FiltersPage with filters list
-  - [ ] 6.5 Create filter card component showing name, status, rule count
-  - [ ] 6.6 Add delete filter functionality with confirmation
-  - [ ] 6.7 Add toggle active/inactive filter functionality
-  - [ ] 6.8 Create FilterDetailPage showing filter info and matches
+- [x] 6.0 Filters List & Management
+  - [x] 6.1 Create filter types (Filter, FilterRule, CreateFilterRequest)
+  - [x] 6.2 Create filters API service functions (list, get, create, update, delete)
+  - [x] 6.3 Create useFilters hooks with TanStack Query
+  - [x] 6.4 Create FiltersPage with filters list
+  - [x] 6.5 Create filter card component showing name, status, rule count
+  - [x] 6.6 Add delete filter functionality with confirmation
+  - [x] 6.7 Add toggle active/inactive filter functionality
+  - [x] 6.8 Create FilterDetailPage showing filter info and matches
 
 - [ ] 7.0 Filter Builder
   - [ ] 7.1 Define filter field options (field name, type, operators)

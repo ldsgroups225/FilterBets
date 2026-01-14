@@ -10,6 +10,8 @@ import { Login } from "./pages/Login"
 import { RegisterPage } from "./pages/RegisterPage"
 import { FixturesPage } from "./pages/FixturesPage"
 import { FixtureDetailPage } from "./pages/FixtureDetailPage"
+import { FiltersPage } from "./pages/FiltersPage"
+import { FilterDetailPage } from "./pages/FilterDetailPage"
 import { NotFound } from "./pages/NotFound"
 
 function App() {
@@ -57,7 +59,17 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout>
-                  <div>Filters Page (Coming Soon)</div>
+                  <FiltersPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/filters/:id"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <FilterDetailPage />
                 </Layout>
               </ProtectedRoute>
             }
