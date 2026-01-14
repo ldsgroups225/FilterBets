@@ -107,13 +107,13 @@
   - [x] 3.6 Create error boundary component
   - [x] 3.7 Style active navigation links
 
-- [ ] 4.0 Dashboard Page
-  - [ ] 4.1 Create DashboardPage component
-  - [ ] 4.2 Create stats cards (today's fixtures, active filters)
-  - [ ] 4.3 Create today's matches list component
-  - [ ] 4.4 Add quick action buttons (create filter, view all fixtures)
-  - [ ] 4.5 Integrate with fixtures API (today's fixtures)
-  - [ ] 4.6 Integrate with filters API (user's filters count)
+- [x] 4.0 Dashboard Page
+  - [x] 4.1 Create DashboardPage component
+  - [x] 4.2 Create stats cards (today's fixtures, active filters)
+  - [x] 4.3 Create today's matches list component
+  - [x] 4.4 Add quick action buttons (create filter, view all fixtures)
+  - [x] 4.5 Integrate with fixtures API (today's fixtures)
+  - [x] 4.6 Integrate with filters API (user's filters count)
 
 - [ ] 5.0 Fixtures Feature
   - [ ] 5.1 Create fixture types (Fixture, FixtureListResponse)
