@@ -35,6 +35,9 @@ class Filter(Base):
     backtest_results: Mapped[list["BacktestResult"]] = relationship(  # noqa: F821
         "BacktestResult", back_populates="filter", cascade="all, delete-orphan"
     )
+    backtest_jobs: Mapped[list["BacktestJob"]] = relationship(  # noqa: F821
+        "BacktestJob", back_populates="filter", cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"<Filter(id={self.id}, name={self.name}, user_id={self.user_id})>"

@@ -47,6 +47,9 @@ class Team(Base):
     standings: Mapped[list["Standing"]] = relationship(  # noqa: F821
         "Standing", back_populates="team"
     )
+    computed_stats: Mapped[list["TeamComputedStats"]] = relationship(  # noqa: F821
+        "TeamComputedStats", back_populates="team"
+    )
 
     def __repr__(self) -> str:
         return f"<Team(id={self.id}, name={self.display_name})>"
