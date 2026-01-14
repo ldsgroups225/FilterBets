@@ -31,6 +31,9 @@ htmlcov/
 # Jupyter Notebook
 .ipynb_checkpoints
 
+# pyenv
+.python-version
+
 # Environments
 .env
 .venv
