@@ -27,7 +27,7 @@ class Team(Base):
     team_id: Mapped[int] = mapped_column(Integer, unique=True, index=True, nullable=False)
     location: Mapped[str] = mapped_column(String(100), nullable=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-    abbreviation: Mapped[str] = mapped_column(String(10), nullable=True)
+    abbreviation: Mapped[str] = mapped_column(String(50), nullable=True)
     display_name: Mapped[str] = mapped_column(String(150), nullable=False)
     short_display_name: Mapped[str] = mapped_column(String(100), nullable=True)
     color: Mapped[str] = mapped_column(String(10), nullable=True)
@@ -36,7 +36,7 @@ class Team(Base):
     venue_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("venues.venue_id"), nullable=True
     )
-    slug: Mapped[str] = mapped_column(String(100), nullable=True)
+    slug: Mapped[str] = mapped_column(String(150), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     # Relationships

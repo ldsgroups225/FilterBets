@@ -3,7 +3,7 @@
 from datetime import datetime, timedelta
 from typing import Any
 
-from sqlalchemy import and_, delete, select
+from sqlalchemy import and_, delete, extract, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.backtest_result import BacktestResult
@@ -113,11 +113,11 @@ class BacktestService:
         self, rules: list[dict[str, Any]], seasons: list[int]
     ) -> list[Fixture]:
         """Get historical fixtures matching filter rules."""
-        # Build query for finished matches in specified seasons
+        # Build query for finished matches in specified seasons (by year)
         query = select(Fixture).where(
             and_(
                 Fixture.status_id == 28,  # Full Time
-                Fixture.season_type.in_(seasons),
+                extract('year', Fixture.match_date).in_(seasons),
             )
         )
 

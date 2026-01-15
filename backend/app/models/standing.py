@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -19,6 +19,12 @@ class Standing(Base):
     """League standings/table model."""
 
     __tablename__ = "standings"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "season_type", "league_id", "team_id", name="uq_standing_season_league_team"
+        ),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     season_type: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
