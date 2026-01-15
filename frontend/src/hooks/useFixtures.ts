@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
-import { getFixtures, getTodayFixtures, getUpcomingFixtures, getFixture } from '@/services/fixtures'
 import type { FixtureFilters } from '@/types/fixture'
+import { useQuery } from '@tanstack/react-query'
+import { getFixture, getFixtures, getTodayFixtures, getUpcomingFixtures } from '@/services/fixtures'
 
 export function useFixtures(filters?: FixtureFilters) {
   return useQuery({

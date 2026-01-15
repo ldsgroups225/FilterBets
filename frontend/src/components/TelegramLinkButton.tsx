@@ -2,30 +2,30 @@
  * Button component for linking Telegram account
  */
 
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { IconLoader2 } from '@tabler/icons-react';
-import { Button } from '@/components/ui/button';
-import { generateTelegramLink } from '@/services/api/telegram';
-import { toast } from 'sonner';
+import { IconLoader2 } from '@tabler/icons-react'
+import { useMutation } from '@tanstack/react-query'
+import { useState } from 'react'
+import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
+import { generateTelegramLink } from '@/services/api/telegram'
 
 export interface TelegramLinkButtonProps {
   /**
    * Callback when link is generated and user is redirected
    */
-  onLinkGenerated?: () => void;
+  onLinkGenerated?: () => void
   /**
    * Button variant
    */
-  variant?: 'default' | 'outline' | 'secondary' | 'ghost' | 'link';
+  variant?: 'default' | 'outline' | 'secondary' | 'ghost' | 'link'
   /**
    * Button size
    */
-  size?: 'default' | 'sm' | 'lg' | 'icon';
+  size?: 'default' | 'sm' | 'lg' | 'icon'
   /**
    * Custom class name
    */
-  className?: string;
+  className?: string
 }
 
 export function TelegramLinkButton({
@@ -34,34 +34,34 @@ export function TelegramLinkButton({
   size = 'default',
   className,
 }: TelegramLinkButtonProps) {
-  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false)
 
   const linkMutation = useMutation({
     mutationFn: generateTelegramLink,
     onSuccess: (data) => {
       // Open Telegram deep link in new window/tab
-      window.open(data.deep_link_url, '_blank');
+      window.open(data.deep_link_url, '_blank')
 
-      setIsRedirecting(true);
+      setIsRedirecting(true)
 
       toast.success('Opening Telegram...', {
         description: `Link expires in ${Math.floor(data.expires_in_seconds / 60)} minutes. Complete the linking in Telegram.`,
-      });
+      })
 
-      onLinkGenerated?.();
+      onLinkGenerated?.()
     },
     onError: (error: Error) => {
       toast.error('Failed to generate link', {
         description: (error as { response?: { data?: { detail?: string } } }).response?.data?.detail || 'Please try again later.',
-      });
+      })
     },
-  });
+  })
 
   const handleClick = () => {
-    linkMutation.mutate();
-  };
+    linkMutation.mutate()
+  }
 
-  const isLoading = linkMutation.isPending || isRedirecting;
+  const isLoading = linkMutation.isPending || isRedirecting
 
   return (
     <Button
@@ -74,5 +74,5 @@ export function TelegramLinkButton({
       {isLoading && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
       {isLoading ? 'Opening Telegram...' : 'Link Telegram'}
     </Button>
-  );
+  )
 }

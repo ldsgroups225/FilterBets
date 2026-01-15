@@ -1,16 +1,16 @@
-import { useParams, useNavigate } from 'react-router-dom'
+import type { CreateFilterRequest } from '@/types/filter'
 import { IconArrowLeft } from '@tabler/icons-react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { toast } from 'sonner'
+import { FilterBuilder } from '@/components/filters/FilterBuilder'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { FilterBuilder } from '@/components/filters/FilterBuilder'
 import { useFilter, useUpdateFilter } from '@/hooks/useFilters'
-import { toast } from 'sonner'
-import type { CreateFilterRequest } from '@/types/filter'
 
 export function FilterEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const filterId = parseInt(id || '0')
+  const filterId = Number.parseInt(id || '0')
 
   const { data: filter, isLoading, error } = useFilter(filterId)
   const updateMutation = useUpdateFilter()
@@ -23,7 +23,8 @@ export function FilterEditPage() {
       })
       toast.success('Filter updated successfully')
       navigate(`/filters/${filterId}`)
-    } catch (err) {
+    }
+    catch (err) {
       toast.error('Failed to update filter')
       console.error('Update error:', err)
     }

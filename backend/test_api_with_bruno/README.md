@@ -4,7 +4,7 @@ This collection contains comprehensive API tests for the FilterBets football bet
 
 ## 📁 Collection Structure
 
-```
+```text
 test_api_with_bruno/
 ├── Auth/                    # Authentication endpoints
 │   ├── Login.bru           # User login and token generation
@@ -53,7 +53,7 @@ test_api_with_bruno/
 The collection uses the following environment variables:
 
 | Variable | Default Value | Description |
-|----------|---------------|-------------|
+| ---------- | --------------- | ------------- |
 | `base_url` | `http://127.0.0.1:8000/api/v1` | API base URL |
 | `auth_token` | *auto-generated* | JWT authentication token |
 | `league_id` | `1` | Sample league ID |
@@ -250,19 +250,19 @@ This filter finds matches where:
 
 ### 1. Complete Authentication Flow
 
-```
+```text
 Register → Login → Refresh Token
 ```
 
 ### 2. Filter Management Workflow
 
-```
+```text
 Create Filter → Get Filter → Update Filter → Delete Filter
 ```
 
 ### 3. Backtesting Workflow
 
-```
+```text
 Create Filter → Run Backtest → Get Job Status → Get Results
 ```
 

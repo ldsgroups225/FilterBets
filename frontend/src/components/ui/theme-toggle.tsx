@@ -1,5 +1,5 @@
 import { IconSun, IconMoon } from "@tabler/icons-react"
-import { useTheme } from "@/contexts/ThemeContext"
+import { useTheme } from '@/hooks/use-theme'
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,

@@ -1,7 +1,8 @@
-import { Component, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
+import { IconAlertTriangle } from '@tabler/icons-react'
+import { Component } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { IconAlertTriangle } from '@tabler/icons-react'
 
 interface ErrorBoundaryProps {
   children: ReactNode

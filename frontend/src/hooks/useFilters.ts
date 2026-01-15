@@ -1,14 +1,14 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import type { CreateFilterRequest, UpdateFilterRequest } from '@/types/filter'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  getFilters,
-  getFilter,
   createFilter,
-  updateFilter,
   deleteFilter,
   getActiveFiltersCount,
-  toggleFilterAlerts
+  getFilter,
+  getFilters,
+  toggleFilterAlerts,
+  updateFilter,
 } from '@/services/filters'
-import type { CreateFilterRequest, UpdateFilterRequest } from '@/types/filter'
 
 export function useFilters() {
   return useQuery({
@@ -47,7 +47,7 @@ export function useUpdateFilter() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: UpdateFilterRequest }) =>
+    mutationFn: ({ id, data }: { id: number, data: UpdateFilterRequest }) =>
       updateFilter(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['filters'] })
@@ -71,7 +71,7 @@ export function useToggleFilterAlerts() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ id, enabled }: { id: number; enabled: boolean }) =>
+    mutationFn: ({ id, enabled }: { id: number, enabled: boolean }) =>
       toggleFilterAlerts(id, enabled),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['filters'] })

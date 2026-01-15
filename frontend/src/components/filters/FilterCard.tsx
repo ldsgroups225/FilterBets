@@ -1,9 +1,7 @@
+import type { Filter } from '@/types/filter'
+import { IconBell, IconBellOff, IconEdit, IconFilter, IconToggleLeft, IconToggleRight, IconTrash } from '@tabler/icons-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { IconFilter, IconTrash, IconEdit, IconToggleLeft, IconToggleRight, IconBell, IconBellOff } from '@tabler/icons-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,8 +12,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTelegramStatus } from '@/hooks/useTelegramStatus'
-import type { Filter } from '@/types/filter'
 
 interface FilterCardProps {
   filter: Filter
@@ -71,22 +71,28 @@ export function FilterCard({ filter, onDelete, onToggleActive, onToggleAlerts }:
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-muted-foreground">Rules:</span>
-                <div className="font-medium mt-1">{filter.rules.length} condition(s)</div>
+                <div className="font-medium mt-1">
+                  {filter.rules.length}
+                  {' '}
+                  condition(s)
+                </div>
               </div>
               <div>
                 <span className="text-muted-foreground">Alerts:</span>
                 <div className="font-medium mt-1 flex items-center gap-1">
-                  {filter.alerts_enabled ? (
-                    <>
-                      <IconBell className="h-3 w-3" />
-                      Enabled
-                    </>
-                  ) : (
-                    <>
-                      <IconBellOff className="h-3 w-3" />
-                      Disabled
-                    </>
-                  )}
+                  {filter.alerts_enabled
+                    ? (
+                        <>
+                          <IconBell className="h-3 w-3" />
+                          Enabled
+                        </>
+                      )
+                    : (
+                        <>
+                          <IconBellOff className="h-3 w-3" />
+                          Disabled
+                        </>
+                      )}
                 </div>
               </div>
             </div>
@@ -114,11 +120,13 @@ export function FilterCard({ filter, onDelete, onToggleActive, onToggleAlerts }:
                 }
                 disabled={!telegramStatus?.linked}
               >
-                {filter.alerts_enabled ? (
-                  <IconBell className="h-4 w-4" />
-                ) : (
-                  <IconBellOff className="h-4 w-4" />
-                )}
+                {filter.alerts_enabled
+                  ? (
+                      <IconBell className="h-4 w-4" />
+                    )
+                  : (
+                      <IconBellOff className="h-4 w-4" />
+                    )}
               </Button>
               <Button
                 variant="outline"
@@ -132,11 +140,13 @@ export function FilterCard({ filter, onDelete, onToggleActive, onToggleAlerts }:
                 size="sm"
                 onClick={handleToggleActive}
               >
-                {filter.is_active ? (
-                  <IconToggleRight className="h-4 w-4" />
-                ) : (
-                  <IconToggleLeft className="h-4 w-4" />
-                )}
+                {filter.is_active
+                  ? (
+                      <IconToggleRight className="h-4 w-4" />
+                    )
+                  : (
+                      <IconToggleLeft className="h-4 w-4" />
+                    )}
               </Button>
               <Button
                 variant="outline"
@@ -156,7 +166,9 @@ export function FilterCard({ filter, onDelete, onToggleActive, onToggleAlerts }:
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Filter</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{filter.name}"? This action cannot be undone.
+              Are you sure you want to delete "
+              {filter.name}
+              "? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -7,7 +7,7 @@ export interface FilterFieldOption {
   label: string
   type: FieldType
   operators: Array<'=' | '!=' | '>' | '<' | '>=' | '<=' | 'in' | 'between'>
-  options?: Array<{ value: string; label: string }> // For select/multiselect
+  options?: Array<{ value: string, label: string }> // For select/multiselect
   min?: number
   max?: number
   step?: number
@@ -162,10 +162,10 @@ export const OPERATOR_LABELS: Record<string, string> = {
   '<': 'less than',
   '>=': 'greater than or equal',
   '<=': 'less than or equal',
-  in: 'in',
-  between: 'between',
+  'in': 'in',
+  'between': 'between',
 }
 
 export function getFieldConfig(fieldName: string): FilterFieldOption | undefined {
-  return FILTER_FIELDS.find((f) => f.field === fieldName)
+  return FILTER_FIELDS.find(f => f.field === fieldName)
 }

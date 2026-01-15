@@ -1,21 +1,21 @@
-import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { format } from 'date-fns'
+import type { BacktestRequest, BacktestResponse } from '@/types/backtest'
 import {
   IconArrowLeft,
-  IconFilter,
-  IconEdit,
-  IconTrash,
-  IconToggleLeft,
-  IconToggleRight,
-  IconChartBar,
   IconBell,
   IconBellOff,
+  IconChartBar,
+  IconEdit,
+  IconFilter,
+  IconToggleLeft,
+  IconToggleRight,
+  IconTrash,
 } from '@tabler/icons-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
+import { format } from 'date-fns'
+import { useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { toast } from 'sonner'
+import { BacktestForm } from '@/components/filters/BacktestForm'
+import { BacktestResults } from '@/components/filters/BacktestResults'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,18 +26,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { BacktestForm } from '@/components/filters/BacktestForm'
-import { BacktestResults } from '@/components/filters/BacktestResults'
-import { useFilter, useDeleteFilter, useUpdateFilter, useToggleFilterAlerts } from '@/hooks/useFilters'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useDeleteFilter, useFilter, useToggleFilterAlerts, useUpdateFilter } from '@/hooks/useFilters'
 import { useTelegramStatus } from '@/hooks/useTelegramStatus'
 import { runBacktest } from '@/services/backtest'
-import { toast } from 'sonner'
-import type { BacktestRequest, BacktestResponse } from '@/types/backtest'
 
 export function FilterDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const filterId = parseInt(id || '0')
+  const filterId = Number.parseInt(id || '0')
 
   const { data: filter, isLoading, error } = useFilter(filterId)
   const deleteMutation = useDeleteFilter()
@@ -54,7 +54,8 @@ export function FilterDetailPage() {
       await deleteMutation.mutateAsync(filterId)
       toast.success('Filter deleted successfully')
       navigate('/filters')
-    } catch (err) {
+    }
+    catch (err) {
       toast.error('Failed to delete filter')
       console.error('Delete error:', err)
     }
@@ -62,21 +63,24 @@ export function FilterDetailPage() {
   }
 
   const handleToggleActive = async () => {
-    if (!filter) return
+    if (!filter)
+      return
     try {
       await updateMutation.mutateAsync({
         id: filterId,
         data: { is_active: !filter.is_active },
       })
       toast.success(`Filter ${!filter.is_active ? 'activated' : 'deactivated'}`)
-    } catch (err) {
+    }
+    catch (err) {
       toast.error('Failed to update filter')
       console.error('Update error:', err)
     }
   }
 
   const handleToggleAlerts = async () => {
-    if (!filter) return
+    if (!filter)
+      return
 
     if (!telegramStatus?.linked) {
       toast.error('Please link your Telegram account first', {
@@ -95,7 +99,8 @@ export function FilterDetailPage() {
         enabled: !filter.alerts_enabled,
       })
       toast.success(`Alerts ${!filter.alerts_enabled ? 'enabled' : 'disabled'}`)
-    } catch (err) {
+    }
+    catch (err) {
       toast.error('Failed to toggle alerts')
       console.error('Toggle alerts error:', err)
     }
@@ -107,10 +112,12 @@ export function FilterDetailPage() {
       const result = await runBacktest(filterId, data)
       setBacktestResult(result)
       toast.success('Backtest completed successfully')
-    } catch (err) {
+    }
+    catch (err) {
       toast.error('Failed to run backtest')
       console.error('Backtest error:', err)
-    } finally {
+    }
+    finally {
       setIsRunningBacktest(false)
     }
   }
@@ -122,8 +129,8 @@ export function FilterDetailPage() {
     '<': 'less than',
     '>=': 'greater than or equal',
     '<=': 'less than or equal',
-    in: 'in',
-    between: 'between',
+    'in': 'in',
+    'between': 'between',
   }
 
   if (isLoading) {
@@ -178,30 +185,34 @@ export function FilterDetailPage() {
             }
             disabled={!telegramStatus?.linked}
           >
-            {filter.alerts_enabled ? (
-              <>
-                <IconBell className="mr-2 h-4 w-4" />
-                Alerts On
-              </>
-            ) : (
-              <>
-                <IconBellOff className="mr-2 h-4 w-4" />
-                Alerts Off
-              </>
-            )}
+            {filter.alerts_enabled
+              ? (
+                  <>
+                    <IconBell className="mr-2 h-4 w-4" />
+                    Alerts On
+                  </>
+                )
+              : (
+                  <>
+                    <IconBellOff className="mr-2 h-4 w-4" />
+                    Alerts Off
+                  </>
+                )}
           </Button>
           <Button variant="outline" onClick={handleToggleActive}>
-            {filter.is_active ? (
-              <>
-                <IconToggleRight className="mr-2 h-4 w-4" />
-                Deactivate
-              </>
-            ) : (
-              <>
-                <IconToggleLeft className="mr-2 h-4 w-4" />
-                Activate
-              </>
-            )}
+            {filter.is_active
+              ? (
+                  <>
+                    <IconToggleRight className="mr-2 h-4 w-4" />
+                    Deactivate
+                  </>
+                )
+              : (
+                  <>
+                    <IconToggleLeft className="mr-2 h-4 w-4" />
+                    Activate
+                  </>
+                )}
           </Button>
           <Button variant="outline" onClick={() => navigate(`/filters/${filterId}/edit`)}>
             <IconEdit className="mr-2 h-4 w-4" />
@@ -234,7 +245,11 @@ export function FilterDetailPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <span className="text-sm text-muted-foreground">Rules Count</span>
-              <div className="font-medium mt-1">{filter.rules.length} conditions</div>
+              <div className="font-medium mt-1">
+                {filter.rules.length}
+                {' '}
+                conditions
+              </div>
             </div>
             <div>
               <span className="text-sm text-muted-foreground">Created</span>
@@ -251,14 +266,19 @@ export function FilterDetailPage() {
         <CardHeader>
           <CardTitle>Filter Rules</CardTitle>
           <CardDescription>
-            {filter.rules.length} condition{filter.rules.length !== 1 ? 's' : ''} must be met
+            {filter.rules.length}
+            {' '}
+            condition
+            {filter.rules.length !== 1 ? 's' : ''}
+            {' '}
+            must be met
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {filter.rules.map((rule, index) => (
               <div
-                key={index}
+                key={rule.value.toString()}
                 className="flex items-center gap-3 p-3 rounded-lg border bg-muted/50"
               >
                 <Badge variant="outline" className="font-mono">
@@ -267,7 +287,8 @@ export function FilterDetailPage() {
                 <div className="flex-1">
                   <div className="font-medium">{rule.field}</div>
                   <div className="text-sm text-muted-foreground">
-                    {operatorLabels[rule.operator] || rule.operator}{' '}
+                    {operatorLabels[rule.operator] || rule.operator}
+                    {' '}
                     <span className="font-mono">
                       {Array.isArray(rule.value) ? rule.value.join(', ') : rule.value}
                     </span>
@@ -291,16 +312,18 @@ export function FilterDetailPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {backtestResult ? (
-            <div className="space-y-4">
-              <BacktestResults result={backtestResult} />
-              <Button variant="outline" onClick={() => setBacktestResult(null)}>
-                Run New Backtest
-              </Button>
-            </div>
-          ) : (
-            <BacktestForm onSubmit={handleRunBacktest} isLoading={isRunningBacktest} />
-          )}
+          {backtestResult
+            ? (
+                <div className="space-y-4">
+                  <BacktestResults result={backtestResult} />
+                  <Button variant="outline" onClick={() => setBacktestResult(null)}>
+                    Run New Backtest
+                  </Button>
+                </div>
+              )
+            : (
+                <BacktestForm onSubmit={handleRunBacktest} isLoading={isRunningBacktest} />
+              )}
         </CardContent>
       </Card>
 
@@ -325,7 +348,9 @@ export function FilterDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Filter</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{filter.name}"? This action cannot be undone.
+              Are you sure you want to delete "
+              {filter.name}
+              "? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

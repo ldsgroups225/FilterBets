@@ -1,13 +1,13 @@
+import { IconFilter, IconPlus } from '@tabler/icons-react'
 import { useNavigate } from 'react-router-dom'
-import { IconPlus, IconFilter } from '@tabler/icons-react'
+import { toast } from 'sonner'
+import { FilterCard } from '@/components/filters/FilterCard'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { FilterCard } from '@/components/filters/FilterCard'
-import { useFilters, useDeleteFilter, useUpdateFilter, useToggleFilterAlerts } from '@/hooks/useFilters'
+import { useDeleteFilter, useFilters, useToggleFilterAlerts, useUpdateFilter } from '@/hooks/useFilters'
 import { useTelegramStatus } from '@/hooks/useTelegramStatus'
-import { toast } from 'sonner'
 
 export function FiltersPage() {
   const navigate = useNavigate()
@@ -21,7 +21,8 @@ export function FiltersPage() {
     try {
       await deleteMutation.mutateAsync(id)
       toast.success('Filter deleted successfully')
-    } catch (err) {
+    }
+    catch (err) {
       toast.error('Failed to delete filter')
       console.error('Delete error:', err)
     }
@@ -34,7 +35,8 @@ export function FiltersPage() {
         data: { is_active: isActive },
       })
       toast.success(`Filter ${isActive ? 'activated' : 'deactivated'}`)
-    } catch (err) {
+    }
+    catch (err) {
       toast.error('Failed to update filter')
       console.error('Update error:', err)
     }
@@ -55,7 +57,8 @@ export function FiltersPage() {
     try {
       await toggleAlertsMutation.mutateAsync({ id, enabled })
       toast.success(`Alerts ${enabled ? 'enabled' : 'disabled'}`)
-    } catch (err) {
+    }
+    catch (err) {
       toast.error('Failed to toggle alerts')
       console.error('Toggle alerts error:', err)
     }
@@ -78,81 +81,94 @@ export function FiltersPage() {
       </div>
 
       {/* Filters List */}
-      {isLoading ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-64 w-full" />
-          ))}
-        </div>
-      ) : error ? (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center py-12">
-              <p className="text-destructive">Failed to load filters</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                {error instanceof Error ? error.message : 'Unknown error'}
-              </p>
+      {isLoading
+        ? (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map(() => (
+                <Skeleton key={crypto.randomUUID()} className="h-64 w-full" />
+              ))}
             </div>
-          </CardContent>
-        </Card>
-      ) : data?.items && data.items.length > 0 ? (
-        <>
-          {!telegramStatus?.linked && (
-            <Alert>
-              <AlertDescription>
-                Link your Telegram account in{' '}
-                <Button
-                  variant="link"
-                  className="p-0 h-auto font-semibold"
-                  onClick={() => navigate('/settings')}
-                >
-                  Settings
-                </Button>{' '}
-                to enable notifications for your filters.
-              </AlertDescription>
-            </Alert>
-          )}
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              {data.total} filter{data.total !== 1 ? 's' : ''} total
-            </p>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {data.items.map((filter) => (
-              <FilterCard
-                key={filter.id}
-                filter={filter}
-                onDelete={handleDelete}
-                onToggleActive={handleToggleActive}
-                onToggleAlerts={handleToggleAlerts}
-              />
-            ))}
-          </div>
-        </>
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <IconFilter className="h-5 w-5" />
-              No Filters Yet
-            </CardTitle>
-            <CardDescription>
-              Create your first filter to start identifying betting opportunities
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">
-                Filters help you automatically scan matches based on your criteria
-              </p>
-              <Button onClick={() => navigate('/filters/new')}>
-                <IconPlus className="h-4 w-4 mr-2" />
-                Create Your First Filter
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+          )
+        : error
+          ? (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center py-12">
+                    <p className="text-destructive">Failed to load filters</p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {error instanceof Error ? error.message : 'Unknown error'}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          : data?.items && data.items.length > 0
+            ? (
+                <>
+                  {!telegramStatus?.linked && (
+                    <Alert>
+                      <AlertDescription>
+                        Link your Telegram account in
+                        {' '}
+                        <Button
+                          variant="link"
+                          className="p-0 h-auto font-semibold"
+                          onClick={() => navigate('/settings')}
+                        >
+                          Settings
+                        </Button>
+                        {' '}
+                        to enable notifications for your filters.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">
+                      {data.total}
+                      {' '}
+                      filter
+                      {data.total !== 1 ? 's' : ''}
+                      {' '}
+                      total
+                    </p>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {data.items.map(filter => (
+                      <FilterCard
+                        key={filter.id}
+                        filter={filter}
+                        onDelete={handleDelete}
+                        onToggleActive={handleToggleActive}
+                        onToggleAlerts={handleToggleAlerts}
+                      />
+                    ))}
+                  </div>
+                </>
+              )
+            : (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <IconFilter className="h-5 w-5" />
+                      No Filters Yet
+                    </CardTitle>
+                    <CardDescription>
+                      Create your first filter to start identifying betting opportunities
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground mb-4">
+                        Filters help you automatically scan matches based on your criteria
+                      </p>
+                      <Button onClick={() => navigate('/filters/new')}>
+                        <IconPlus className="h-4 w-4 mr-2" />
+                        Create Your First Filter
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
     </div>
   )
 }

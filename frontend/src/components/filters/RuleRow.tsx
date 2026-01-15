@@ -1,3 +1,4 @@
+import type { FilterRule } from '@/types/filter'
 import { IconTrash } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,8 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { FILTER_FIELDS, OPERATOR_LABELS, getFieldConfig } from '@/lib/filterFields'
-import type { FilterRule } from '@/types/filter'
+import { FILTER_FIELDS, getFieldConfig, OPERATOR_LABELS } from '@/lib/filterFields'
 
 interface RuleRowProps {
   rule: FilterRule
@@ -23,7 +23,8 @@ export function RuleRow({ rule, index, onChange, onRemove }: RuleRowProps) {
   const fieldConfig = getFieldConfig(rule.field)
 
   const handleFieldChange = (field: string | null) => {
-    if (!field) return
+    if (!field)
+      return
     const config = getFieldConfig(field)
     const defaultOperator = config?.operators[0] || '='
     onChange(index, {
@@ -34,7 +35,8 @@ export function RuleRow({ rule, index, onChange, onRemove }: RuleRowProps) {
   }
 
   const handleOperatorChange = (operator: string | null) => {
-    if (!operator) return
+    if (!operator)
+      return
     onChange(index, {
       ...rule,
       operator: operator as FilterRule['operator'],
@@ -47,7 +49,8 @@ export function RuleRow({ rule, index, onChange, onRemove }: RuleRowProps) {
   }
 
   const renderValueInput = () => {
-    if (!fieldConfig) return null
+    if (!fieldConfig)
+      return null
 
     // Between operator - two number inputs
     if (rule.operator === 'between') {
@@ -57,7 +60,7 @@ export function RuleRow({ rule, index, onChange, onRemove }: RuleRowProps) {
           <Input
             type="number"
             value={values[0]}
-            onChange={(e) => handleValueChange([parseFloat(e.target.value), values[1] as number])}
+            onChange={e => handleValueChange([Number.parseFloat(e.target.value), values[1] as number])}
             min={fieldConfig.min}
             max={fieldConfig.max}
             step={fieldConfig.step}
@@ -67,7 +70,7 @@ export function RuleRow({ rule, index, onChange, onRemove }: RuleRowProps) {
           <Input
             type="number"
             value={values[1]}
-            onChange={(e) => handleValueChange([values[0] as number, parseFloat(e.target.value)])}
+            onChange={e => handleValueChange([values[0] as number, Number.parseFloat(e.target.value)])}
             min={fieldConfig.min}
             max={fieldConfig.max}
             step={fieldConfig.step}
@@ -84,7 +87,8 @@ export function RuleRow({ rule, index, onChange, onRemove }: RuleRowProps) {
         <Select
           value={currentValues[0] || ''}
           onValueChange={(value) => {
-            if (!value) return
+            if (!value)
+              return
             if (!currentValues.includes(value)) {
               handleValueChange([...currentValues, value])
             }
@@ -98,7 +102,7 @@ export function RuleRow({ rule, index, onChange, onRemove }: RuleRowProps) {
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {fieldConfig.options.map((option) => (
+            {fieldConfig.options.map(option => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>
@@ -113,13 +117,13 @@ export function RuleRow({ rule, index, onChange, onRemove }: RuleRowProps) {
       return (
         <Select
           value={typeof rule.value === 'string' ? rule.value : ''}
-          onValueChange={(value) => value && handleValueChange(value)}
+          onValueChange={value => value && handleValueChange(value)}
         >
           <SelectTrigger className="w-48">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {fieldConfig.options.map((option) => (
+            {fieldConfig.options.map(option => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>
@@ -135,7 +139,7 @@ export function RuleRow({ rule, index, onChange, onRemove }: RuleRowProps) {
         <Input
           type="number"
           value={typeof rule.value === 'number' ? rule.value : 0}
-          onChange={(e) => handleValueChange(parseFloat(e.target.value))}
+          onChange={e => handleValueChange(Number.parseFloat(e.target.value))}
           min={fieldConfig.min}
           max={fieldConfig.max}
           step={fieldConfig.step}
@@ -149,7 +153,7 @@ export function RuleRow({ rule, index, onChange, onRemove }: RuleRowProps) {
       <Input
         type="text"
         value={typeof rule.value === 'string' ? rule.value : ''}
-        onChange={(e) => handleValueChange(e.target.value)}
+        onChange={e => handleValueChange(e.target.value)}
         className="w-48"
       />
     )
@@ -165,7 +169,7 @@ export function RuleRow({ rule, index, onChange, onRemove }: RuleRowProps) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {FILTER_FIELDS.map((field) => (
+            {FILTER_FIELDS.map(field => (
               <SelectItem key={field.field} value={field.field}>
                 {field.label}
               </SelectItem>
@@ -182,7 +186,7 @@ export function RuleRow({ rule, index, onChange, onRemove }: RuleRowProps) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {fieldConfig?.operators.map((op) => (
+            {fieldConfig?.operators.map(op => (
               <SelectItem key={op} value={op}>
                 {OPERATOR_LABELS[op]}
               </SelectItem>

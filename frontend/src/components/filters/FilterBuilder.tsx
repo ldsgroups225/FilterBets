@@ -1,12 +1,12 @@
-import { useState } from 'react'
+import type { CreateFilterRequest, FilterRule } from '@/types/filter'
 import { IconPlus } from '@tabler/icons-react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { RuleRow } from './RuleRow'
-import type { FilterRule, CreateFilterRequest } from '@/types/filter'
 
 interface FilterBuilderProps {
   initialData?: {
@@ -35,7 +35,7 @@ export function FilterBuilder({
         operator: '>=',
         value: 1.5,
       },
-    ]
+    ],
   )
   const [isActive, setIsActive] = useState(initialData?.is_active ?? true)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -68,7 +68,8 @@ export function FilterBuilder({
 
     if (!name.trim()) {
       newErrors.name = 'Filter name is required'
-    } else if (name.length > 100) {
+    }
+    else if (name.length > 100) {
       newErrors.name = 'Filter name must be less than 100 characters'
     }
 
@@ -78,7 +79,8 @@ export function FilterBuilder({
 
     if (rules.length === 0) {
       newErrors.rules = 'At least one rule is required'
-    } else if (rules.length > 10) {
+    }
+    else if (rules.length > 10) {
       newErrors.rules = 'Maximum 10 rules allowed'
     }
 
@@ -126,12 +128,14 @@ export function FilterBuilder({
           {/* Name */}
           <div className="space-y-2">
             <Label htmlFor="name">
-              Filter Name <span className="text-destructive">*</span>
+              Filter Name
+              {' '}
+              <span className="text-destructive">*</span>
             </Label>
             <Input
               id="name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={e => setName(e.target.value)}
               placeholder="e.g., High Scoring Teams Filter"
               maxLength={100}
             />
@@ -144,7 +148,7 @@ export function FilterBuilder({
             <Textarea
               id="description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={e => setDescription(e.target.value)}
               placeholder="Describe your filter strategy..."
               rows={3}
               maxLength={500}
@@ -160,7 +164,7 @@ export function FilterBuilder({
               type="checkbox"
               id="is-active"
               checked={isActive}
-              onChange={(e) => setIsActive(e.target.checked)}
+              onChange={e => setIsActive(e.target.checked)}
               className="h-4 w-4"
             />
             <Label htmlFor="is-active" className="cursor-pointer">
@@ -177,7 +181,9 @@ export function FilterBuilder({
             <div>
               <CardTitle>Filter Rules</CardTitle>
               <CardDescription>
-                Define conditions that fixtures must meet ({rules.length}/10 rules)
+                Define conditions that fixtures must meet (
+                {rules.length}
+                /10 rules)
               </CardDescription>
             </div>
             <Button
@@ -196,7 +202,7 @@ export function FilterBuilder({
           {errors.rules && <p className="text-sm text-destructive">{errors.rules}</p>}
           {rules.map((rule, index) => (
             <RuleRow
-              key={index}
+              key={rule.value.toString()}
               rule={rule}
               index={index}
               onChange={handleRuleChange}

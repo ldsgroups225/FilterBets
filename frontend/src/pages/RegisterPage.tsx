@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
-import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useAuth } from '@/hooks/useAuth'
 
 export function RegisterPage() {
   const { register, isAuthenticated } = useAuth()
@@ -39,9 +39,11 @@ export function RegisterPage() {
 
     try {
       await register(email, password)
-    } catch {
+    }
+    catch {
       setError('Registration failed. Email may already be in use.')
-    } finally {
+    }
+    finally {
       setIsLoading(false)
     }
   }
@@ -62,7 +64,7 @@ export function RegisterPage() {
                 type="email"
                 placeholder="name@example.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={e => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
               />
@@ -74,7 +76,7 @@ export function RegisterPage() {
                 type="password"
                 placeholder="Create a password (min 8 characters)"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
               />
@@ -86,7 +88,7 @@ export function RegisterPage() {
                 type="password"
                 placeholder="Confirm your password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={e => setConfirmPassword(e.target.value)}
                 required
                 disabled={isLoading}
               />
@@ -99,7 +101,8 @@ export function RegisterPage() {
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
-            Already have an account?{' '}
+            Already have an account?
+            {' '}
             <Link to="/login" className="text-primary hover:underline">
               Sign in
             </Link>

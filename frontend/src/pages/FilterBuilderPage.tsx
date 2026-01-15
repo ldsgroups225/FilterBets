@@ -1,10 +1,10 @@
-import { useNavigate } from 'react-router-dom'
-import { IconArrowLeft } from '@tabler/icons-react'
-import { Button } from '@/components/ui/button'
-import { FilterBuilder } from '@/components/filters/FilterBuilder'
-import { useCreateFilter } from '@/hooks/useFilters'
-import { toast } from 'sonner'
 import type { CreateFilterRequest } from '@/types/filter'
+import { IconArrowLeft } from '@tabler/icons-react'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
+import { FilterBuilder } from '@/components/filters/FilterBuilder'
+import { Button } from '@/components/ui/button'
+import { useCreateFilter } from '@/hooks/useFilters'
 
 export function FilterBuilderPage() {
   const navigate = useNavigate()
@@ -15,7 +15,8 @@ export function FilterBuilderPage() {
       const filter = await createMutation.mutateAsync(data)
       toast.success('Filter created successfully')
       navigate(`/filters/${filter.id}`)
-    } catch (err) {
+    }
+    catch (err) {
       toast.error('Failed to create filter')
       console.error('Create error:', err)
     }

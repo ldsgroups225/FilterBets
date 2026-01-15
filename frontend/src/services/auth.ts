@@ -1,8 +1,8 @@
-import { apiClient } from '@/api/client'
 import type { AuthResponse, LoginRequest, RegisterRequest, User } from '@/types/auth'
+import { apiClient } from '@/api/client'
 
 // Login user
-export const login = async (credentials: LoginRequest): Promise<AuthResponse> => {
+export async function login(credentials: LoginRequest): Promise<AuthResponse> {
   const response = await apiClient.post<AuthResponse>('/api/v1/auth/login', {
     email: credentials.email,
     password: credentials.password,
@@ -11,13 +11,13 @@ export const login = async (credentials: LoginRequest): Promise<AuthResponse> =>
 }
 
 // Register new user
-export const register = async (data: RegisterRequest): Promise<AuthResponse> => {
+export async function register(data: RegisterRequest): Promise<AuthResponse> {
   const response = await apiClient.post<AuthResponse>('/api/v1/auth/register', data)
   return response.data
 }
 
 // Refresh access token
-export const refreshAccessToken = async (refreshToken: string): Promise<AuthResponse> => {
+export async function refreshAccessToken(refreshToken: string): Promise<AuthResponse> {
   const response = await apiClient.post<AuthResponse>('/api/v1/auth/refresh', {
     refresh_token: refreshToken,
   })
@@ -25,7 +25,7 @@ export const refreshAccessToken = async (refreshToken: string): Promise<AuthResp
 }
 
 // Get current user
-export const getCurrentUser = async (): Promise<User> => {
+export async function getCurrentUser(): Promise<User> {
   const response = await apiClient.get<User>('/api/v1/auth/me')
   return response.data
 }

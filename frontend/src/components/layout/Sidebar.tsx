@@ -1,14 +1,14 @@
-import { NavLink, useLocation } from 'react-router-dom'
 import {
-  IconLayoutDashboard,
   IconCalendar,
-  IconFilter,
   IconChevronLeft,
+  IconFilter,
+  IconLayoutDashboard,
   IconX,
 } from '@tabler/icons-react'
+import { useEffect } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { useEffect } from 'react'
 
 interface SidebarProps {
   isCollapsed: boolean
@@ -65,7 +65,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileClose }: 
           // Mobile
           'md:hidden',
           isMobileOpen ? 'translate-x-0' : '-translate-x-full',
-          isMobileOpen && 'block w-64'
+          isMobileOpen && 'block w-64',
         )}
       >
         <div className="flex h-full flex-col">
@@ -78,7 +78,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileClose }: 
 
           {/* Navigation */}
           <nav className="flex-1 space-y-1 p-2">
-            {navItems.map((item) => (
+            {navItems.map(item => (
               <NavLink
                 key={item.href}
                 to={item.href}
@@ -90,9 +90,8 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileClose }: 
                     isActive
                       ? 'bg-accent text-accent-foreground'
                       : 'text-muted-foreground',
-                    isCollapsed && 'md:justify-center'
-                  )
-                }
+                    isCollapsed && 'md:justify-center',
+                  )}
               >
                 <item.icon className="h-5 w-5 flex-shrink-0" />
                 {(!isCollapsed || isMobileOpen) && <span>{item.title}</span>}
@@ -111,7 +110,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobileOpen, onMobileClose }: 
               <IconChevronLeft
                 className={cn(
                   'h-4 w-4 transition-transform',
-                  isCollapsed && 'rotate-180'
+                  isCollapsed && 'rotate-180',
                 )}
               />
               {!isCollapsed && <span className="ml-2">Collapse</span>}

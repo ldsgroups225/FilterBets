@@ -2,22 +2,22 @@
  * Telegram API client functions
  */
 
-import { apiClient } from '../../api/client';
+import { apiClient } from '../../api/client'
 
 export interface TelegramLinkResponse {
-  deep_link_url: string;
-  expires_in_seconds: number;
+  deep_link_url: string
+  expires_in_seconds: number
 }
 
 export interface TelegramStatusResponse {
-  linked: boolean;
-  verified: boolean;
-  chat_id: string | null;
+  linked: boolean
+  verified: boolean
+  chat_id: string | null
 }
 
 export interface TelegramUnlinkResponse {
-  success: boolean;
-  message: string;
+  success: boolean
+  message: string
 }
 
 /**
@@ -25,9 +25,9 @@ export interface TelegramUnlinkResponse {
  */
 export async function generateTelegramLink(): Promise<TelegramLinkResponse> {
   const response = await apiClient.post<TelegramLinkResponse>(
-    '/auth/telegram/generate-link'
-  );
-  return response.data;
+    '/auth/telegram/generate-link',
+  )
+  return response.data
 }
 
 /**
@@ -35,9 +35,9 @@ export async function generateTelegramLink(): Promise<TelegramLinkResponse> {
  */
 export async function getTelegramStatus(): Promise<TelegramStatusResponse> {
   const response = await apiClient.get<TelegramStatusResponse>(
-    '/auth/telegram/status'
-  );
-  return response.data;
+    '/auth/telegram/status',
+  )
+  return response.data
 }
 
 /**
@@ -45,7 +45,7 @@ export async function getTelegramStatus(): Promise<TelegramStatusResponse> {
  */
 export async function unlinkTelegram(): Promise<TelegramUnlinkResponse> {
   const response = await apiClient.delete<TelegramUnlinkResponse>(
-    '/auth/telegram/unlink'
-  );
-  return response.data;
+    '/auth/telegram/unlink',
+  )
+  return response.data
 }

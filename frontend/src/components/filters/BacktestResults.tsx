@@ -1,12 +1,13 @@
-import { format } from 'date-fns'
+import type { BacktestResponse } from '@/types/backtest'
 import {
-  IconTrendingUp,
-  IconTrendingDown,
-  IconChartLine,
   IconCalendar,
+  IconChartLine,
+  IconTrendingDown,
+  IconTrendingUp,
 } from '@tabler/icons-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Table,
   TableBody,
@@ -15,7 +16,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import type { BacktestResponse } from '@/types/backtest'
 
 interface BacktestResultsProps {
   result: BacktestResponse
@@ -42,7 +42,10 @@ export function BacktestResults({ result }: BacktestResultsProps) {
             <div>
               <CardTitle>Backtest Results</CardTitle>
               <CardDescription>
-                {betTypeLabels[result.bet_type]} • Seasons: {result.seasons.join(', ')}
+                {betTypeLabels[result.bet_type]}
+                {' '}
+                • Seasons:
+                {result.seasons.join(', ')}
               </CardDescription>
             </div>
             <div className="flex flex-col items-end gap-2">
@@ -63,25 +66,31 @@ export function BacktestResults({ result }: BacktestResultsProps) {
             </div>
             <div>
               <span className="text-sm text-muted-foreground">Win Rate</span>
-              <div className="text-2xl font-bold">{result.win_rate.toFixed(1)}%</div>
+              <div className="text-2xl font-bold">
+                {result.win_rate.toFixed(1)}
+                %
+              </div>
             </div>
             <div>
               <span className="text-sm text-muted-foreground">ROI</span>
               <div
                 className={`text-2xl font-bold ${isProfitable ? 'text-green-600' : isBreakEven ? 'text-gray-600' : 'text-red-600'
-                  }`}
+                }`}
               >
                 {result.roi_percentage > 0 ? '+' : ''}
-                {result.roi_percentage.toFixed(1)}%
+                {result.roi_percentage.toFixed(1)}
+                %
               </div>
             </div>
             <div>
               <span className="text-sm text-muted-foreground">Total Profit</span>
               <div
                 className={`text-2xl font-bold ${isProfitable ? 'text-green-600' : isBreakEven ? 'text-gray-600' : 'text-red-600'
-                  }`}
+                }`}
               >
-                {result.total_profit > 0 ? '+' : ''}${result.total_profit.toFixed(2)}
+                {result.total_profit > 0 ? '+' : ''}
+                $
+                {result.total_profit.toFixed(2)}
               </div>
             </div>
           </div>
@@ -104,8 +113,7 @@ export function BacktestResults({ result }: BacktestResultsProps) {
               <div className="text-sm text-muted-foreground mt-1">
                 {Number.isFinite(result.wins / result.total_matches)
                   ? `${((result.wins / result.total_matches) * 100).toFixed(1)}%`
-                  : "-"
-                }
+                  : '-'}
               </div>
 
             </div>
@@ -119,8 +127,7 @@ export function BacktestResults({ result }: BacktestResultsProps) {
               <div className="text-sm text-muted-foreground mt-1">
                 {Number.isFinite(result.losses / result.total_matches)
                   ? `${((result.losses / result.total_matches) * 100).toFixed(1)}%`
-                  : "-"
-                }
+                  : '-'}
               </div>
             </div>
 
@@ -133,8 +140,7 @@ export function BacktestResults({ result }: BacktestResultsProps) {
               <div className="text-sm text-muted-foreground mt-1">
                 {Number.isFinite(result.pushes / result.total_matches)
                   ? `${((result.pushes / result.total_matches) * 100).toFixed(1)}%`
-                  : "-"
-                }
+                  : '-'}
               </div>
             </div>
           </div>
@@ -165,7 +171,7 @@ export function BacktestResults({ result }: BacktestResultsProps) {
                     : result.analytics.streaks.current_streak < 0
                       ? 'text-red-600'
                       : 'text-gray-600'
-                    }`}
+                  }`}
                 >
                   {result.analytics.streaks.current_streak > 0 ? '+' : ''}
                   {result.analytics.streaks.current_streak}
@@ -200,28 +206,33 @@ export function BacktestResults({ result }: BacktestResultsProps) {
               <div>
                 <span className="text-sm text-muted-foreground">Max Drawdown</span>
                 <div className="text-xl font-bold text-red-600">
-                  ${result.analytics.drawdown.max_drawdown.toFixed(2)}
+                  $
+                  {result.analytics.drawdown.max_drawdown.toFixed(2)}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  {result.analytics.drawdown.max_drawdown_pct.toFixed(1)}%
+                  {result.analytics.drawdown.max_drawdown_pct.toFixed(1)}
+                  %
                 </div>
               </div>
               <div>
                 <span className="text-sm text-muted-foreground">Current Drawdown</span>
                 <div className="text-xl font-bold">
-                  ${result.analytics.drawdown.current_drawdown.toFixed(2)}
+                  $
+                  {result.analytics.drawdown.current_drawdown.toFixed(2)}
                 </div>
               </div>
               <div>
                 <span className="text-sm text-muted-foreground">Peak Balance</span>
                 <div className="text-xl font-bold text-green-600">
-                  ${result.analytics.drawdown.peak_balance.toFixed(2)}
+                  $
+                  {result.analytics.drawdown.peak_balance.toFixed(2)}
                 </div>
               </div>
               <div>
                 <span className="text-sm text-muted-foreground">Current Balance</span>
                 <div className="text-xl font-bold">
-                  ${(result.analytics.drawdown.peak_balance - result.analytics.drawdown.current_drawdown).toFixed(2)}
+                  $
+                  {(result.analytics.drawdown.peak_balance - result.analytics.drawdown.current_drawdown).toFixed(2)}
                 </div>
               </div>
             </div>
@@ -253,22 +264,27 @@ export function BacktestResults({ result }: BacktestResultsProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {result.analytics.monthly_breakdown.map((month) => (
+                  {result.analytics.monthly_breakdown.map(month => (
                     <TableRow key={month.month}>
                       <TableCell className="font-medium">{month.month}</TableCell>
                       <TableCell className="text-right">{month.matches}</TableCell>
                       <TableCell className="text-right text-green-600">{month.wins}</TableCell>
                       <TableCell className="text-right text-red-600">{month.losses}</TableCell>
-                      <TableCell className="text-right">{month.win_rate.toFixed(1)}%</TableCell>
+                      <TableCell className="text-right">
+                        {month.win_rate.toFixed(1)}
+                        %
+                      </TableCell>
                       <TableCell
                         className={`text-right font-medium ${month.profit > 0
                           ? 'text-green-600'
                           : month.profit < 0
                             ? 'text-red-600'
                             : 'text-gray-600'
-                          }`}
+                        }`}
                       >
-                        {month.profit > 0 ? '+' : ''}${month.profit.toFixed(2)}
+                        {month.profit > 0 ? '+' : ''}
+                        $
+                        {month.profit.toFixed(2)}
                       </TableCell>
                     </TableRow>
                   ))}

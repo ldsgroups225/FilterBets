@@ -1,16 +1,18 @@
-import { useMemo } from 'react'
+import type { ColumnDef, SortingState } from '@tanstack/react-table'
+import type { Fixture } from '@/types/fixture'
+import { IconArrowsSort } from '@tabler/icons-react'
 import {
-  useReactTable,
+
+  flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  flexRender,
-  type ColumnDef,
-  type SortingState,
+
+  useReactTable,
 } from '@tanstack/react-table'
-import { useState } from 'react'
 import { format } from 'date-fns'
-import { IconArrowsSort } from '@tabler/icons-react'
+import { useMemo, useState } from 'react'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -20,8 +22,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import type { Fixture } from '@/types/fixture'
 
 interface FixturesTableProps {
   fixtures: Fixture[]
@@ -109,7 +109,7 @@ export function FixturesTable({ fixtures, onRowClick }: FixturesTableProps) {
         header: 'Status',
         cell: ({ row }) => {
           const statusId = row.original.status_id
-          const statusMap: Record<number, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+          const statusMap: Record<number, { label: string, variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
             1: { label: 'Scheduled', variant: 'default' },
             2: { label: 'Live', variant: 'destructive' },
             3: { label: 'Finished', variant: 'secondary' },
@@ -120,10 +120,9 @@ export function FixturesTable({ fixtures, onRowClick }: FixturesTableProps) {
         },
       },
     ],
-    []
+    [],
   )
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: fixtures,
     columns,
@@ -146,9 +145,9 @@ export function FixturesTable({ fixtures, onRowClick }: FixturesTableProps) {
       <div className="rounded-md border">
         <Table>
           <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
+            {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
+                {headerGroup.headers.map(header => (
                   <TableHead key={header.id}>
                     {header.isPlaceholder
                       ? null
@@ -159,27 +158,29 @@ export function FixturesTable({ fixtures, onRowClick }: FixturesTableProps) {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  onClick={() => onRowClick?.(row.original)}
-                  className={onRowClick ? 'cursor-pointer hover:bg-muted/50' : ''}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            {table.getRowModel().rows?.length
+              ? (
+                  table.getRowModel().rows.map(row => (
+                    <TableRow
+                      key={row.id}
+                      onClick={() => onRowClick?.(row.original)}
+                      className={onRowClick ? 'cursor-pointer hover:bg-muted/50' : ''}
+                    >
+                      {row.getVisibleCells().map(cell => (
+                        <TableCell key={cell.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                )
+              : (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                      No fixtures found.
                     </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No fixtures found.
-                </TableCell>
-              </TableRow>
-            )}
+                  </TableRow>
+                )}
           </TableBody>
         </Table>
       </div>
@@ -187,12 +188,22 @@ export function FixturesTable({ fixtures, onRowClick }: FixturesTableProps) {
       {/* Pagination */}
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
-          Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
+          Showing
+          {' '}
+          {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}
+          {' '}
+          to
+          {' '}
           {Math.min(
             (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
-            fixtures.length
-          )}{' '}
-          of {fixtures.length} fixtures
+            fixtures.length,
+          )}
+          {' '}
+          of
+          {' '}
+          {fixtures.length}
+          {' '}
+          fixtures
         </div>
         <div className="flex items-center gap-2">
           <Button

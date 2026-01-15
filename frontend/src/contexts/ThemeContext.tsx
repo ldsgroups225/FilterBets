@@ -1,14 +1,7 @@
-import { createContext, useEffect, useState, useContext, type ReactNode } from 'react'
-
-type Theme = 'dark' | 'light' | 'system'
-
-interface ThemeContextType {
-  theme: Theme
-  setTheme: (theme: Theme) => void
-  effectiveTheme: 'dark' | 'light'
-}
-
-export const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
+import type { ReactNode } from 'react'
+import type { Theme, ThemeContextType } from './theme'
+import { useEffect, useState } from 'react'
+import { ThemeContext } from './theme'
 
 interface ThemeProviderProps {
   children: ReactNode
@@ -16,40 +9,30 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
-    // Check localStorage first, then system preference
     const stored = localStorage.getItem('theme') as Theme
-    if (stored) return stored
+    if (stored)
+      return stored
 
-    // Check system preference
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
       return 'dark'
     }
     return 'light'
   })
 
-  // Calculate effective theme (system follows system preference)
   const effectiveTheme = theme === 'system'
     ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
     : theme
 
-  // Apply theme to document
   useEffect(() => {
     const root = document.documentElement
-
-    if (theme === 'system') {
-      root.classList.remove('light', 'dark')
-      root.classList.add(effectiveTheme)
-    } else {
-      root.classList.remove('light', 'dark')
-      root.classList.add(theme)
-    }
-
+    root.classList.remove('light', 'dark')
+    root.classList.add(effectiveTheme)
     localStorage.setItem('theme', theme)
   }, [theme, effectiveTheme])
 
-  // Listen for system theme changes
   useEffect(() => {
-    if (theme !== 'system') return
+    if (theme !== 'system')
+      return
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     const handleChange = () => {
@@ -68,13 +51,5 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     effectiveTheme,
   }
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
-}
-
-export function useTheme(): ThemeContextType {
-  const context = useContext(ThemeContext)
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider')
-  }
-  return context
+  return <ThemeContext value={value}>{children}</ThemeContext>
 }

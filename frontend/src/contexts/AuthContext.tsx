@@ -1,8 +1,9 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useEffect, useState, useCallback, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
+import type { AuthContextType, User } from '@/types/auth'
+import { createContext, useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import * as authService from '@/services/auth'
-import type { AuthContextType, User } from '@/types/auth'
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -24,7 +25,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const refreshToken = useCallback(async () => {
     const token = localStorage.getItem('refresh_token')
-    if (!token) throw new Error('No refresh token')
+    if (!token)
+      throw new Error('No refresh token')
 
     const response = await authService.refreshAccessToken(token)
     localStorage.setItem('access_token', response.access_token)
@@ -40,7 +42,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         try {
           const currentUser = await authService.getCurrentUser()
           setUser(currentUser)
-        } catch {
+        }
+        catch {
           // Token invalid, clear storage
           localStorage.removeItem('access_token')
           localStorage.removeItem('refresh_token')
@@ -54,19 +57,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Auto-refresh token before expiry
   useEffect(() => {
-    if (!user) return
+    if (!user)
+      return
 
     // Refresh token every 25 minutes (tokens expire in 30 minutes)
     const interval = setInterval(
       async () => {
         try {
           await refreshToken()
-        } catch (error) {
+        }
+        catch (error) {
           console.error('Token refresh failed:', error)
           logout()
         }
       },
-      25 * 60 * 1000
+      25 * 60 * 1000,
     )
 
     return () => clearInterval(interval)
@@ -98,5 +103,5 @@ export function AuthProvider({ children }: AuthProviderProps) {
     refreshToken,
   }
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  return <AuthContext value={value}>{children}</AuthContext>
 }

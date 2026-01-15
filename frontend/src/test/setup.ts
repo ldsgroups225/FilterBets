@@ -1,4 +1,4 @@
-import "@testing-library/jest-dom"
+import '@testing-library/jest-dom'
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -23,6 +23,6 @@ globalThis.IntersectionObserver = class IntersectionObserver {
   takeRecords() {
     return []
   }
+
   unobserve() { }
 } as unknown as typeof IntersectionObserver
-

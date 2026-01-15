@@ -1,16 +1,16 @@
-import { useParams, useNavigate } from 'react-router-dom'
-import { format } from 'date-fns'
 import { IconArrowLeft, IconCalendar, IconTrophy } from '@tabler/icons-react'
+import { format } from 'date-fns'
+import { useNavigate, useParams } from 'react-router-dom'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFixture } from '@/hooks/useFixtures'
 
 export function FixtureDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const fixtureId = parseInt(id || '0')
+  const fixtureId = Number.parseInt(id || '0')
 
   const { data: fixture, isLoading, error } = useFixture(fixtureId)
 
@@ -49,7 +49,7 @@ export function FixtureDetailPage() {
   }
 
   const matchDate = new Date(fixture.match_date)
-  const statusMap: Record<number, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+  const statusMap: Record<number, { label: string, variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
     1: { label: 'Scheduled', variant: 'default' },
     2: { label: 'Live', variant: 'destructive' },
     3: { label: 'Finished', variant: 'secondary' },
@@ -97,11 +97,13 @@ export function FixtureDetailPage() {
 
             {/* VS or Score Separator */}
             <div className="px-8">
-              {fixture.home_score !== null && fixture.away_score !== null ? (
-                <div className="text-2xl font-bold text-muted-foreground">-</div>
-              ) : (
-                <div className="text-xl font-semibold text-muted-foreground">VS</div>
-              )}
+              {fixture.home_score !== null && fixture.away_score !== null
+                ? (
+                    <div className="text-2xl font-bold text-muted-foreground">-</div>
+                  )
+                : (
+                    <div className="text-xl font-semibold text-muted-foreground">VS</div>
+                  )}
             </div>
 
             {/* Away Team */}

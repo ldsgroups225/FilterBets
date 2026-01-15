@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import type { BacktestRequest, BetType } from '@/types/backtest'
 import { IconChartBar } from '@tabler/icons-react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -10,15 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import type { BacktestRequest, BetType } from '@/types/backtest'
 
 interface BacktestFormProps {
   onSubmit: (data: BacktestRequest) => void
   isLoading?: boolean
 }
 
-const BET_TYPES: Array<{ value: BetType; label: string }> = [
+const BET_TYPES: Array<{ value: BetType, label: string }> = [
   { value: 'home_win', label: 'Home Win' },
   { value: 'away_win', label: 'Away Win' },
   { value: 'draw', label: 'Draw' },
@@ -36,8 +36,9 @@ export function BacktestForm({ onSubmit, isLoading = false }: BacktestFormProps)
 
   const handleSeasonToggle = (season: number) => {
     if (selectedSeasons.includes(season)) {
-      setSelectedSeasons(selectedSeasons.filter((s) => s !== season))
-    } else {
+      setSelectedSeasons(selectedSeasons.filter(s => s !== season))
+    }
+    else {
       if (selectedSeasons.length < 5) {
         setSelectedSeasons([...selectedSeasons, season].sort())
       }
@@ -89,14 +90,16 @@ export function BacktestForm({ onSubmit, isLoading = false }: BacktestFormProps)
           {/* Bet Type */}
           <div className="space-y-2">
             <Label htmlFor="bet-type">
-              Bet Type <span className="text-destructive">*</span>
+              Bet Type
+              {' '}
+              <span className="text-destructive">*</span>
             </Label>
-            <Select value={betType} onValueChange={(value) => setBetType(value as BetType)}>
+            <Select value={betType} onValueChange={value => setBetType(value as BetType)}>
               <SelectTrigger id="bet-type">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {BET_TYPES.map((type) => (
+                {BET_TYPES.map(type => (
                   <SelectItem key={type.value} value={type.value}>
                     {type.label}
                   </SelectItem>
@@ -108,18 +111,20 @@ export function BacktestForm({ onSubmit, isLoading = false }: BacktestFormProps)
           {/* Seasons */}
           <div className="space-y-2">
             <Label>
-              Seasons <span className="text-destructive">*</span>
+              Seasons
+              {' '}
+              <span className="text-destructive">*</span>
             </Label>
             <div className="flex flex-wrap gap-2">
-              {AVAILABLE_SEASONS.map((season) => (
+              {AVAILABLE_SEASONS.map(season => (
                 <button
                   key={season}
                   type="button"
                   onClick={() => handleSeasonToggle(season)}
                   className={`px-4 py-2 rounded-md border transition-colors ${selectedSeasons.includes(season)
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-background hover:bg-muted border-input'
-                    }`}
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-background hover:bg-muted border-input'
+                  }`}
                 >
                   {season}
                 </button>
@@ -127,7 +132,14 @@ export function BacktestForm({ onSubmit, isLoading = false }: BacktestFormProps)
             </div>
             {errors.seasons && <p className="text-sm text-destructive">{errors.seasons}</p>}
             <p className="text-sm text-muted-foreground">
-              Selected: {selectedSeasons.length} season{selectedSeasons.length !== 1 ? 's' : ''} (max
+              Selected:
+              {' '}
+              {selectedSeasons.length}
+              {' '}
+              season
+              {selectedSeasons.length !== 1 ? 's' : ''}
+              {' '}
+              (max
               5)
             </p>
           </div>
@@ -135,7 +147,9 @@ export function BacktestForm({ onSubmit, isLoading = false }: BacktestFormProps)
           {/* Stake */}
           <div className="space-y-2">
             <Label htmlFor="stake">
-              Stake Amount <span className="text-destructive">*</span>
+              Stake Amount
+              {' '}
+              <span className="text-destructive">*</span>
             </Label>
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">$</span>
@@ -143,7 +157,7 @@ export function BacktestForm({ onSubmit, isLoading = false }: BacktestFormProps)
                 id="stake"
                 type="number"
                 value={stake}
-                onChange={(e) => setStake(parseFloat(e.target.value))}
+                onChange={e => setStake(Number.parseFloat(e.target.value))}
                 min={0.01}
                 step={0.01}
                 className="w-32"

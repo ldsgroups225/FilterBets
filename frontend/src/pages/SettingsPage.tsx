@@ -2,7 +2,7 @@
  * Settings page with Telegram integration
  */
 
-import { TelegramStatus } from '@/components/TelegramStatus';
+import { TelegramStatus } from '@/components/TelegramStatus'
 
 export default function SettingsPage() {
   return (
@@ -24,5 +24,5 @@ export default function SettingsPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

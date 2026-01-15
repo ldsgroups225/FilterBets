@@ -1,11 +1,11 @@
+import { IconActivity, IconBell, IconCalendar, IconFilter, IconPlus, IconTrendingUp } from '@tabler/icons-react'
 import { Link } from 'react-router-dom'
-import { IconActivity, IconTrendingUp, IconFilter, IconBell, IconPlus, IconCalendar } from "@tabler/icons-react"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
-import { useTodayFixtures } from "@/hooks/useFixtures"
-import { useActiveFiltersCount } from "@/hooks/useFilters"
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useActiveFiltersCount } from '@/hooks/useFilters'
+import { useTodayFixtures } from '@/hooks/useFixtures'
 
 export function Home() {
   const { data: todayFixtures, isLoading: fixturesLoading } = useTodayFixtures()
@@ -44,14 +44,16 @@ export function Home() {
             <IconActivity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {fixturesLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold">{todayFixtures?.length || 0}</div>
-                <p className="text-xs text-muted-foreground">Fixtures available</p>
-              </>
-            )}
+            {fixturesLoading
+              ? (
+                  <Skeleton className="h-8 w-16" />
+                )
+              : (
+                  <>
+                    <div className="text-2xl font-bold">{todayFixtures?.length || 0}</div>
+                    <p className="text-xs text-muted-foreground">Fixtures available</p>
+                  </>
+                )}
           </CardContent>
         </Card>
 
@@ -61,14 +63,16 @@ export function Home() {
             <IconFilter className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {filtersLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold">{activeFiltersCount || 0}</div>
-                <p className="text-xs text-muted-foreground">Scanning for matches</p>
-              </>
-            )}
+            {filtersLoading
+              ? (
+                  <Skeleton className="h-8 w-16" />
+                )
+              : (
+                  <>
+                    <div className="text-2xl font-bold">{activeFiltersCount || 0}</div>
+                    <p className="text-xs text-muted-foreground">Scanning for matches</p>
+                  </>
+                )}
           </CardContent>
         </Card>
 
@@ -101,12 +105,17 @@ export function Home() {
           <CardHeader>
             <CardTitle>Today's Matches</CardTitle>
             <CardDescription>
-              {todayFixtures.length} fixture{todayFixtures.length !== 1 ? 's' : ''} scheduled for today
+              {todayFixtures.length}
+              {' '}
+              fixture
+              {todayFixtures.length !== 1 ? 's' : ''}
+              {' '}
+              scheduled for today
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {todayFixtures.slice(0, 5).map((fixture) => (
+              {todayFixtures.slice(0, 5).map(fixture => (
                 <div
                   key={fixture.id}
                   className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors"
@@ -118,9 +127,12 @@ export function Home() {
                       <span className="font-medium">{fixture.away_team_name}</span>
                     </div>
                     <div className="text-sm text-muted-foreground mt-1">
-                      {fixture.league_name} • {new Date(fixture.match_date).toLocaleTimeString('en-US', {
+                      {fixture.league_name}
+                      {' '}
+                      •
+                      {new Date(fixture.match_date).toLocaleTimeString('en-US', {
                         hour: '2-digit',
-                        minute: '2-digit'
+                        minute: '2-digit',
                       })}
                     </div>
                   </div>
@@ -136,7 +148,11 @@ export function Home() {
               {todayFixtures.length > 5 && (
                 <Link to="/fixtures" className="block">
                   <Button variant="outline" className="w-full">
-                    View all {todayFixtures.length} fixtures
+                    View all
+                    {' '}
+                    {todayFixtures.length}
+                    {' '}
+                    fixtures
                   </Button>
                 </Link>
               )}
