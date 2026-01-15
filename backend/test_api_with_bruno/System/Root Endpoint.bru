@@ -1,0 +1,21 @@
+meta {
+  name: Root Endpoint
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/..
+  auth: none
+}
+
+tests {
+  test("Root Endpoint", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

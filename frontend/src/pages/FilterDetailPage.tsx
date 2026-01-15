@@ -9,6 +9,8 @@ import {
   IconToggleLeft,
   IconToggleRight,
   IconChartBar,
+  IconBell,
+  IconBellOff,
 } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -26,7 +28,8 @@ import {
 } from '@/components/ui/alert-dialog'
 import { BacktestForm } from '@/components/filters/BacktestForm'
 import { BacktestResults } from '@/components/filters/BacktestResults'
-import { useFilter, useDeleteFilter, useUpdateFilter } from '@/hooks/useFilters'
+import { useFilter, useDeleteFilter, useUpdateFilter, useToggleFilterAlerts } from '@/hooks/useFilters'
+import { useTelegramStatus } from '@/hooks/useTelegramStatus'
 import { runBacktest } from '@/services/backtest'
 import { toast } from 'sonner'
 import type { BacktestRequest, BacktestResponse } from '@/types/backtest'
@@ -39,6 +42,8 @@ export function FilterDetailPage() {
   const { data: filter, isLoading, error } = useFilter(filterId)
   const deleteMutation = useDeleteFilter()
   const updateMutation = useUpdateFilter()
+  const toggleAlertsMutation = useToggleFilterAlerts()
+  const { data: telegramStatus } = useTelegramStatus()
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [backtestResult, setBacktestResult] = useState<BacktestResponse | null>(null)
@@ -67,6 +72,32 @@ export function FilterDetailPage() {
     } catch (err) {
       toast.error('Failed to update filter')
       console.error('Update error:', err)
+    }
+  }
+
+  const handleToggleAlerts = async () => {
+    if (!filter) return
+
+    if (!telegramStatus?.linked) {
+      toast.error('Please link your Telegram account first', {
+        description: 'Go to Settings to link your Telegram account and enable notifications.',
+        action: {
+          label: 'Go to Settings',
+          onClick: () => navigate('/settings'),
+        },
+      })
+      return
+    }
+
+    try {
+      await toggleAlertsMutation.mutateAsync({
+        id: filterId,
+        enabled: !filter.alerts_enabled,
+      })
+      toast.success(`Alerts ${!filter.alerts_enabled ? 'enabled' : 'disabled'}`)
+    } catch (err) {
+      toast.error('Failed to toggle alerts')
+      console.error('Toggle alerts error:', err)
     }
   }
 
@@ -135,6 +166,30 @@ export function FilterDetailPage() {
           Back to Filters
         </Button>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={handleToggleAlerts}
+            title={
+              !telegramStatus?.linked
+                ? 'Link Telegram first to enable alerts'
+                : filter.alerts_enabled
+                  ? 'Disable alerts'
+                  : 'Enable alerts'
+            }
+            disabled={!telegramStatus?.linked}
+          >
+            {filter.alerts_enabled ? (
+              <>
+                <IconBell className="mr-2 h-4 w-4" />
+                Alerts On
+              </>
+            ) : (
+              <>
+                <IconBellOff className="mr-2 h-4 w-4" />
+                Alerts Off
+              </>
+            )}
+          </Button>
           <Button variant="outline" onClick={handleToggleActive}>
             {filter.is_active ? (
               <>

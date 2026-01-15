@@ -1,14 +1,20 @@
 """BacktestJob model for async backtest job tracking."""
 
+from __future__ import annotations
+
 import uuid
 from datetime import datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+if TYPE_CHECKING:
+    from app.models.filter import Filter
+    from app.models.user import User
 
 
 class BacktestJob(Base):
@@ -43,8 +49,8 @@ class BacktestJob(Base):
     completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     # Relationships
-    user: Mapped["User"] = relationship("User", back_populates="backtest_jobs")  # noqa: F821
-    filter: Mapped["Filter"] = relationship("Filter", back_populates="backtest_jobs")  # noqa: F821
+    user: Mapped[User] = relationship("User", back_populates="backtest_jobs")
+    filter: Mapped[Filter] = relationship("Filter", back_populates="backtest_jobs")
 
     @property
     def is_pending(self) -> bool:

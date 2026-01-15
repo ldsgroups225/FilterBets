@@ -14,6 +14,7 @@ import { FiltersPage } from "./pages/FiltersPage"
 import { FilterDetailPage } from "./pages/FilterDetailPage"
 import { FilterBuilderPage } from "./pages/FilterBuilderPage"
 import { FilterEditPage } from "./pages/FilterEditPage"
+import SettingsPage from "./pages/SettingsPage"
 import { NotFound } from "./pages/NotFound"
 
 function App() {
@@ -92,6 +93,16 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <FilterEditPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <SettingsPage />
                 </Layout>
               </ProtectedRoute>
             }

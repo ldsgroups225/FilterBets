@@ -1,0 +1,32 @@
+meta {
+  name: Get Fixtures by Date Range
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{base_url}}/fixtures?start_date={{start_date}}&end_date={{end_date}}
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+script:pre-request {
+  const moment = require('moment');
+  bru.setEnvVar("start_date", moment().subtract(7, 'days').format('YYYY-MM-DD'));
+  bru.setEnvVar("end_date", moment().format('YYYY-MM-DD'));
+}
+
+tests {
+  test("Get Fixtures by Date Range", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.body).to.be.an("array");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

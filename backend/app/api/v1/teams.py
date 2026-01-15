@@ -21,7 +21,7 @@ from app.services.stats_calculator import (
 router = APIRouter(prefix="/teams", tags=["teams"])
 
 
-@router.get("/{team_id}", response_model=TeamResponse)
+@router.get("/{team_id}", response_model=TeamResponse, operation_id="get_team")
 async def get_team(
     team_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -47,7 +47,7 @@ async def get_team(
     return TeamResponse.model_validate(team)
 
 
-@router.get("/{team_id}/stats/{event_id}", response_model=TeamStatsResponse)
+@router.get("/{team_id}/stats/{event_id}", response_model=TeamStatsResponse, operation_id="get_team_match_stats")
 async def get_team_match_stats(
     team_id: int,
     event_id: int,
@@ -77,7 +77,7 @@ async def get_team_match_stats(
     return TeamStatsResponse.model_validate(stats)
 
 
-@router.get("/{team_id}/form", response_model=TeamFormResponse)
+@router.get("/{team_id}/form", response_model=TeamFormResponse, operation_id="get_team_form")
 async def get_team_form(
     team_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -103,7 +103,7 @@ async def get_team_form(
         raise HTTPException(status_code=404, detail=str(e)) from e
 
 
-@router.get("/head-to-head/{team1_id}/{team2_id}", response_model=list[FixtureResponse])
+@router.get("/head-to-head/{team1_id}/{team2_id}", response_model=list[FixtureResponse], operation_id="get_head_to_head")
 async def get_head_to_head_matches(
     team1_id: int,
     team2_id: int,
@@ -126,7 +126,7 @@ async def get_head_to_head_matches(
     return [FixtureResponse.model_validate(fixture) for fixture in fixtures]
 
 
-@router.get("/{team_id}/computed-stats", response_model=ComputedStatsResponse)
+@router.get("/{team_id}/computed-stats", response_model=ComputedStatsResponse, operation_id="get_team_computed_stats")
 async def get_team_computed_stats(
     team_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],

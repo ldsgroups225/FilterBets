@@ -1,0 +1,45 @@
+meta {
+  name: Update Filter
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{base_url}}/filters/{{filter_id}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+tests {
+  test("Filter Updated Successfully", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.body.id).to.equal(bru.getEnvVar("filter_id"));
+    expect(res.body.name).to.equal("Updated Home Win Filter");
+    expect(res.body.alerts_enabled).to.be.true;
+  });
+}
+
+body:json {
+  {
+    "name": "Updated Home Win Filter",
+    "description": "Updated filter description",
+    "rules": [
+      {
+        "field": "home_team_form_wins_last5",
+        "operator": ">=",
+        "value": 2
+      }
+    ],
+    "is_active": true,
+    "alerts_enabled": true
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

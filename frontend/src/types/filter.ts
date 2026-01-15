@@ -13,6 +13,7 @@ export interface Filter {
   description: string | null
   rules: FilterRule[]
   is_active: boolean
+  alerts_enabled: boolean
   created_at: string
   updated_at: string
 }
@@ -29,6 +30,7 @@ export interface UpdateFilterRequest {
   description?: string
   rules?: FilterRule[]
   is_active?: boolean
+  alerts_enabled?: boolean
 }
 
 export interface FilterListResponse {

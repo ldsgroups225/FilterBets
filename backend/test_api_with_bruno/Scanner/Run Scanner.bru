@@ -1,0 +1,32 @@
+meta {
+  name: Run Scanner
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/scanner/run
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+script:post-response {
+  bru.setEnvVar("job_id", res.body.job_id);
+}
+
+tests {
+  test("Scanner Job Started", function() {
+    expect(res.getStatus()).to.equal(202);
+    expect(res.body.job_id).to.exist;
+  });
+}
+
+body:json {
+  {
+    "filter_id": "{{filter_id}}"
+  }
+}

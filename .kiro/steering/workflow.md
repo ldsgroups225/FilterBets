@@ -51,6 +51,7 @@ Start on task 1.1 from tasks/tasks-[feature-name].md
 After each task:
 
 - AI implements the change
+- **Test affected endpoints via MCP server at `/mcp`** (FastAPI-MCP auto-exposes all endpoints)
 - You review the code
 - Mark task complete by changing `- [ ]` to `- [x]`
 - Move to next task
@@ -63,6 +64,7 @@ For each task, ensure:
 - [ ] Tests are written (if applicable)
 - [ ] No linting errors
 - [ ] Type hints are complete (Python) / Types defined (TypeScript)
+- [ ] Endpoints tested via MCP server (`/mcp`)
 
 ## Phase 3: Verification
 

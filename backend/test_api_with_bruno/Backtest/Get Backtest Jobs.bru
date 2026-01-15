@@ -1,0 +1,26 @@
+meta {
+  name: Get Backtest Jobs
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/backtest/jobs
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+tests {
+  test("Get Backtest Jobs", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.body).to.be.an("array");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

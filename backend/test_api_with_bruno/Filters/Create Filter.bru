@@ -1,0 +1,53 @@
+meta {
+  name: Create Filter
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/filters
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+script:post-response {
+  bru.setEnvVar("filter_id", res.body.id);
+}
+
+tests {
+  test("Filter Created Successfully", function() {
+    expect(res.getStatus()).to.equal(201);
+    expect(res.body.id).to.exist;
+    expect(res.body.name).to.equal("Home Win Filter");
+  });
+}
+
+body:json {
+  {
+    "name": "Home Win Filter",
+    "description": "Filter for home team wins (home_score > away_score)",
+    "rules": [
+      {
+        "field": "home_score",
+        "value": 0,
+        "operator": ">"
+      },
+      {
+        "field": "away_score",
+        "value": 0,
+        "operator": ">"
+      }
+    ],
+    "is_active": true,
+    "alerts_enabled": false
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

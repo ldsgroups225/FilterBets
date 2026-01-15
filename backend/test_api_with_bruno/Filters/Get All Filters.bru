@@ -1,0 +1,26 @@
+meta {
+  name: Get All Filters
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/filters
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+tests {
+  test("Get All Filters", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.body).to.be.an("array");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

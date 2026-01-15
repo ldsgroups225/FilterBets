@@ -1,0 +1,26 @@
+meta {
+  name: Get Team by ID
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/teams/{{team_id}}
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+tests {
+  test("Get Team by ID", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.body.id).to.equal(bru.getEnvVar("team_id"));
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

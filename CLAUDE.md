@@ -35,6 +35,11 @@ alembic upgrade head                            # Run database migrations
 celery -A tasks.celery_app worker --loglevel=info  # Run Celery worker
 celery -A tasks.celery_app beat --loglevel=info    # Run Celery scheduler
 
+# MCP Server (API Testing via LLM)
+# FastAPI-MCP exposes read-only endpoints at /mcp for LLM integration
+# Auth and destructive operations are excluded for safety
+# Use this to test endpoints after completing tasks
+
 # Frontend (React)
 cd frontend && pnpm install                     # Install frontend deps
 pnpm dev                                        # Run frontend dev server
@@ -98,6 +103,7 @@ Follow this structured, three-phase process.
 #### B. Implement the Tasks
 
 - Instruct your AI assistant to implement the work, one sub-task at a time.
+- **After each task:** Test affected endpoints via the MCP server at `/mcp` to verify functionality.
 
 #### C. Verify and Finalize with the Orchestrator
 

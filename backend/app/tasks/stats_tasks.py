@@ -1,7 +1,7 @@
 """Celery tasks for team statistics calculation."""
 
 import logging
-from typing import Any
+from typing import Any, cast
 
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
@@ -24,11 +24,11 @@ def get_async_session() -> AsyncSession:
     async_session_maker = sessionmaker(
         engine, class_=AsyncSession, expire_on_commit=False
     )
-    return async_session_maker()
+    return cast(AsyncSession, async_session_maker())
 
 
 @celery_app.task(name="app.tasks.stats_tasks.refresh_all_team_stats_task", bind=True)
-def refresh_all_team_stats_task(self: Any, season_type: int | None = None) -> dict[str, Any]:
+def refresh_all_team_stats_task(_self: Any, season_type: int | None = None) -> dict[str, Any]:
     """
     Celery task to refresh computed stats for all teams.
 
@@ -65,7 +65,7 @@ def refresh_all_team_stats_task(self: Any, season_type: int | None = None) -> di
 
 @celery_app.task(name="app.tasks.stats_tasks.refresh_team_stats_task", bind=True)
 def refresh_team_stats_task(
-    self: Any, team_id: int, season_type: int
+    _self: Any, team_id: int, season_type: int
 ) -> dict[str, Any]:
     """
     Celery task to refresh computed stats for a specific team and season.

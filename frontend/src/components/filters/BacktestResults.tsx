@@ -102,8 +102,12 @@ export function BacktestResults({ result }: BacktestResultsProps) {
               </div>
               <div className="text-3xl font-bold">{result.wins}</div>
               <div className="text-sm text-muted-foreground mt-1">
-                {((result.wins / result.total_matches) * 100).toFixed(1)}%
+                {Number.isFinite(result.wins / result.total_matches)
+                  ? `${((result.wins / result.total_matches) * 100).toFixed(1)}%`
+                  : "-"
+                }
               </div>
+
             </div>
 
             <div className="text-center p-4 border rounded-lg bg-red-50 dark:bg-red-950">
@@ -113,7 +117,10 @@ export function BacktestResults({ result }: BacktestResultsProps) {
               </div>
               <div className="text-3xl font-bold">{result.losses}</div>
               <div className="text-sm text-muted-foreground mt-1">
-                {((result.losses / result.total_matches) * 100).toFixed(1)}%
+                {Number.isFinite(result.losses / result.total_matches)
+                  ? `${((result.losses / result.total_matches) * 100).toFixed(1)}%`
+                  : "-"
+                }
               </div>
             </div>
 
@@ -124,7 +131,10 @@ export function BacktestResults({ result }: BacktestResultsProps) {
               </div>
               <div className="text-3xl font-bold">{result.pushes}</div>
               <div className="text-sm text-muted-foreground mt-1">
-                {((result.pushes / result.total_matches) * 100).toFixed(1)}%
+                {Number.isFinite(result.pushes / result.total_matches)
+                  ? `${((result.pushes / result.total_matches) * 100).toFixed(1)}%`
+                  : "-"
+                }
               </div>
             </div>
           </div>
@@ -151,10 +161,10 @@ export function BacktestResults({ result }: BacktestResultsProps) {
                 <span className="text-sm text-muted-foreground">Current Streak</span>
                 <div
                   className={`text-2xl font-bold ${result.analytics.streaks.current_streak > 0
-                      ? 'text-green-600'
-                      : result.analytics.streaks.current_streak < 0
-                        ? 'text-red-600'
-                        : 'text-gray-600'
+                    ? 'text-green-600'
+                    : result.analytics.streaks.current_streak < 0
+                      ? 'text-red-600'
+                      : 'text-gray-600'
                     }`}
                 >
                   {result.analytics.streaks.current_streak > 0 ? '+' : ''}
@@ -252,10 +262,10 @@ export function BacktestResults({ result }: BacktestResultsProps) {
                       <TableCell className="text-right">{month.win_rate.toFixed(1)}%</TableCell>
                       <TableCell
                         className={`text-right font-medium ${month.profit > 0
-                            ? 'text-green-600'
-                            : month.profit < 0
-                              ? 'text-red-600'
-                              : 'text-gray-600'
+                          ? 'text-green-600'
+                          : month.profit < 0
+                            ? 'text-red-600'
+                            : 'text-gray-600'
                           }`}
                       >
                         {month.profit > 0 ? '+' : ''}${month.profit.toFixed(2)}

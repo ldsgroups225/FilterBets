@@ -1,0 +1,25 @@
+meta {
+  name: Delete Filter
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{base_url}}/filters/{{filter_id}}
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+tests {
+  test("Filter Deleted Successfully", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

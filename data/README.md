@@ -1,8 +1,39 @@
 # /data/ Directory
 
-This directory is intended for storing the raw and processed data used by the FilterBets application.
+This directory stores raw and processed data for the FilterBets application.
 
-**Important**: This directory is included in the project's `.gitignore` file. The data stored here will not and should not be committed to the Git repository.
+**Important**: This directory is in `.gitignore`. Data files are not committed to Git.
+
+## Directory Structure
+
+```text
+data/
+├── base_data/           # Core relational tables (fixtures, teams, leagues, etc.)
+├── plays_data/          # Play-by-play match events
+├── keyEvents_data/      # Key match events (goals, cards, subs)
+├── lineup_data/         # Team lineups per match
+├── commentary_data/     # Match commentary
+├── playerStats_data/    # Player statistics per league/season
+├── processed/           # Cleaned & feature-engineered data (OUTPUT)
+│   ├── matches_final.parquet      # Main backtesting dataset
+│   ├── matches_for_postgres.csv   # PostgreSQL import ready
+│   ├── team_history.parquet       # Team match history with rolling features
+│   ├── leagues_clean.parquet      # League metadata with tiers
+│   └── schema_documentation.json  # Column definitions
+├── download_data.py     # Kaggle dataset download script
+└── README.md
+```
+
+## Quick Stats
+
+| Dataset | Records | Description |
+| --------- | --------- | ------------- |
+| fixtures | 67,353 | All matches (Jan 2024 - Oct 2026) |
+| team_stats | 103,787 | Per-match team statistics |
+| standings | 6,071 | League table snapshots |
+| teams | 4,144 | Team metadata |
+| leagues | 1,084 | League/season combinations |
+| players | 64,857 | Player information |
 
 ## Setup
 

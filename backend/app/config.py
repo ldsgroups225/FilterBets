@@ -57,6 +57,15 @@ class Settings(BaseSettings):
     jwt_access_token_expire_minutes: int = 30
     jwt_refresh_token_expire_days: int = 7
 
+    # Telegram Bot
+    telegram_bot_token: str = ""
+    telegram_bot_username: str = "FilterBetsBot"
+    telegram_link_token_ttl: int = 1800  # 30 minutes in seconds
+
+    # Scanner Configuration
+    scanner_lookahead_hours: int = 24  # How far ahead to scan for fixtures
+    scanner_max_notifications_per_scan: int = 1000  # Safety limit
+
     def get_allowed_origins_list(self) -> list[str]:
         """Get allowed origins as a list."""
         return [origin.strip() for origin in self.allowed_origins.split(",")]

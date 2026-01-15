@@ -1,11 +1,21 @@
 """Team model mapped from ESPN teams.csv."""
 
+from __future__ import annotations
+
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+if TYPE_CHECKING:
+    from app.models.fixture import Fixture
+    from app.models.standing import Standing
+    from app.models.team_computed_stats import TeamComputedStats
+    from app.models.team_stats import TeamStats
+    from app.models.venue import Venue
 
 
 class Team(Base):
@@ -17,7 +27,7 @@ class Team(Base):
     team_id: Mapped[int] = mapped_column(Integer, unique=True, index=True, nullable=False)
     location: Mapped[str] = mapped_column(String(100), nullable=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-    abbreviation: Mapped[str] = mapped_column(String(10), nullable=True)
+    abbreviation: Mapped[str] = mapped_column(String(50), nullable=True)
     display_name: Mapped[str] = mapped_column(String(150), nullable=False)
     short_display_name: Mapped[str] = mapped_column(String(100), nullable=True)
     color: Mapped[str] = mapped_column(String(10), nullable=True)
@@ -26,28 +36,28 @@ class Team(Base):
     venue_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("venues.venue_id"), nullable=True
     )
-    slug: Mapped[str] = mapped_column(String(100), nullable=True)
+    slug: Mapped[str] = mapped_column(String(150), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     # Relationships
-    venue: Mapped["Venue"] = relationship("Venue", back_populates="teams")  # noqa: F821
-    home_fixtures: Mapped[list["Fixture"]] = relationship(  # noqa: F821
+    venue: Mapped[Venue] = relationship("Venue", back_populates="teams")
+    home_fixtures: Mapped[list[Fixture]] = relationship(
         "Fixture",
         foreign_keys="Fixture.home_team_id",
         back_populates="home_team",
     )
-    away_fixtures: Mapped[list["Fixture"]] = relationship(  # noqa: F821
+    away_fixtures: Mapped[list[Fixture]] = relationship(
         "Fixture",
         foreign_keys="Fixture.away_team_id",
         back_populates="away_team",
     )
-    stats: Mapped[list["TeamStats"]] = relationship(  # noqa: F821
+    stats: Mapped[list[TeamStats]] = relationship(
         "TeamStats", back_populates="team"
     )
-    standings: Mapped[list["Standing"]] = relationship(  # noqa: F821
+    standings: Mapped[list[Standing]] = relationship(
         "Standing", back_populates="team"
     )
-    computed_stats: Mapped[list["TeamComputedStats"]] = relationship(  # noqa: F821
+    computed_stats: Mapped[list[TeamComputedStats]] = relationship(
         "TeamComputedStats", back_populates="team"
     )
 

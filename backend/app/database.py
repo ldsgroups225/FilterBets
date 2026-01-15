@@ -61,7 +61,8 @@ async def check_database_connection() -> bool:
     """Check if database connection is healthy."""
     try:
         async with async_session_maker() as session:
-            await session.execute("SELECT 1")
+            from sqlalchemy import text
+            await session.execute(text("SELECT 1"))
             return True
     except Exception:
         return False

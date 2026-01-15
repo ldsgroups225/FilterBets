@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 from uuid import UUID
 
 from sqlalchemy import select
@@ -30,12 +30,12 @@ def get_async_session() -> AsyncSession:
     async_session_maker = sessionmaker(
         engine, class_=AsyncSession, expire_on_commit=False
     )
-    return async_session_maker()
+    return cast(AsyncSession, async_session_maker())
 
 
 @celery_app.task(name="app.tasks.backtest_tasks.run_async_backtest", bind=True)
 def run_async_backtest(
-    self: Any,
+    _self: Any,
     job_id: str,
     filter_id: int,
     bet_type: str,

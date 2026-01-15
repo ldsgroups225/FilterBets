@@ -1,0 +1,38 @@
+meta {
+  name: Register
+  type: http
+  seq: 2
+}
+
+script:pre-request {
+  const random = Math.random().toString(36).substring(7);
+  bru.setEnvVar("random_email", `testuser_${random}@example.com`);
+}
+
+tests {
+  test("Successful Registration", function() {
+    expect(res.getStatus()).to.equal(201);
+    expect(res.body.email).to.equal(bru.getEnvVar("random_email"));
+    expect(res.body.full_name).to.equal("Test User");
+    expect(res.body.password).to.not.exist;
+  });
+}
+
+post {
+  url: {{base_url}}/auth/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "{{random_email}}",
+    "password": "TestPassword123!",
+    "full_name": "Test User"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
