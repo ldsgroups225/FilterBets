@@ -1,0 +1,26 @@
+meta {
+  name: Get Backtest Job by ID
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{base_url}}/backtest/jobs/{{job_id}}
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+tests {
+  test("Get Backtest Job by ID", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.body.id).to.equal(bru.getEnvVar("job_id"));
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

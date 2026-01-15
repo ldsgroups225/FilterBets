@@ -1,0 +1,38 @@
+meta {
+  name: Run Backtest
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/filters/{{filter_id}}/backtest
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+script:post-response {
+  bru.setEnvVar("job_id", res.body.job_id);
+}
+
+tests {
+  test("Backtest Job Started", function() {
+    expect(res.getStatus()).to.equal(202);
+    expect(res.body.job_id).to.exist;
+  });
+}
+
+body:json {
+  {
+    "bet_type": "home_win",
+    "seasons": ["2024"]
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
