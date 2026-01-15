@@ -2,7 +2,7 @@
  * Telegram API client functions
  */
 
-import { apiClient } from './client';
+import { apiClient } from '../../api/client';
 
 export interface TelegramLinkResponse {
   deep_link_url: string;

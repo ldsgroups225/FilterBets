@@ -153,9 +153,13 @@ def send_filter_alert(self: Any, filter_match_id: int) -> dict[str, Any]:
 
 
 async def _send_filter_alert_async(
-    task: Any, filter_match_id: int
+    _task: Any, filter_match_id: int
 ) -> dict[str, Any]:
     """Async implementation of send_filter_alert.
+
+    Args:
+        _task: Celery task instance (unused but required)
+        filter_match_id: ID of the filter match to send alert for
 
     Args:
         task: Celery task instance

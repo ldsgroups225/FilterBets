@@ -512,7 +512,7 @@ class TestFilterEngineComputedStats:
         return {"fixture": fixture, "team1": team1, "team2": team2}
 
     async def test_filter_by_home_team_form_wins_last5(
-        self, db_session: AsyncSession, setup_stats_data
+        self, db_session: AsyncSession, setup_stats_data  # noqa: ARG002
     ):
         """Test filtering by home team form wins (last 5 games)."""
         engine = FilterEngine(db_session)
@@ -525,7 +525,7 @@ class TestFilterEngineComputedStats:
         assert fixtures[0].home_team_id == 1
 
     async def test_filter_by_home_team_goals_avg(
-        self, db_session: AsyncSession, setup_stats_data
+        self, db_session: AsyncSession, setup_stats_data  # noqa: ARG002
     ):
         """Test filtering by home team goals average."""
         engine = FilterEngine(db_session)
@@ -538,7 +538,7 @@ class TestFilterEngineComputedStats:
         assert fixtures[0].home_team_id == 1
 
     async def test_filter_by_away_team_goals_avg(
-        self, db_session: AsyncSession, setup_stats_data
+        self, db_session: AsyncSession, setup_stats_data  # noqa: ARG002
     ):
         """Test filtering by away team goals average."""
         engine = FilterEngine(db_session)
@@ -551,7 +551,7 @@ class TestFilterEngineComputedStats:
         assert fixtures[0].away_team_id == 2
 
     async def test_filter_by_home_team_clean_sheet_pct(
-        self, db_session: AsyncSession, setup_stats_data
+        self, db_session: AsyncSession, setup_stats_data  # noqa: ARG002
     ):
         """Test filtering by home team clean sheet percentage."""
         engine = FilterEngine(db_session)
@@ -564,7 +564,7 @@ class TestFilterEngineComputedStats:
         assert fixtures[0].home_team_id == 1
 
     async def test_filter_by_total_expected_goals(
-        self, db_session: AsyncSession, setup_stats_data
+        self, db_session: AsyncSession, setup_stats_data  # noqa: ARG002
     ):
         """Test filtering by total expected goals (computed field)."""
         engine = FilterEngine(db_session)
@@ -577,7 +577,7 @@ class TestFilterEngineComputedStats:
         assert len(fixtures) == 1
 
     async def test_filter_by_multiple_stats_criteria(
-        self, db_session: AsyncSession, setup_stats_data
+        self, db_session: AsyncSession, setup_stats_data  # noqa: ARG002
     ):
         """Test filtering with multiple computed stats criteria."""
         engine = FilterEngine(db_session)
@@ -630,7 +630,7 @@ class TestFilterEngineComputedStats:
         assert len(fixtures) == 0
 
     async def test_filter_by_home_team_home_goals_avg(
-        self, db_session: AsyncSession, setup_stats_data
+        self, db_session: AsyncSession, setup_stats_data  # noqa: ARG002
     ):
         """Test filtering by home team's home goals average."""
         engine = FilterEngine(db_session)
@@ -643,7 +643,7 @@ class TestFilterEngineComputedStats:
         assert fixtures[0].home_team_id == 1
 
     async def test_filter_by_away_team_away_goals_avg(
-        self, db_session: AsyncSession, setup_stats_data
+        self, db_session: AsyncSession, setup_stats_data  # noqa: ARG002
     ):
         """Test filtering by away team's away goals average."""
         engine = FilterEngine(db_session)

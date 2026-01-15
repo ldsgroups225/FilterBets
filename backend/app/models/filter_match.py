@@ -1,12 +1,19 @@
 """FilterMatch model for tracking matches that triggered filters."""
 
+from __future__ import annotations
+
 from datetime import datetime
 from enum import Enum as PyEnum
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+if TYPE_CHECKING:
+    from app.models.filter import Filter
+    from app.models.fixture import Fixture
 
 
 class BetResult(str, PyEnum):
@@ -44,8 +51,8 @@ class FilterMatch(Base):
     )
 
     # Relationships
-    filter: Mapped["Filter"] = relationship("Filter", back_populates="filter_matches")  # noqa: F821
-    fixture: Mapped["Fixture"] = relationship("Fixture", back_populates="filter_matches")  # noqa: F821
+    filter: Mapped[Filter] = relationship("Filter", back_populates="filter_matches")
+    fixture: Mapped[Fixture] = relationship("Fixture", back_populates="filter_matches")
 
     def __repr__(self) -> str:
         return f"<FilterMatch(id={self.id}, filter_id={self.filter_id}, fixture_id={self.fixture_id})>"

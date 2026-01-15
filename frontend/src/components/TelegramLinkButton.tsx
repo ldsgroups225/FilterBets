@@ -50,9 +50,9 @@ export function TelegramLinkButton({
 
       onLinkGenerated?.();
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Failed to generate link', {
-        description: error.response?.data?.detail || 'Please try again later.',
+        description: (error as { response?: { data?: { detail?: string } } }).response?.data?.detail || 'Please try again later.',
       });
     },
   });

@@ -31,10 +31,12 @@ async def main() -> None:
     # Start the bot using long polling
     await application.initialize()
     await application.start()
-    await application.updater.start_polling(
-        allowed_updates=["message", "callback_query"],
-        drop_pending_updates=True,
-    )
+
+    if application.updater:
+        await application.updater.start_polling(
+            allowed_updates=["message", "callback_query"],
+            drop_pending_updates=True,
+        )
 
     logger.info("Bot is running. Press Ctrl+C to stop.")
 
@@ -44,7 +46,8 @@ async def main() -> None:
     except (KeyboardInterrupt, SystemExit):
         logger.info("Stopping bot...")
     finally:
-        await application.updater.stop()
+        if application.updater:
+            await application.updater.stop()
         await application.stop()
         await application.shutdown()
         logger.info("Bot stopped.")

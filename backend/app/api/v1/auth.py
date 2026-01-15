@@ -27,8 +27,8 @@ def create_auth_response(user: User) -> AuthResponse:
     user_info = UserInToken(
         id=user.id,
         email=user.email,
-        created_at=user.created_at.isoformat(),
-        updated_at=user.updated_at.isoformat(),
+        createdAt=user.created_at.isoformat(),
+        updatedAt=user.updated_at.isoformat(),
     )
     return AuthResponse(
         access_token=tokens.access_token,

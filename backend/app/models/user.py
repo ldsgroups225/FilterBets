@@ -1,12 +1,19 @@
 """User model for authentication."""
 
+from __future__ import annotations
+
 from datetime import datetime
 from enum import Enum as PyEnum
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, DateTime, Enum, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+if TYPE_CHECKING:
+    from app.models.backtest_job import BacktestJob
+    from app.models.filter import Filter
 
 
 class ScanFrequency(str, PyEnum):
@@ -40,10 +47,10 @@ class User(Base):
     )
 
     # Relationships
-    filters: Mapped[list["Filter"]] = relationship(  # noqa: F821
+    filters: Mapped[list[Filter]] = relationship(
         "Filter", back_populates="user", cascade="all, delete-orphan"
     )
-    backtest_jobs: Mapped[list["BacktestJob"]] = relationship(  # noqa: F821
+    backtest_jobs: Mapped[list[BacktestJob]] = relationship(
         "BacktestJob", back_populates="user", cascade="all, delete-orphan"
     )
 

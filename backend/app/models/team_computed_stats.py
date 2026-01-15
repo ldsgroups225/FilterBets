@@ -1,12 +1,18 @@
 """TeamComputedStats model for pre-computed team statistics."""
 
+from __future__ import annotations
+
 from datetime import datetime
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+if TYPE_CHECKING:
+    from app.models.team import Team
 
 
 class TeamComputedStats(Base):
@@ -72,7 +78,7 @@ class TeamComputedStats(Base):
     computed_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     # Relationships
-    team: Mapped["Team"] = relationship("Team", back_populates="computed_stats")  # noqa: F821
+    team: Mapped[Team] = relationship("Team", back_populates="computed_stats")
 
     def __repr__(self) -> str:
         return f"<TeamComputedStats(team_id={self.team_id}, season={self.season_type})>"

@@ -109,7 +109,7 @@ class TestTeamStatsCalculator:
 
         return {"team1": team1, "team2": team2, "fixtures": fixtures}
 
-    async def test_calculate_team_overall_stats(self, db_session, setup_data):
+    async def test_calculate_team_overall_stats(self, db_session, setup_data):  # noqa: ARG002
         """Test calculating overall team statistics."""
         calculator = TeamStatsCalculator(db_session)
         stats = await calculator.calculate_team_overall_stats(1, 2024)
@@ -129,7 +129,7 @@ class TestTeamStatsCalculator:
         assert stats["points"] == 10  # 3*3 + 1*1
         assert stats["points_per_game"] == Decimal("2.00")
 
-    async def test_calculate_team_home_stats(self, db_session, setup_data):
+    async def test_calculate_team_home_stats(self, db_session, setup_data):  # noqa: ARG002
         """Test calculating home team statistics."""
         calculator = TeamStatsCalculator(db_session)
         stats = await calculator.calculate_team_home_stats(1, 2024)
@@ -141,7 +141,7 @@ class TestTeamStatsCalculator:
         assert stats["home_goals_scored_avg"] == Decimal("2.00")  # (3+2+1)/3
         assert stats["home_goals_conceded_avg"] == Decimal("0.67")  # (1+0+1)/3
 
-    async def test_calculate_team_away_stats(self, db_session, setup_data):
+    async def test_calculate_team_away_stats(self, db_session, setup_data):  # noqa: ARG002
         """Test calculating away team statistics."""
         calculator = TeamStatsCalculator(db_session)
         stats = await calculator.calculate_team_away_stats(1, 2024)
@@ -153,7 +153,7 @@ class TestTeamStatsCalculator:
         assert stats["away_goals_scored_avg"] == Decimal("1.50")  # (1+2)/2
         assert stats["away_goals_conceded_avg"] == Decimal("1.00")  # (2+0)/2
 
-    async def test_calculate_team_form_last5(self, db_session, setup_data):
+    async def test_calculate_team_form_last5(self, db_session, setup_data):  # noqa: ARG002
         """Test calculating team form for last 5 games."""
         calculator = TeamStatsCalculator(db_session)
         stats = await calculator.calculate_team_form(1, 2024, 5)
@@ -165,7 +165,7 @@ class TestTeamStatsCalculator:
         assert stats["form_last5_goals_scored"] == 9
         assert stats["form_last5_goals_conceded"] == 4
 
-    async def test_calculate_team_form_last10(self, db_session, setup_data):
+    async def test_calculate_team_form_last10(self, db_session, setup_data):  # noqa: ARG002
         """Test calculating team form for last 10 games."""
         calculator = TeamStatsCalculator(db_session)
         stats = await calculator.calculate_team_form(1, 2024, 10)
@@ -178,7 +178,7 @@ class TestTeamStatsCalculator:
         # No goals fields for last10
         assert "form_last10_goals_scored" not in stats
 
-    async def test_refresh_team_stats_creates_new(self, db_session, setup_data):
+    async def test_refresh_team_stats_creates_new(self, db_session, setup_data):  # noqa: ARG002
         """Test refreshing team stats creates new record."""
         calculator = TeamStatsCalculator(db_session)
         computed_stats = await calculator.refresh_team_stats(1, 2024)
@@ -189,7 +189,7 @@ class TestTeamStatsCalculator:
         assert computed_stats.wins == 3
         assert computed_stats.points == 10
 
-    async def test_refresh_team_stats_updates_existing(self, db_session, setup_data):
+    async def test_refresh_team_stats_updates_existing(self, db_session, setup_data):  # noqa: ARG002
         """Test refreshing team stats updates existing record."""
         calculator = TeamStatsCalculator(db_session)
 
@@ -249,7 +249,7 @@ class TestTeamStatsCalculator:
         assert stats["goals_scored_avg"] == Decimal("0.00")
         assert stats["points"] == 0
 
-    async def test_get_computed_stats_endpoint(self, client, auth_headers, db_session, setup_data):
+    async def test_get_computed_stats_endpoint(self, client, auth_headers, db_session, setup_data):  # noqa: ARG002
         """Test GET /teams/{id}/computed-stats endpoint."""
         # First create computed stats
         calculator = TeamStatsCalculator(db_session)

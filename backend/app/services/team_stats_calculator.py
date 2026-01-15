@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from decimal import Decimal
+from typing import Any
 
 from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,7 +25,7 @@ class TeamStatsCalculator:
 
     async def calculate_team_overall_stats(
         self, team_id: int, season_type: int
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Calculate overall team statistics for a season.
 
         Args:
@@ -72,6 +73,10 @@ class TeamStatsCalculator:
                 fixture.away_team_score if is_home else fixture.home_team_score
             )
 
+            # Skip if scores are None (shouldn't happen with our query filter)
+            if team_score is None or opponent_score is None:
+                continue
+
             goals_scored += team_score
             goals_conceded += opponent_score
 
@@ -118,7 +123,7 @@ class TeamStatsCalculator:
 
     async def calculate_team_home_stats(
         self, team_id: int, season_type: int
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Calculate home team statistics for a season.
 
         Args:
@@ -152,6 +157,10 @@ class TeamStatsCalculator:
         home_goals_conceded = 0
 
         for fixture in fixtures:
+            # Skip if scores are None (shouldn't happen with our query filter)
+            if fixture.home_team_score is None or fixture.away_team_score is None:
+                continue
+
             home_goals_scored += fixture.home_team_score
             home_goals_conceded += fixture.away_team_score
 
@@ -177,7 +186,7 @@ class TeamStatsCalculator:
 
     async def calculate_team_away_stats(
         self, team_id: int, season_type: int
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Calculate away team statistics for a season.
 
         Args:
@@ -211,6 +220,10 @@ class TeamStatsCalculator:
         away_goals_conceded = 0
 
         for fixture in fixtures:
+            # Skip if scores are None (shouldn't happen with our query filter)
+            if fixture.away_team_score is None or fixture.home_team_score is None:
+                continue
+
             away_goals_scored += fixture.away_team_score
             away_goals_conceded += fixture.home_team_score
 
@@ -236,7 +249,7 @@ class TeamStatsCalculator:
 
     async def calculate_team_form(
         self, team_id: int, season_type: int, n_games: int
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Calculate team form for last N games.
 
         Args:
@@ -285,6 +298,10 @@ class TeamStatsCalculator:
             opponent_score = (
                 fixture.away_team_score if is_home else fixture.home_team_score
             )
+
+            # Skip if scores are None (shouldn't happen with our query filter)
+            if team_score is None or opponent_score is None:
+                continue
 
             goals_scored += team_score
             goals_conceded += opponent_score
@@ -399,7 +416,7 @@ class TeamStatsCalculator:
 
         return count
 
-    def _empty_overall_stats(self) -> dict:
+    def _empty_overall_stats(self) -> dict[str, Any]:
         """Return empty overall stats."""
         return {
             "matches_played": 0,
@@ -418,7 +435,7 @@ class TeamStatsCalculator:
             "points_per_game": Decimal("0.00"),
         }
 
-    def _empty_home_away_stats(self) -> dict:
+    def _empty_home_away_stats(self) -> dict[str, Any]:
         """Return empty home/away stats."""
         return {
             "home_matches": 0,
@@ -435,7 +452,7 @@ class TeamStatsCalculator:
             "away_goals_conceded_avg": Decimal("0.00"),
         }
 
-    def _empty_form_stats(self, n_games: int) -> dict:
+    def _empty_form_stats(self, n_games: int) -> dict[str, Any]:
         """Return empty form stats."""
         prefix = f"form_last{n_games}_"
         stats = {

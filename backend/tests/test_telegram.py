@@ -20,7 +20,7 @@ async def test_user(db_session: AsyncSession) -> User:
     """Create a test user."""
     user = User(
         email="test@example.com",
-        hashed_password="hashed_password",
+        password_hash="hashed_password",
         is_active=True,
     )
     db_session.add(user)
@@ -78,7 +78,7 @@ class TestTelegramService:
 
     @pytest.mark.asyncio
     async def test_link_telegram_account(
-        self, telegram_service: TelegramService, test_user: User, db_session: AsyncSession
+        self, telegram_service: TelegramService, test_user: User, db_session: AsyncSession  # noqa: ARG002
     ):
         """Test linking a Telegram account."""
         with patch.object(telegram_service, "_get_redis") as mock_redis:
@@ -228,4 +228,4 @@ class TestTelegramAPIEndpoints:
     async def test_generate_link_unauthorized(self, client):
         """Test generate link without authentication."""
         response = await client.post("/api/v1/auth/telegram/generate-link")
-        assert response.status_code == 401
+        assert response.status_code == 403

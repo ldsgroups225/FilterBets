@@ -1,11 +1,18 @@
 """League model mapped from ESPN leagues.csv."""
 
+from __future__ import annotations
+
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+if TYPE_CHECKING:
+    from app.models.fixture import Fixture
+    from app.models.standing import Standing
 
 
 class League(Base):
@@ -30,10 +37,10 @@ class League(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     # Relationships
-    fixtures: Mapped[list["Fixture"]] = relationship(  # noqa: F821
+    fixtures: Mapped[list[Fixture]] = relationship(
         "Fixture", back_populates="league"
     )
-    standings: Mapped[list["Standing"]] = relationship(  # noqa: F821
+    standings: Mapped[list[Standing]] = relationship(
         "Standing", back_populates="league"
     )
 

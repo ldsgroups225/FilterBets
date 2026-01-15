@@ -35,9 +35,9 @@ export function TelegramStatus({ enablePolling = false }: TelegramStatusProps) {
       invalidateStatus();
       setShowUnlinkDialog(false);
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Failed to unlink', {
-        description: error.response?.data?.detail || 'Please try again later.',
+        description: (error as { response?: { data?: { detail?: string } } }).response?.data?.detail || 'Please try again later.',
       });
     },
   });

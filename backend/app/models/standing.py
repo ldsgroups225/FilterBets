@@ -1,11 +1,18 @@
 """Standing model mapped from ESPN standings.csv."""
 
+from __future__ import annotations
+
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+if TYPE_CHECKING:
+    from app.models.league import League
+    from app.models.team import Team
 
 
 class Standing(Base):
@@ -42,8 +49,8 @@ class Standing(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     # Relationships
-    league: Mapped["League"] = relationship("League", back_populates="standings")  # noqa: F821
-    team: Mapped["Team"] = relationship("Team", back_populates="standings")  # noqa: F821
+    league: Mapped[League] = relationship("League", back_populates="standings")
+    team: Mapped[Team] = relationship("Team", back_populates="standings")
 
     def __repr__(self) -> str:
         return f"<Standing(id={self.id}, team_id={self.team_id}, rank={self.team_rank})>"

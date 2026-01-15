@@ -284,21 +284,21 @@ class FilterEngine:
 
         # Evaluate based on operator
         if operator == "=":
-            return field_value == value
+            return bool(field_value == value)
         elif operator == "!=":
-            return field_value != value
+            return bool(field_value != value)
         elif operator == ">":
-            return field_value > value
+            return bool(field_value > value)
         elif operator == "<":
-            return field_value < value
+            return bool(field_value < value)
         elif operator == ">=":
-            return field_value >= value
+            return bool(field_value >= value)
         elif operator == "<=":
-            return field_value <= value
+            return bool(field_value <= value)
         elif operator == "in":
-            return field_value in value
+            return bool(field_value in value)
         elif operator == "between":
-            return value[0] <= field_value <= value[1]
+            return bool(value[0] <= field_value <= value[1])
 
         return False
 

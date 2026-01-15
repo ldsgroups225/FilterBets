@@ -1,11 +1,21 @@
 """Fixture model mapped from ESPN fixtures.csv."""
 
+from __future__ import annotations
+
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+if TYPE_CHECKING:
+    from app.models.filter_match import FilterMatch
+    from app.models.league import League
+    from app.models.team import Team
+    from app.models.team_stats import TeamStats
+    from app.models.venue import Venue
 
 
 class Fixture(Base):
@@ -41,18 +51,18 @@ class Fixture(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     # Relationships
-    league: Mapped["League"] = relationship("League", back_populates="fixtures")  # noqa: F821
-    venue: Mapped["Venue"] = relationship("Venue", back_populates="fixtures")  # noqa: F821
-    home_team: Mapped["Team"] = relationship(  # noqa: F821
+    league: Mapped[League] = relationship("League", back_populates="fixtures")
+    venue: Mapped[Venue] = relationship("Venue", back_populates="fixtures")
+    home_team: Mapped[Team] = relationship(
         "Team", foreign_keys=[home_team_id], back_populates="home_fixtures"
     )
-    away_team: Mapped["Team"] = relationship(  # noqa: F821
+    away_team: Mapped[Team] = relationship(
         "Team", foreign_keys=[away_team_id], back_populates="away_fixtures"
     )
-    team_stats: Mapped[list["TeamStats"]] = relationship(  # noqa: F821
+    team_stats: Mapped[list[TeamStats]] = relationship(
         "TeamStats", back_populates="fixture"
     )
-    filter_matches: Mapped[list["FilterMatch"]] = relationship(  # noqa: F821
+    filter_matches: Mapped[list[FilterMatch]] = relationship(
         "FilterMatch", back_populates="fixture", cascade="all, delete-orphan"
     )
 

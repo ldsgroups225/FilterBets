@@ -78,7 +78,7 @@ class TelegramService:
         return int(user_id_str)
 
     async def link_telegram_account(
-        self, token: str, telegram_chat_id: str, telegram_username: str | None = None
+        self, token: str, telegram_chat_id: str, _telegram_username: str | None = None
     ) -> User | None:
         """Link a Telegram account to a user.
 

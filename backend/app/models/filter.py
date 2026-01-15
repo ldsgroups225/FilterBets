@@ -1,13 +1,21 @@
 """Filter model for user-defined betting strategies."""
 
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+if TYPE_CHECKING:
+    from app.models.backtest_job import BacktestJob
+    from app.models.backtest_result import BacktestResult
+    from app.models.filter_match import FilterMatch
+    from app.models.user import User
 
 
 class Filter(Base):
@@ -31,14 +39,14 @@ class Filter(Base):
     )
 
     # Relationships
-    user: Mapped["User"] = relationship("User", back_populates="filters")  # noqa: F821
-    backtest_results: Mapped[list["BacktestResult"]] = relationship(  # noqa: F821
+    user: Mapped[User] = relationship("User", back_populates="filters")
+    backtest_results: Mapped[list[BacktestResult]] = relationship(
         "BacktestResult", back_populates="filter", cascade="all, delete-orphan"
     )
-    backtest_jobs: Mapped[list["BacktestJob"]] = relationship(  # noqa: F821
+    backtest_jobs: Mapped[list[BacktestJob]] = relationship(
         "BacktestJob", back_populates="filter", cascade="all, delete-orphan"
     )
-    filter_matches: Mapped[list["FilterMatch"]] = relationship(  # noqa: F821
+    filter_matches: Mapped[list[FilterMatch]] = relationship(
         "FilterMatch", back_populates="filter", cascade="all, delete-orphan"
     )
 

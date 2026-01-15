@@ -97,7 +97,7 @@ async def get_notification_history(
                 fixture_id=filter_match.fixture_id,
                 home_team=home_team.name,
                 away_team=away_team.name,
-                league_name=league.name,
+                league_name=league.league_name,
                 match_date=fixture.match_date,
                 matched_at=filter_match.matched_at,
                 notification_sent=filter_match.notification_sent,

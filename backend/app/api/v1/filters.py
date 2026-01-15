@@ -125,7 +125,8 @@ async def update_filter(
     if filter_data.description is not None:
         filter_obj.description = filter_data.description
     if filter_data.rules is not None:
-        filter_obj.rules = [rule.model_dump() for rule in filter_data.rules]  # type: ignore[misc]
+        # Type ignore needed due to SQLAlchemy JSONB column type complexity
+        filter_obj.rules = [rule.model_dump() for rule in filter_data.rules]  # type: ignore[assignment]
     if filter_data.is_active is not None:
         filter_obj.is_active = filter_data.is_active
 

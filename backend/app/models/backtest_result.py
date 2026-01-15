@@ -1,11 +1,17 @@
 """BacktestResult model for cached backtest results."""
 
+from __future__ import annotations
+
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+if TYPE_CHECKING:
+    from app.models.filter import Filter
 
 
 class BacktestResult(Base):
@@ -31,7 +37,7 @@ class BacktestResult(Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
     # Relationships
-    filter: Mapped["Filter"] = relationship(  # noqa: F821
+    filter: Mapped[Filter] = relationship(
         "Filter", back_populates="backtest_results"
     )
 

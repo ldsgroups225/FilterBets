@@ -1,6 +1,7 @@
 """Telegram bot implementation for FilterBets."""
 
 import logging
+from typing import Any
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -26,18 +27,18 @@ AsyncSessionLocal = sessionmaker(
 
 async def get_db() -> AsyncSession:
     """Get database session for bot handlers."""
-    async with AsyncSessionLocal() as session:
-        return session
+    session = AsyncSessionLocal()
+    return session  # type: ignore[return-value]  # noqa: PGH003
 
 
 async def start_with_token(
-    update: Update, context: ContextTypes.DEFAULT_TYPE, token: str
+    update: Update, _context: ContextTypes.DEFAULT_TYPE, token: str
 ) -> None:
     """Handle /start command with token for account linking.
 
     Args:
         update: Telegram update object
-        context: Bot context
+        _context: Bot context (unused but required by framework)
         token: Link token from deep link
     """
     if not update.effective_chat:
@@ -52,7 +53,7 @@ async def start_with_token(
     try:
         user = await telegram_service.link_telegram_account(token, chat_id, username)
 
-        if user:
+        if user and update.message:
             await update.message.reply_text(
                 f"✅ *Account Linked Successfully!*\n\n"
                 f"Your Telegram account is now linked to FilterBets.\n"
@@ -62,7 +63,7 @@ async def start_with_token(
                 parse_mode="Markdown",
             )
             logger.info(f"Successfully linked Telegram account for user {user.id}")
-        else:
+        elif update.message:
             await update.message.reply_text(
                 "❌ *Link Failed*\n\n"
                 "The link code is invalid or has expired.\n"
@@ -75,13 +76,16 @@ async def start_with_token(
         await db.close()
 
 
-async def start_without_token(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def start_without_token(update: Update, _context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle /start command without token - show welcome message.
 
     Args:
         update: Telegram update object
         context: Bot context
     """
+    if not update.message:
+        return
+
     await update.message.reply_text(
         "👋 *Welcome to FilterBets!*\n\n"
         "I'm your betting analytics assistant. To get started:\n\n"
@@ -94,25 +98,25 @@ async def start_without_token(update: Update, context: ContextTypes.DEFAULT_TYPE
     )
 
 
-async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def start_command(update: Update, _context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle /start command - with or without token.
 
     Args:
         update: Telegram update object
-        context: Bot context
+        _context: Bot context
     """
     if not update.message:
         return
 
     # Check if there's a token in the command args
-    if context.args and len(context.args) > 0:
-        token = context.args[0]
-        await start_with_token(update, context, token)
+    if _context.args and len(_context.args) > 0:
+        token = _context.args[0]
+        await start_with_token(update, _context, token)
     else:
-        await start_without_token(update, context)
+        await start_without_token(update, _context)
 
 
-async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def status_command(update: Update, _context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle /status command - show linked account info.
 
     Args:
@@ -166,7 +170,7 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await db.close()
 
 
-async def filters_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def filters_command(update: Update, _context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle /filters command - list user's active filters.
 
     Args:
@@ -233,7 +237,7 @@ async def filters_command(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         await db.close()
 
 
-async def unlink_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def unlink_command(update: Update, _context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle /unlink command - unlink Telegram account.
 
     Args:
@@ -283,7 +287,7 @@ async def unlink_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await db.close()
 
 
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def help_command(update: Update, _context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle /help command - show available commands.
 
     Args:
@@ -305,7 +309,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     )
 
 
-def create_bot_application() -> Application:
+def create_bot_application() -> Application[Any, Any, Any, Any, Any, Any]:
     """Create and configure the Telegram bot application.
 
     Returns:

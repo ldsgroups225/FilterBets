@@ -25,11 +25,11 @@ AsyncSessionLocal = sessionmaker(
 
 
 @celery_app.task(name="app.tasks.scanner_tasks.run_pre_match_scanner", bind=True)
-def run_pre_match_scanner(self: Any) -> dict[str, Any]:
+def run_pre_match_scanner(_self: Any) -> dict[str, Any]:
     """Run the pre-match scanner and queue notifications.
 
     Args:
-        self: Celery task instance
+        _self: Celery task instance (unused but required by bind=True)
 
     Returns:
         Dictionary with scan statistics
