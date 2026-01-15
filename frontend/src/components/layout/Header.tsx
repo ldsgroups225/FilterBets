@@ -1,6 +1,7 @@
 import { Link, NavLink } from "react-router-dom"
 import { IconActivity, IconLogout, IconMenu2 } from "@tabler/icons-react"
 import { useAuth } from "@/hooks/useAuth"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -31,6 +32,7 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
             <IconActivity className="h-6 w-6 text-primary" />
             <span className="font-bold">FilterBets</span>
           </Link>
+          <ThemeToggle />
           {isAuthenticated && (
             <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
               <NavLink
