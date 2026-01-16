@@ -3,12 +3,12 @@
 import csv
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Set
+from typing import Any
 
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import sessionmaker
 
 from app.models import Fixture, League, Standing, Team, TeamStats, Venue
 
@@ -35,7 +35,7 @@ class DataIngestionService:
         self.data_dir = Path(data_dir) if isinstance(data_dir, str) else data_dir
         self.batch_size = batch_size
         self.max_workers = max_workers
-        
+
         # Get engine from session for creating additional sessions
         self.engine = session.get_bind()
         self.async_session_factory = sessionmaker(
@@ -52,28 +52,28 @@ class DataIngestionService:
 
         # Order matters due to foreign key constraints
         print("📥 Starting data ingestion...")
-        
+
         print("  → Ingesting venues...")
         results["venues"] = await self.ingest_venues()
         print(f"    ✓ {results['venues']:,} venues inserted")
-        
+
         print("  → Ingesting leagues...")
         results["leagues"] = await self.ingest_leagues()
         print(f"    ✓ {results['leagues']:,} leagues inserted")
-        
+
         print("  → Ingesting teams...")
         results["teams"] = await self.ingest_teams()
         print(f"    ✓ {results['teams']:,} teams inserted")
-        
+
         print("  → Ingesting fixtures...")
         results["fixtures"] = await self.ingest_fixtures()
         print(f"    ✓ {results['fixtures']:,} fixtures inserted")
-        
+
         # Run sequentially - asyncpg doesn't support concurrent operations on same connection
         print("  → Ingesting team stats...")
         results["team_stats"] = await self.ingest_team_stats()
         print(f"    ✓ {results['team_stats']:,} team stats inserted")
-        
+
         print("  → Ingesting standings...")
         results["standings"] = await self.ingest_standings()
         print(f"    ✓ {results['standings']:,} standings inserted")
@@ -110,7 +110,7 @@ class DataIngestionService:
 
         # Filter out existing venues
         new_venues = [v for v in venues_data if v["venue_id"] not in existing_ids]
-        
+
         if not new_venues:
             return 0
 
@@ -118,7 +118,7 @@ class DataIngestionService:
         count = 0
         for i in range(0, len(new_venues), self.batch_size):
             batch = new_venues[i : i + self.batch_size]
-            
+
             # Use INSERT ... ON CONFLICT DO NOTHING for idempotency
             stmt = insert(Venue).values(batch)
             stmt = stmt.on_conflict_do_nothing(index_elements=["venue_id"])
@@ -139,13 +139,13 @@ class DataIngestionService:
             return 0
 
         # First pass: collect unique leagues by league_id, keeping the most recent year
-        unique_leagues: dict[int, dict] = {}
+        unique_leagues: dict[int, dict[str, Any]] = {}
         with open(csv_path, encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 league_id = int(row["leagueId"])
                 year = int(row["year"])
-                
+
                 if league_id not in unique_leagues or year > unique_leagues[league_id]["year"]:
                     unique_leagues[league_id] = {
                         "season_type": int(row["seasonType"]),
@@ -165,7 +165,7 @@ class DataIngestionService:
         count = 0
         for i in range(0, len(leagues_data), self.batch_size):
             batch = leagues_data[i : i + self.batch_size]
-            
+
             stmt = insert(League).values(batch)
             stmt = stmt.on_conflict_do_update(
                 index_elements=["league_id", "season_type", "year"],
@@ -231,7 +231,7 @@ class DataIngestionService:
         count = 0
         for i in range(0, len(teams_data), self.batch_size):
             batch = teams_data[i : i + self.batch_size]
-            
+
             stmt = insert(Team).values(batch)
             stmt = stmt.on_conflict_do_update(
                 index_elements=["team_id"],
@@ -263,10 +263,10 @@ class DataIngestionService:
         # Pre-load valid IDs
         result = await self.session.execute(select(Venue.venue_id))
         valid_venue_ids = {row[0] for row in result.fetchall()}
-        
+
         result = await self.session.execute(select(League.league_id))
         valid_league_ids = {row[0] for row in result.fetchall()}
-        
+
         result = await self.session.execute(select(Team.team_id))
         valid_team_ids = {row[0] for row in result.fetchall()}
 
@@ -277,12 +277,12 @@ class DataIngestionService:
         # Load and validate fixtures
         fixtures_data = []
         skipped = 0
-        
+
         with open(csv_path, encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 event_id = int(row["eventId"])
-                
+
                 # Skip if already exists
                 if event_id in existing_ids:
                     continue
@@ -291,9 +291,9 @@ class DataIngestionService:
                 league_id = int(row["leagueId"])
                 home_team_id = int(row["homeTeamId"])
                 away_team_id = int(row["awayTeamId"])
-                
-                if (league_id not in valid_league_ids or 
-                    home_team_id not in valid_team_ids or 
+
+                if (league_id not in valid_league_ids or
+                    home_team_id not in valid_team_ids or
                     away_team_id not in valid_team_ids):
                     skipped += 1
                     continue
@@ -337,14 +337,14 @@ class DataIngestionService:
         # Bulk insert with progress tracking
         count = 0
         total = len(fixtures_data)
-        
+
         for i in range(0, total, self.batch_size):
             batch = fixtures_data[i : i + self.batch_size]
-            
+
             stmt = insert(Fixture).values(batch)
             stmt = stmt.on_conflict_do_nothing(index_elements=["event_id"])
             await self.session.execute(stmt)
-            
+
             count += len(batch)
             if total > 10000:  # Only show progress for large datasets
                 print(f"      Progress: {min(i + self.batch_size, total):,}/{total:,} ({min(i + self.batch_size, total)/total*100:.1f}%)")
@@ -385,7 +385,7 @@ class DataIngestionService:
             for row in reader:
                 event_id = int(row["eventId"])
                 team_id = int(row["teamId"])
-                
+
                 # Skip if already exists
                 if (event_id, team_id) in existing_keys:
                     continue
@@ -451,15 +451,15 @@ class DataIngestionService:
         # Bulk insert
         count = 0
         total = len(stats_data)
-        
+
         for i in range(0, total, self.batch_size):
             batch = stats_data[i : i + self.batch_size]
-            
+
             # Use composite unique constraint
             stmt = insert(TeamStats).values(batch)
             stmt = stmt.on_conflict_do_nothing(index_elements=["event_id", "team_id"])
             await self.session.execute(stmt)
-            
+
             count += len(batch)
             if total > 10000:
                 print(f"      Team stats progress: {min(i + self.batch_size, total):,}/{total:,} ({min(i + self.batch_size, total)/total*100:.1f}%)")
@@ -491,7 +491,7 @@ class DataIngestionService:
                 season_type = int(row["seasonType"])
                 league_id = int(row["leagueId"])
                 team_id = int(row["teamId"])
-                
+
                 # Skip if already exists
                 if (season_type, league_id, team_id) in existing_keys:
                     continue
@@ -527,14 +527,14 @@ class DataIngestionService:
         # Bulk insert
         count = 0
         total = len(standings_data)
-        
+
         for i in range(0, total, self.batch_size):
             batch = standings_data[i : i + self.batch_size]
-            
+
             stmt = insert(Standing).values(batch)
             stmt = stmt.on_conflict_do_nothing(index_elements=["season_type", "league_id", "team_id"])
             await self.session.execute(stmt)
-            
+
             count += len(batch)
             if total > 10000:
                 print(f"      Standings progress: {min(i + self.batch_size, total):,}/{total:,} ({min(i + self.batch_size, total)/total*100:.1f}%)")

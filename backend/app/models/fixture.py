@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, JSON
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -48,7 +48,7 @@ class Fixture(Base):
     away_team_shootout_score: Mapped[int | None] = mapped_column(Integer, nullable=True)
     status_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
     update_time: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    features_metadata: Mapped[dict | None] = mapped_column("features_metadata", JSON, nullable=True)
+    features_metadata: Mapped[dict[str, Any] | None] = mapped_column("features_metadata", JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     # Relationships
@@ -99,8 +99,8 @@ class Fixture(Base):
     @property
     def league_name(self) -> str | None:
         """Get league name."""
-        return self.league.name if self.league else None
-    
+        return self.league.league_name if self.league else None
+
     @property
     def league_logo(self) -> str | None:
         """Get league logo."""

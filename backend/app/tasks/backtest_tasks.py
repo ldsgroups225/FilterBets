@@ -6,8 +6,7 @@ from typing import Any, cast
 from uuid import UUID
 
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.config import get_settings
 from app.models.backtest_job import BacktestJob
@@ -27,13 +26,13 @@ def get_async_session() -> AsyncSession:
         echo=False,
         pool_pre_ping=True,
     )
-    async_session_maker = sessionmaker(
+    session_factory = async_sessionmaker(
         engine, class_=AsyncSession, expire_on_commit=False
     )
-    return cast(AsyncSession, async_session_maker())
+    return session_factory()
 
 
-@celery_app.task(name="app.tasks.backtest_tasks.run_async_backtest", bind=True)
+@celery_app.task(name="app.tasks.backtest_tasks.run_async_backtest", bind=True)  # type: ignore[untyped-decorator]
 def run_async_backtest(
     _self: Any,
     job_id: str,
@@ -120,6 +119,10 @@ def run_async_backtest(
             job.result = response.model_dump(mode="json")
             job.completed_at = datetime.utcnow()
             await session.commit()
+
+            # Trigger notification
+            from app.tasks.notification_tasks import send_backtest_report
+            send_backtest_report.delay(job_id)
 
             logger.info(f"Successfully completed backtest job {job_id}")
 

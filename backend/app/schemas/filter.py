@@ -144,6 +144,12 @@ class FilterUpdate(BaseModel):
         return v
 
 
+class FilterAlertsToggle(BaseModel):
+    """Schema for toggling filter alerts."""
+
+    alerts_enabled: bool = Field(..., description="Enable or disable alerts")
+
+
 class FilterResponse(BaseModel):
     """Schema for filter response."""
 
@@ -153,6 +159,7 @@ class FilterResponse(BaseModel):
     description: str | None
     rules: list[dict[str, Any]]  # JSONB stored as dict
     is_active: bool
+    alerts_enabled: bool
     created_at: datetime
     updated_at: datetime
 

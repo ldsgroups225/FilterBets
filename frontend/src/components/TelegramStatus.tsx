@@ -96,62 +96,62 @@ export function TelegramStatus({ enablePolling: initialPolling = false }: Telegr
           <div className="p-8 md:w-80 bg-white/2 flex flex-col justify-center items-center text-center space-y-4">
             {isLinked
               ? (
-                <>
-                  <div className="h-12 w-12 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-                    <IconShieldCheck className="h-6 w-6" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-bold uppercase tracking-widest text-emerald-500">Security Active</p>
-                    <p className="text-sm font-medium opacity-50">Notifications enabled</p>
-                  </div>
-                  <AlertDialog open={showUnlinkDialog} onOpenChange={setShowUnlinkDialog}>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowUnlinkDialog(true)}
-                      className="w-full rounded-xl text-destructive hover:bg-destructive/10 font-bold"
-                    >
-                      Unlink Account
-                    </Button>
-                    <AlertDialogContent className="rounded-2xl border-white/10 glass-dark">
-                      <AlertDialogHeader>
-                        <AlertDialogTitle className="text-2xl font-extrabold uppercase tracking-tight">Pause Notifications?</AlertDialogTitle>
-                        <AlertDialogDescription className="font-medium">
-                          You'll stop receiving real-time betting alerts on Telegram.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter className="mt-6 gap-3">
-                        <AlertDialogCancel className="rounded-xl border-white/10 font-bold">Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => unlinkMutation.mutate()}
-                          disabled={unlinkMutation.isPending}
-                          className="rounded-xl bg-destructive hover:bg-destructive/90 text-white font-bold"
-                        >
-                          {unlinkMutation.isPending && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
-                          Disconnect
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </>
-              )
+                  <>
+                    <div className="h-12 w-12 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                      <IconShieldCheck className="h-6 w-6" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs font-bold uppercase tracking-widest text-emerald-500">Security Active</p>
+                      <p className="text-sm font-medium opacity-50">Notifications enabled</p>
+                    </div>
+                    <AlertDialog open={showUnlinkDialog} onOpenChange={setShowUnlinkDialog}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowUnlinkDialog(true)}
+                        className="w-full rounded-xl text-destructive hover:bg-destructive/10 font-bold"
+                      >
+                        Unlink Account
+                      </Button>
+                      <AlertDialogContent className="rounded-2xl border-white/10 glass-dark">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle className="text-2xl font-extrabold uppercase tracking-tight">Pause Notifications?</AlertDialogTitle>
+                          <AlertDialogDescription className="font-medium">
+                            You'll stop receiving real-time betting alerts on Telegram.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter className="mt-6 gap-3">
+                          <AlertDialogCancel className="rounded-xl border-white/10 font-bold">Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => unlinkMutation.mutate()}
+                            disabled={unlinkMutation.isPending}
+                            className="rounded-xl bg-destructive hover:bg-destructive/90 text-white font-bold"
+                          >
+                            {unlinkMutation.isPending && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Disconnect
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </>
+                )
               : (
-                <>
-                  <div className="space-y-4 w-full">
-                    <p className="text-xs font-black uppercase tracking-widest opacity-30 leading-relaxed">
-                      Link your account to unlock automated match scanning alerts
-                    </p>
-                    <TelegramLinkButton
-                      variant="default"
-                      className="w-full rounded-xl font-bold h-12 shadow-lg shadow-primary/20"
-                      onLinkGenerated={() => {
-                        invalidateStatus()
-                        setIsPolling(true)
-                      }}
-                    />
-                  </div>
-                </>
-              )}
+                  <>
+                    <div className="space-y-4 w-full">
+                      <p className="text-xs font-black uppercase tracking-widest opacity-30 leading-relaxed">
+                        Link your account to unlock automated match scanning alerts
+                      </p>
+                      <TelegramLinkButton
+                        variant="default"
+                        className="w-full rounded-xl font-bold h-12 shadow-lg shadow-primary/20"
+                        onLinkGenerated={() => {
+                          invalidateStatus()
+                          setIsPolling(true)
+                        }}
+                      />
+                    </div>
+                  </>
+                )}
           </div>
         </div>
       </CardContent>

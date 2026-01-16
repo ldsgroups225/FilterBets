@@ -35,7 +35,7 @@ class BacktestService:
 
     async def run_backtest(
         self, filter_obj: Filter, request: BacktestRequest, include_analytics: bool = False
-    ) -> BacktestResponse | EnhancedBacktestResponse:
+    ) -> BacktestResponse:
         """
         Run a backtest for a filter against historical data.
 
@@ -90,6 +90,48 @@ class BacktestService:
         await self._cache_result(filter_obj.id, request, response)
 
         return response
+
+    async def run_enhanced_pre_match_backtest(
+        self,
+        filter_obj: Filter,
+        bet_type: BetType,
+        seasons: list[int],
+        include_analytics: bool = True,
+    ) -> EnhancedBacktestResponse:
+        """Run enhanced pre-match backtest with detailed analytics."""
+        request = BacktestRequest(bet_type=bet_type, seasons=seasons)
+        result = await self.run_backtest(filter_obj, request, include_analytics=include_analytics)
+        if isinstance(result, EnhancedBacktestResponse):
+            return result
+        # Fallback
+        return EnhancedBacktestResponse(**result.model_dump())
+
+    async def get_quick_pre_match_analytics(
+        self,
+        filter_obj: Filter,
+        seasons: list[int] | None = None,
+    ) -> dict[str, Any]:
+        """Get quick pre-match analytics for a filter."""
+        seasons_to_use = seasons or [2024, 2025]
+
+        # Default to OVER_2_5 for quick analytics
+        request = BacktestRequest(bet_type=BetType.OVER_2_5, seasons=seasons_to_use)
+        result = await self.run_backtest(filter_obj, request, include_analytics=True)
+
+        analytics_data: dict[str, Any] = {}
+        if isinstance(result, EnhancedBacktestResponse) and result.analytics:
+            analytics_data = {
+                "performance_summary": {
+                    "win_rate": result.win_rate,
+                    "roi": result.roi_percentage,
+                    "total_matches": result.total_matches,
+                },
+                "trends": [m.model_dump() for m in result.analytics.monthly_breakdown[-3:]]
+                if result.analytics.monthly_breakdown else [],
+                "risk_metrics": result.analytics.drawdown.model_dump(),
+            }
+
+        return analytics_data
 
     async def _get_cached_result(
         self, filter_id: int, bet_type: BetType, seasons: list[int]

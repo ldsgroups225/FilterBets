@@ -26,7 +26,7 @@ class FixtureResponse(BaseModel):
     status_id: int = Field(..., description="Match status ID")
     update_time: datetime | None = Field(None, description="Last update timestamp")
     created_at: datetime = Field(..., description="Record creation timestamp")
-    
+
     # Flattened fields for frontend
     home_team_name: str | None = Field(None, description="Home team name")
     away_team_name: str | None = Field(None, description="Away team name")

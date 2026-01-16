@@ -6,6 +6,7 @@ from app.models.filter import Filter
 from app.models.filter_match import BetResult, FilterMatch
 from app.models.fixture import Fixture
 from app.models.league import League
+from app.models.live_match import LiveFilterResult, LiveMatch, LiveOdds
 from app.models.standing import Standing
 from app.models.team import Team
 from app.models.team_computed_stats import TeamComputedStats
@@ -28,4 +29,7 @@ __all__ = [
     "BetResult",
     "BacktestResult",
     "BacktestJob",
+    "LiveMatch",
+    "LiveOdds",
+    "LiveFilterResult",
 ]

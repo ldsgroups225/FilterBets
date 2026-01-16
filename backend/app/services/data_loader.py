@@ -3,12 +3,11 @@
 from pathlib import Path
 from typing import Any
 
-import pandas as pd
+import pandas as pd  # type: ignore[import-untyped]
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.fixture import Fixture
-from app.models.league import League
 from app.models.team import Team
 
 
@@ -111,9 +110,9 @@ class DataLoaderService:
         # Store computed features in JSONB metadata field
         features = self._extract_features(row)
         if features:
-            if not fixture.metadata:
-                fixture.metadata = {}
-            fixture.metadata["features"] = features
+            if not fixture.features_metadata:
+                fixture.features_metadata = {}
+            fixture.features_metadata["features"] = features
 
     async def _create_fixture_from_row(self, row: pd.Series) -> Fixture | None:
         """Create a new fixture from a DataFrame row."""
@@ -138,7 +137,7 @@ class DataLoaderService:
                 away_team_score=int(row["awayTeamScore"]) if pd.notna(row.get("awayTeamScore")) else None,
                 match_date=pd.to_datetime(row["date"]),
                 status_id=int(row.get("statusId", 28)),  # Default to Full Time
-                metadata={"features": self._extract_features(row)},
+                features_metadata={"features": self._extract_features(row)},
             )
 
             return fixture
@@ -148,7 +147,7 @@ class DataLoaderService:
 
     def _extract_features(self, row: pd.Series) -> dict[str, Any]:
         """Extract computed features from a row."""
-        features = {}
+        features: dict[str, Any] = {}
 
         # Form features (last 5 games)
         form_5_cols = [col for col in row.index if "form_" in col and "_5" in col]
@@ -225,9 +224,9 @@ class DataLoaderService:
             if available_cols:
                 # Calculate percentage of non-null values
                 coverage = (df[available_cols].notna().sum().sum() / (len(df) * len(available_cols)) * 100)
-                stats["feature_coverage"][group_name] = {
+                stats["feature_coverage"][group_name] = {  # type: ignore[assignment, index]
                     "columns": len(available_cols),
-                    "coverage_pct": round(coverage, 2),
+                    "coverage_pct": round(float(coverage), 2),
                 }
 
         return stats

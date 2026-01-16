@@ -1,7 +1,7 @@
 import { IconActivity, IconAlertCircle, IconCheck, IconClock } from '@tabler/icons-react'
 import { motion } from 'motion/react'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useNotifications } from '@/hooks/useNotifications'
 import { cn } from '@/lib/utils'
@@ -12,8 +12,8 @@ export function NotificationHistory() {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-24 w-full rounded-2xl opacity-20" />
+        {Array.from({ length: 3 }, (_, index) => (
+          <Skeleton key={`skeleton-${index}`} className="h-24 w-full rounded-2xl opacity-20" />
         ))}
       </div>
     )

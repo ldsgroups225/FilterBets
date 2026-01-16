@@ -34,7 +34,7 @@ class TelegramService:
             Redis client instance
         """
         if self._redis is None:
-            self._redis = await aioredis.from_url(
+            self._redis = await aioredis.from_url(  # type: ignore[no-untyped-call]
                 settings.redis_url, encoding="utf-8", decode_responses=True
             )
         return self._redis

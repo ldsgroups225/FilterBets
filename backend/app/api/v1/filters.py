@@ -1,6 +1,7 @@
 """Filter management endpoints."""
 
 from datetime import date
+from typing import Any, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
@@ -13,7 +14,7 @@ from app.models.user import User
 from app.schemas.backtest import BacktestRequest, BacktestResponse
 from app.schemas.backtest_job import BacktestJobResponse
 from app.schemas.common import PaginatedResponse
-from app.schemas.filter import FilterCreate, FilterResponse, FilterUpdate
+from app.schemas.filter import FilterAlertsToggle, FilterCreate, FilterResponse, FilterUpdate
 from app.schemas.fixture import FixtureResponse
 from app.services.backtest import BacktestService
 from app.services.filter_engine import FilterEngine
@@ -193,14 +194,14 @@ async def get_filter_matches(
 
 
 @router.post("/{filter_id}/backtest", response_model=BacktestResponse | BacktestJobResponse, operation_id="run_filter_backtest")
-async def run_backtest(
+async def run_filter_backtest(
     filter_id: int,
     request: BacktestRequest,
-    async_mode: bool = Query(False, description="Run backtest asynchronously"),
+    async_mode: bool = Query(False, description="Run asynchronously via Celery"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> BacktestResponse | BacktestJobResponse:
-    """Run a backtest on a filter against historical data.
+    """Run a pre-match backtest on a filter against historical data.
 
     Evaluates the filter's performance by applying it to historical matches
     and calculating win rate, ROI, and other metrics.
@@ -258,13 +259,25 @@ async def run_backtest(
 
     # Synchronous execution
     backtest_service = BacktestService(db)
-    return await backtest_service.run_backtest(filter_obj, request)
+    response = await backtest_service.run_backtest(filter_obj, request)
+
+    # Trigger notification even for sync/cached runs
+    from app.tasks.notification_tasks import send_backtest_report_manual
+    send_backtest_report_manual.delay(
+        user_id=current_user.id,
+        filter_id=filter_id,
+        bet_type=request.bet_type.value,
+        seasons=request.seasons,
+        result_data=response.model_dump(mode="json"),
+    )
+
+    return response
 
 
 @router.patch("/{filter_id}/alerts", response_model=FilterResponse, operation_id="toggle_filter_alerts")
 async def toggle_filter_alerts(
     filter_id: int,
-    alerts_enabled: bool = Query(..., description="Enable or disable alerts"),
+    toggle_data: FilterAlertsToggle,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> Filter:
@@ -273,6 +286,7 @@ async def toggle_filter_alerts(
     Requires Telegram to be linked to the user account.
     Only the filter owner can modify alert settings.
     """
+    alerts_enabled = toggle_data.alerts_enabled
     # Check if user has Telegram linked
     if alerts_enabled and not current_user.telegram_verified:
         raise HTTPException(
@@ -295,4 +309,124 @@ async def toggle_filter_alerts(
     await db.refresh(filter_obj)
 
     return filter_obj
+
+
+@router.post("/{filter_id}/backtest/pre-match", response_model=BacktestResponse, operation_id="run_pre_match_backtest")
+async def run_pre_match_backtest(
+    filter_id: int,
+    request: BacktestRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> BacktestResponse:
+    """Run enhanced pre-match backtest with detailed analytics.
+
+    This endpoint is specifically designed for pre-match filters and provides:
+    - Detailed performance metrics by league, season, and bet type
+    - Risk analysis and confidence intervals
+    - Comparison with baseline performance
+    - Trend analysis over time
+    - Recommended stake sizes based on historical performance
+
+    **Enhanced Features:**
+    - League-specific performance breakdown
+    - Season-over-season trend analysis
+    - Confidence intervals for success rate
+    - Risk-adjusted ROI calculations
+    - Optimal stake size recommendations
+    - Performance vs. baseline comparison
+
+    **Filter Requirements:**
+    Only supports pre-match filter fields (historical stats, form data, etc.).
+    Live filter fields will be ignored for this backtest.
+
+    Args:
+        filter_id: Filter ID to backtest
+        request: Backtest configuration parameters
+        db: Database session
+        current_user: Current authenticated user
+
+    Returns:
+        Enhanced backtest results with detailed analytics
+
+    Raises:
+        HTTPException: 404 if filter not found, 400 if filter contains live rules
+    """
+    # Get filter
+    result = await db.execute(
+        select(Filter).where(Filter.id == filter_id, Filter.user_id == current_user.id)
+    )
+    filter_obj = result.scalar_one_or_none()
+
+    if not filter_obj:
+        raise HTTPException(status_code=404, detail="Filter not found")
+
+    # Check if filter contains live rules (not allowed for pre-match backtest)
+    live_rule_categories = ["live_stats", "team_state", "odds", "timing"]
+    filter_rules = cast(list[dict[str, Any]], filter_obj.rules or [])
+
+    for rule_data in filter_rules:
+        rule_category = rule_data.get("category")
+        if rule_category in live_rule_categories:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Pre-match backtest cannot contain live rules. Found rule category: {rule_category}. "
+                f"Use live scanner backtest endpoint for live filters."
+            )
+
+    # Run enhanced pre-match backtest
+    backtest_service = BacktestService(db)
+    enhanced_results = await backtest_service.run_enhanced_pre_match_backtest(
+        filter_obj=filter_obj,
+        bet_type=request.bet_type,
+        seasons=request.seasons,
+        include_analytics=True,
+    )
+
+    return enhanced_results
+
+
+@router.get("/{filter_id}/analytics/pre-match", operation_id="get_pre_match_analytics")
+async def get_pre_match_analytics(
+    filter_id: int,
+    seasons: list[int] = Query([], description="Seasons to analyze"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Get pre-match analytics for a filter without running full backtest.
+
+    Returns quick analytics including:
+    - Recent performance trends
+    - League-specific insights
+    - Risk metrics
+    - Recommended settings
+
+    Args:
+        filter_id: Filter ID to analyze
+        seasons: Optional seasons to focus on
+        db: Database session
+        current_user: Current authenticated user
+
+    Returns:
+        Quick analytics data
+
+    Raises:
+        HTTPException: 404 if filter not found
+    """
+    # Get filter
+    result = await db.execute(
+        select(Filter).where(Filter.id == filter_id, Filter.user_id == current_user.id)
+    )
+    filter_obj = result.scalar_one_or_none()
+
+    if not filter_obj:
+        raise HTTPException(status_code=404, detail="Filter not found")
+
+    # Get quick analytics
+    backtest_service = BacktestService(db)
+    analytics = await backtest_service.get_quick_pre_match_analytics(
+        filter_obj=filter_obj,
+        seasons=seasons or None,
+    )
+
+    return analytics
 
