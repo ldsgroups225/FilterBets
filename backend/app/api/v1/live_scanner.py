@@ -209,7 +209,7 @@ async def get_filter_results(
     # TODO: Implement actual database query
     # For now, return mock results
 
-    mock_results = [
+    mock_results: list[dict[str, Any]] = [
         {
             "id": 1,
             "filter_id": filter_id,

@@ -1,11 +1,8 @@
 """Tests for filter validation endpoint."""
 
-import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.filter import Filter
-from app.models.user import User
 from app.services.auth import create_user
 
 

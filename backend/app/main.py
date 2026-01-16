@@ -2,13 +2,13 @@
 
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import Any, Annotated
+from typing import Annotated, Any
 
-from fastapi import FastAPI, HTTPException, Request, status, Depends
+from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi_mcp import FastApiMCP  # type: ignore[import-untyped]
-from fastapi_mcp.types import AuthConfig
+from fastapi_mcp.types import AuthConfig  # type: ignore
 from jose import JWTError
 
 from app.api.v1 import api_router
@@ -127,7 +127,7 @@ app.include_router(api_router, prefix="/api/v1")
 
 
 async def authenticate_mcp_request(
-    request: Request,
+    _request: Request,
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(security)] = None,
 ) -> bool:
     """Authentication dependency for MCP endpoints.
@@ -135,7 +135,7 @@ async def authenticate_mcp_request(
     Validates JWT bearer tokens for MCP access.
 
     Args:
-        request: The incoming request
+        _request: The incoming request
         credentials: HTTP authorization credentials
 
     Returns:
@@ -163,12 +163,12 @@ async def authenticate_mcp_request(
                 detail="Invalid token",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-    except JWTError:
+    except JWTError as err:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from err
 
     return True
 

@@ -17,7 +17,7 @@ from pathlib import Path
 # Add backend to path before other imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import pandas as pd
+import pandas as pd  # type: ignore
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
@@ -43,8 +43,8 @@ class DataImporter:
             pool_pre_ping=True,
         )
         self.async_session = sessionmaker(
-            self.engine, class_=AsyncSession, expire_on_commit=False
-        )
+            bind=self.engine, class_=AsyncSession, expire_on_commit=False
+        )  # type: ignore
         self.data_dir = Path(__file__).parent.parent.parent / "data" / "processed"
         self.max_workers = max_workers
 
@@ -106,7 +106,7 @@ class DataImporter:
         batch_results = await asyncio.gather(*tasks, return_exceptions=True)
 
         for result in batch_results:
-            if isinstance(result, Exception):
+            if isinstance(result, BaseException):
                 print(f"❌ Batch processing error: {result}")
                 stats["errors"] += 1
             else:

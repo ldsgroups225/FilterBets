@@ -1,11 +1,11 @@
-import type { Fixture } from '@/types/fixture'
 import type { LeagueTier } from '@/lib/leagueTiers'
+import type { Fixture } from '@/types/fixture'
 import { format } from 'date-fns'
 import { useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { TierBadge } from '@/components/ui/tier-badge'
-import { cn } from '@/lib/utils'
 import { getLeagueTier } from '@/lib/leagueTiers'
+import { cn } from '@/lib/utils'
 import { CachedImage } from '../ui/cached-image'
 
 interface FixturesTableProps {
@@ -48,7 +48,8 @@ export function FixturesTable({ fixtures, onRowClick }: FixturesTableProps) {
 
     // Sort groups by tier (Tier 1 first) then by name
     return Object.values(groups).sort((a, b) => {
-      if (a.tier !== b.tier) return a.tier - b.tier
+      if (a.tier !== b.tier)
+        return a.tier - b.tier
       return a.leagueName.localeCompare(b.leagueName)
     })
   }, [fixtures])
@@ -95,15 +96,15 @@ export function FixturesTable({ fixtures, onRowClick }: FixturesTableProps) {
                 <div className="flex flex-col items-center justify-center w-12 shrink-0 border-r border-white/5 pr-4 mr-0">
                   {fixture.status_id === 2
                     ? (
-                      <span className="text-[10px] font-black text-destructive animate-pulse">LIVE</span>
-                    )
+                        <span className="text-[10px] font-black text-destructive animate-pulse">LIVE</span>
+                      )
                     : fixture.status_id === 3 || fixture.status_id === 28
                       ? (
-                        <span className="text-[10px] font-black text-primary">FT</span>
-                      )
+                          <span className="text-[10px] font-black text-primary">FT</span>
+                        )
                       : (
-                        <span className="text-xs font-bold text-muted-foreground">{format(new Date(fixture.match_date), 'HH:mm')}</span>
-                      )}
+                          <span className="text-xs font-bold text-muted-foreground">{format(new Date(fixture.match_date), 'HH:mm')}</span>
+                        )}
                 </div>
 
                 {/* Teams Column */}
@@ -124,7 +125,8 @@ export function FixturesTable({ fixtures, onRowClick }: FixturesTableProps) {
                       {/* Show form if available */}
                       {fixture.home_form_points_5 !== undefined && (
                         <span className="hidden md:inline-flex text-[8px] font-bold text-muted-foreground/50 bg-white/5 px-1.5 py-0.5 rounded">
-                          {fixture.home_form_points_5}pts
+                          {fixture.home_form_points_5}
+                          pts
                         </span>
                       )}
                     </div>
@@ -149,7 +151,8 @@ export function FixturesTable({ fixtures, onRowClick }: FixturesTableProps) {
                       {/* Show form if available */}
                       {fixture.away_form_points_5 !== undefined && (
                         <span className="hidden md:inline-flex text-[8px] font-bold text-muted-foreground/50 bg-white/5 px-1.5 py-0.5 rounded">
-                          {fixture.away_form_points_5}pts
+                          {fixture.away_form_points_5}
+                          pts
                         </span>
                       )}
                     </div>

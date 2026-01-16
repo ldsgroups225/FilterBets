@@ -122,7 +122,7 @@ export const ALL_LEAGUES: LeagueInfo[] = [
 
 // Quick lookup by code
 export const LEAGUE_MAP = new Map<string, LeagueInfo>(
-  ALL_LEAGUES.map(league => [league.code, league])
+  ALL_LEAGUES.map(league => [league.code, league]),
 )
 
 // Get tier for a league code

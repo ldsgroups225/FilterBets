@@ -10,7 +10,7 @@ Tests cover:
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.auth import create_user
+from app.services.auth import create_user, create_tokens
 
 
 class TestFilterToOutcomeCorrelation:
@@ -21,6 +21,7 @@ class TestFilterToOutcomeCorrelation:
     ) -> None:
         """Test that filters targeting high-scoring teams correlate with over 2.5 goals."""
         user = await create_user(db_session, "test@example.com", "password123")
+        token = create_tokens(user)
 
         response = await client.post(
             "/api/v1/filters/",
@@ -32,7 +33,7 @@ class TestFilterToOutcomeCorrelation:
                 ],
                 "is_active": True,
             },
-            headers={"Authorization": f"Bearer {user.access_token}"},
+            headers={"Authorization": f"Bearer {token.access_token}"},
         )
         assert response.status_code == 201
         filter_id = response.json()["id"]
@@ -40,7 +41,7 @@ class TestFilterToOutcomeCorrelation:
         backtest_response = await client.post(
             f"/api/v1/filters/{filter_id}/backtest",
             json={"bet_type": "over_2_5", "seasons": [2024]},
-            headers={"Authorization": f"Bearer {user.access_token}"},
+            headers={"Authorization": f"Bearer {token.access_token}"},
         )
         assert backtest_response.status_code == 200
         data = backtest_response.json()
@@ -54,6 +55,7 @@ class TestFilterToOutcomeCorrelation:
     ) -> None:
         """Test that filters for good home form correlate with home wins."""
         user = await create_user(db_session, "test2@example.com", "password123")
+        token = create_tokens(user)
 
         response = await client.post(
             "/api/v1/filters/",
@@ -65,7 +67,7 @@ class TestFilterToOutcomeCorrelation:
                 ],
                 "is_active": True,
             },
-            headers={"Authorization": f"Bearer {user.access_token}"},
+            headers={"Authorization": f"Bearer {token.access_token}"},
         )
         assert response.status_code == 201
         filter_id = response.json()["id"]
@@ -73,7 +75,7 @@ class TestFilterToOutcomeCorrelation:
         backtest_response = await client.post(
             f"/api/v1/filters/{filter_id}/backtest",
             json={"bet_type": "home_win", "seasons": [2024]},
-            headers={"Authorization": f"Bearer {user.access_token}"},
+            headers={"Authorization": f"Bearer {token.access_token}"},
         )
         assert backtest_response.status_code == 200
         data = backtest_response.json()
@@ -85,6 +87,7 @@ class TestFilterToOutcomeCorrelation:
     ) -> None:
         """Test that restrictive filters return zero matches."""
         user = await create_user(db_session, "test3@example.com", "password123")
+        token = create_tokens(user)
 
         response = await client.post(
             "/api/v1/filters/",
@@ -96,7 +99,7 @@ class TestFilterToOutcomeCorrelation:
                 ],
                 "is_active": True,
             },
-            headers={"Authorization": f"Bearer {user.access_token}"},
+            headers={"Authorization": f"Bearer {token.access_token}"},
         )
         assert response.status_code == 201
         filter_id = response.json()["id"]
@@ -104,7 +107,7 @@ class TestFilterToOutcomeCorrelation:
         backtest_response = await client.post(
             f"/api/v1/filters/{filter_id}/backtest",
             json={"bet_type": "home_win", "seasons": [2024]},
-            headers={"Authorization": f"Bearer {user.access_token}"},
+            headers={"Authorization": f"Bearer {token.access_token}"},
         )
         assert backtest_response.status_code == 200
         data = backtest_response.json()
@@ -120,6 +123,7 @@ class TestBacktestDeterminism:
     ) -> None:
         """Test that running the same backtest twice returns same results."""
         user = await create_user(db_session, "test4@example.com", "password123")
+        token = create_tokens(user)
 
         response = await client.post(
             "/api/v1/filters/",
@@ -131,7 +135,7 @@ class TestBacktestDeterminism:
                 ],
                 "is_active": True,
             },
-            headers={"Authorization": f"Bearer {user.access_token}"},
+            headers={"Authorization": f"Bearer {token.access_token}"},
         )
         assert response.status_code == 201
         filter_id = response.json()["id"]
@@ -139,13 +143,13 @@ class TestBacktestDeterminism:
         backtest1 = await client.post(
             f"/api/v1/filters/{filter_id}/backtest",
             json={"bet_type": "over_2_5", "seasons": [2024]},
-            headers={"Authorization": f"Bearer {user.access_token}"},
+            headers={"Authorization": f"Bearer {token.access_token}"},
         )
 
         backtest2 = await client.post(
             f"/api/v1/filters/{filter_id}/backtest",
             json={"bet_type": "over_2_5", "seasons": [2024]},
-            headers={"Authorization": f"Bearer {user.access_token}"},
+            headers={"Authorization": f"Bearer {token.access_token}"},
         )
 
         assert backtest1.status_code == 200
@@ -163,6 +167,7 @@ class TestBacktestDeterminism:
     ) -> None:
         """Test that cached results are returned on repeated requests."""
         user = await create_user(db_session, "test5@example.com", "password123")
+        token = create_tokens(user)
 
         response = await client.post(
             "/api/v1/filters/",
@@ -174,7 +179,7 @@ class TestBacktestDeterminism:
                 ],
                 "is_active": True,
             },
-            headers={"Authorization": f"Bearer {user.access_token}"},
+            headers={"Authorization": f"Bearer {token.access_token}"},
         )
         assert response.status_code == 201
         filter_id = response.json()["id"]
@@ -182,13 +187,13 @@ class TestBacktestDeterminism:
         await client.post(
             f"/api/v1/filters/{filter_id}/backtest",
             json={"bet_type": "home_win", "seasons": [2024]},
-            headers={"Authorization": f"Bearer {user.access_token}"},
+            headers={"Authorization": f"Bearer {token.access_token}"},
         )
 
         second_response = await client.post(
             f"/api/v1/filters/{filter_id}/backtest",
             json={"bet_type": "home_win", "seasons": [2024]},
-            headers={"Authorization": f"Bearer {user.access_token}"},
+            headers={"Authorization": f"Bearer {token.access_token}"},
         )
 
         assert second_response.status_code == 200
@@ -269,12 +274,13 @@ class TestMCPAccess:
     ) -> None:
         """Test that MCP endpoint accepts valid tokens."""
         user = await create_user(db_session, "mcp_test@example.com", "password123")
+        token = create_tokens(user)
 
         response = await client.post(
             "/mcp",
             json={"jsonrpc": "2.0", "method": "initialize", "params": {}, "id": 1},
             headers={
-                "Authorization": f"Bearer {user.access_token}",
+                "Authorization": f"Bearer {token.access_token}",
                 "Accept": "text/event-stream",
             },
         )
@@ -289,6 +295,7 @@ class TestFilterValidation:
     ) -> None:
         """Test that validate endpoint returns estimated matches."""
         user = await create_user(db_session, "validate_test@example.com", "password123")
+        token = create_tokens(user)
 
         response = await client.post(
             "/api/v1/filters/validate",
@@ -299,7 +306,7 @@ class TestFilterValidation:
                 ],
                 "is_active": True,
             },
-            headers={"Authorization": f"Bearer {user.access_token}"},
+            headers={"Authorization": f"Bearer {token.access_token}"},
         )
 
         assert response.status_code == 200
@@ -312,6 +319,7 @@ class TestFilterValidation:
     ) -> None:
         """Test that validation rejects post-match fields."""
         user = await create_user(db_session, "validate_test2@example.com", "password123")
+        token = create_tokens(user)
 
         response = await client.post(
             "/api/v1/filters/validate",
@@ -322,7 +330,7 @@ class TestFilterValidation:
                 ],
                 "is_active": True,
             },
-            headers={"Authorization": f"Bearer {user.access_token}"},
+            headers={"Authorization": f"Bearer {token.access_token}"},
         )
 
         assert response.status_code == 200

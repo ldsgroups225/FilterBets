@@ -53,7 +53,12 @@ export function FixturesPage() {
             Analyze upcoming matches and explore historical performance.
           </p>
           <p className="text-xs text-muted-foreground/60 mt-1">
-            {TIER_STATS.tier1Count} Top 5 + {TIER_STATS.tier2Count} Major + Other leagues worldwide
+            {TIER_STATS.tier1Count}
+            {' '}
+            Top 5 +
+            {TIER_STATS.tier2Count}
+            {' '}
+            Major + Other leagues worldwide
           </p>
         </div>
         {hasActiveFilters && (
@@ -103,13 +108,13 @@ export function FixturesPage() {
                   <SelectItem value="all">All Tiers</SelectItem>
                   <SelectItem value="1">
                     <span className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500" />
+                      <span className="w-2 h-2 rounded-full bg-linear-to-r from-amber-500 to-orange-500" />
                       Top 5 European
                     </span>
                   </SelectItem>
                   <SelectItem value="2">
                     <span className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500" />
+                      <span className="w-2 h-2 rounded-full bg-linear-to-r from-blue-500 to-cyan-500" />
                       Major Leagues
                     </span>
                   </SelectItem>
@@ -170,25 +175,25 @@ export function FixturesPage() {
           <CardContent className="p-0">
             {isLoading
               ? (
-                <div className="p-8 space-y-4">
-                  {Array.from({ length: 6 }).map(() => (
-                    <Skeleton key={crypto.randomUUID()} className="h-16 w-full rounded-xl opacity-20" />
-                  ))}
-                </div>
-              )
-              : error
-                ? (
-                  <div className="p-20 text-center">
-                    <p className="text-destructive font-bold">Failed to load fixtures</p>
-                    <p className="text-xs text-muted-foreground mt-1">Please try again later</p>
+                  <div className="p-8 space-y-4">
+                    {Array.from({ length: 6 }).map(() => (
+                      <Skeleton key={crypto.randomUUID()} className="h-16 w-full rounded-xl opacity-20" />
+                    ))}
                   </div>
                 )
+              : error
+                ? (
+                    <div className="p-20 text-center">
+                      <p className="text-destructive font-bold">Failed to load fixtures</p>
+                      <p className="text-xs text-muted-foreground mt-1">Please try again later</p>
+                    </div>
+                  )
                 : (
-                  <FixturesTable
-                    fixtures={data?.items || []}
-                    onRowClick={f => navigate(`/fixtures/${f.id}`)}
-                  />
-                )}
+                    <FixturesTable
+                      fixtures={data?.items || []}
+                      onRowClick={f => navigate(`/fixtures/${f.id}`)}
+                    />
+                  )}
           </CardContent>
         </Card>
       </div>

@@ -198,8 +198,8 @@ class TestPreMatchScanner:
 
             assert isinstance(stats, ScanStats)
             assert stats.users_scanned >= 0
-            assert stats.filters_scanned >= 0
-            assert stats.fixtures_scanned >= 0
+            assert stats.filters_evaluated >= 0
+            assert stats.fixtures_checked >= 0
 
     @pytest.mark.asyncio
     async def test_run_full_scan_respects_max_notifications(

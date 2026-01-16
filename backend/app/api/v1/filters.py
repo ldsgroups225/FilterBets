@@ -17,13 +17,13 @@ from app.schemas.backtest import BacktestRequest, BacktestResponse
 from app.schemas.backtest_job import BacktestJobResponse
 from app.schemas.common import PaginatedResponse
 from app.schemas.filter import (
+    POST_MATCH_FIELDS,
+    PRE_MATCH_ONLY_FIELDS,
     FilterAlertsToggle,
     FilterCondition,
     FilterCreate,
     FilterResponse,
     FilterUpdate,
-    POST_MATCH_FIELDS,
-    PRE_MATCH_ONLY_FIELDS,
 )
 from app.schemas.fixture import FixtureResponse
 from app.services.backtest import BacktestService
@@ -238,6 +238,16 @@ async def run_filter_backtest(
     if not filter_obj:
         raise HTTPException(status_code=404, detail="Filter not found")
 
+    # Validate minimum 3 rules for backtesting
+    filter_rules = cast(list[dict[str, Any]], filter_obj.rules or [])
+    if len(filter_rules) < 3:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Backtesting requires at least 3 rules for meaningful analysis. "
+            f"Current filter has {len(filter_rules)} rule(s). "
+            f"Please add more conditions to your filter before running a backtest.",
+        )
+
     # If async mode, create job and dispatch to Celery
     if async_mode:
         from uuid import uuid4
@@ -370,6 +380,16 @@ async def run_pre_match_backtest(
     if not filter_obj:
         raise HTTPException(status_code=404, detail="Filter not found")
 
+    # Validate minimum 3 rules for backtesting
+    filter_rules = cast(list[dict[str, Any]], filter_obj.rules or [])
+    if len(filter_rules) < 3:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Backtesting requires at least 3 rules for meaningful analysis. "
+            f"Current filter has {len(filter_rules)} rule(s). "
+            f"Please add more conditions to your filter before running a backtest.",
+        )
+
     # Check if filter contains live rules (not allowed for pre-match backtest)
     live_rule_categories = ["live_stats", "team_state", "odds", "timing"]
     filter_rules = cast(list[dict[str, Any]], filter_obj.rules or [])
@@ -471,7 +491,7 @@ async def validate_filter(
     date_from: date | None = Query(None, description="Start date for match estimation"),
     date_to: date | None = Query(None, description="End date for match estimation"),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    _current_user: User = Depends(get_current_user),
 ) -> FilterValidationResponse:
     """Validate a filter without saving it.
 
@@ -509,9 +529,10 @@ async def validate_filter(
             )
 
         if field in POST_MATCH_FIELDS:
+            alternative = POST_MATCH_FIELDS[field].get("alternative") or "See documentation"
             errors.append(
                 f"Field '{field}' is post-match only and cannot be used for pre-match validation. "
-                f"Use pre-match alternatives: {PRE_MATCH_ONLY_FIELDS.get(field, 'See documentation')}"
+                f"Use pre-match alternatives: {alternative}"
             )
 
         if operator == "between" and not isinstance(value, list | tuple):

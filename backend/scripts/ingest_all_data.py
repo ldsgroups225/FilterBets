@@ -19,12 +19,11 @@ import json
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from sqlalchemy import text, JSON
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.config import get_settings
 
@@ -57,7 +56,7 @@ async def import_venues(session: AsyncSession, data_dir: Path) -> int:
 
     print("   Importing venues...")
     count = 0
-    with open(venue_file, "r", encoding="utf-8") as f:
+    with open(venue_file, encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
             await session.execute(
@@ -90,7 +89,7 @@ async def import_teams(session: AsyncSession, data_dir: Path) -> int:
 
     print("   Importing teams...")
     count = 0
-    with open(team_file, "r", encoding="utf-8") as f:
+    with open(team_file, encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
             await session.execute(
@@ -129,7 +128,7 @@ async def import_leagues(session: AsyncSession, data_dir: Path) -> int:
 
     print("   Importing leagues...")
     count = 0
-    with open(league_file, "r", encoding="utf-8") as f:
+    with open(league_file, encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
             await session.execute(
@@ -167,7 +166,7 @@ async def import_standings(session: AsyncSession, data_dir: Path) -> int:
 
     print("   Importing standings...")
     count = 0
-    with open(standing_file, "r", encoding="utf-8") as f:
+    with open(standing_file, encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
             await session.execute(
@@ -212,13 +211,12 @@ async def import_fixtures_base(session: AsyncSession, data_dir: Path) -> int:
 
     print("   Importing base fixtures...")
     count = 0
-    with open(fixture_file, "r", encoding="utf-8") as f:
+    with open(fixture_file, encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
             try:
                 home_score = int(row["homeTeamScore"]) if row.get("homeTeamScore") else None
                 away_score = int(row["awayTeamScore"]) if row.get("awayTeamScore") else None
-                total_goals = (home_score + away_score) if home_score and away_score else None
                 match_date_str = row.get("date", "")
                 match_date = datetime.strptime(match_date_str, "%Y-%m-%d %H:%M:%S") if match_date_str else None
 
@@ -269,17 +267,17 @@ async def import_processed_matches(session: AsyncSession, data_dir: Path) -> tup
     updated = 0
     batch_size = 500
     total_rows = 0
-    
-    with open(csv_file, "r", encoding="utf-8") as f:
+
+    with open(csv_file, encoding="utf-8") as f:
         reader = csv.DictReader(f)
         batch = []
         for row in reader:
             event_id = int(row["eventId"])
-            
+
             home_score = int(row["homeTeamScore"]) if row.get("homeTeamScore") else None
             away_score = int(row["awayTeamScore"]) if row.get("awayTeamScore") else None
             total_goals = (home_score + away_score) if home_score and away_score else None
-            
+
             features_metadata = {
                 "total_goals": total_goals,
                 "over_1_5": 1 if total_goals and total_goals > 1 else (0 if total_goals is not None else None),
@@ -325,14 +323,14 @@ async def import_processed_matches(session: AsyncSession, data_dir: Path) -> tup
                 "away_form_goals_conceded_10": float(row["away_form_goals_conceded_10"]) if row.get("away_form_goals_conceded_10") else None,
                 "away_form_clean_sheets_10": float(row["away_form_clean_sheets_10"]) if row.get("away_form_clean_sheets_10") else None,
             }
-            
+
             batch.append({
                 "event_id": event_id,
                 "home_team_score": home_score,
                 "away_team_score": away_score,
                 "features_metadata": json.dumps(features_metadata),
             })
-            
+
             if len(batch) >= batch_size:
                 for item in batch:
                     result = await session.execute(
@@ -345,16 +343,16 @@ async def import_processed_matches(session: AsyncSession, data_dir: Path) -> tup
                         """),
                         item
                     )
-                    if result.rowcount > 0:
+                    if result.rowcount > 0:  # type: ignore[attr-defined]
                         updated += 1
                     else:
                         created += 1
-                
+
                 await session.commit()
                 total_rows += len(batch)
                 print(f"      Processed {total_rows:,} records...")
                 batch = []
-        
+
         if batch:
             for item in batch:
                 result = await session.execute(
@@ -367,14 +365,14 @@ async def import_processed_matches(session: AsyncSession, data_dir: Path) -> tup
                     """),
                     item
                 )
-                if result.rowcount > 0:
+                if result.rowcount > 0:  # type: ignore[attr-defined]
                     updated += 1
                 else:
                     created += 1
-            
+
             await session.commit()
             total_rows += len(batch)
-    
+
     print(f"   ✅ Updated {updated:,} fixtures, {created:,} new")
     return (created, updated)
 
@@ -382,16 +380,16 @@ async def import_processed_matches(session: AsyncSession, data_dir: Path) -> tup
 async def get_db_stats(session: AsyncSession) -> dict:
     """Get database statistics."""
     stats = {}
-    
+
     for table in ["fixtures", "teams", "leagues", "venues", "standings"]:
         result = await session.execute(text(f"SELECT COUNT(*) FROM {table}"))
         stats[table] = result.scalar()
-    
+
     result = await session.execute(
         text("SELECT COUNT(*) FROM fixtures WHERE features_metadata IS NOT NULL")
     )
     stats["fixtures_with_features"] = result.scalar()
-    
+
     return stats
 
 
@@ -404,7 +402,7 @@ async def main():
     args = parser.parse_args()
 
     data_dir = Path(__file__).parent.parent.parent / "data"
-    
+
     print("🚀 FilterBets Data Import")
     print("=" * 50)
     print(f"Data directory: {data_dir}")
@@ -421,20 +419,20 @@ async def main():
             if args.step in ["all", "base"]:
                 if not args.dry_run:
                     await clear_database(session)
-                
+
                 print("\n📥 Step 1: Base Data")
                 print("-" * 30)
-                
-                v_count = await import_venues(session, data_dir)
-                t_count = await import_teams(session, data_dir)
-                l_count = await import_leagues(session, data_dir)
-                s_count = await import_standings(session, data_dir)
-                f_count = await import_fixtures_base(session, data_dir)
+
+                await import_venues(session, data_dir)
+                await import_teams(session, data_dir)
+                await import_leagues(session, data_dir)
+                await import_standings(session, data_dir)
+                await import_fixtures_base(session, data_dir)
 
             if args.step in ["all", "processed"]:
                 print("\n📥 Step 2: Processed Data (Features)")
                 print("-" * 30)
-                
+
                 c_count, u_count = await import_processed_matches(session, data_dir)
 
             if not args.dry_run:
@@ -443,7 +441,7 @@ async def main():
                 stats = await get_db_stats(session)
                 for table, count in stats.items():
                     print(f"   {table}: {count:,}")
-            
+
             if args.dry_run:
                 print("\n⚠️  DRY RUN COMPLETE - No changes made")
             else:

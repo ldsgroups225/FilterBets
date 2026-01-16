@@ -1,7 +1,7 @@
 """Celery tasks for team statistics calculation."""
 
 import logging
-from typing import Any, cast
+from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 

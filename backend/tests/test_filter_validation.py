@@ -4,10 +4,10 @@ import pytest
 from pydantic import ValidationError
 
 from app.schemas.filter import (
-    FilterCreate,
-    FilterUpdate,
     POST_MATCH_FIELDS,
     PRE_MATCH_ONLY_FIELDS,
+    FilterCreate,
+    FilterUpdate,
 )
 
 

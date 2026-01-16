@@ -1,7 +1,8 @@
 """Backtest service for evaluating filter strategies against historical data."""
 
 from datetime import datetime, timedelta
-from math import asin, exp, sqrt as math_sqrt
+from math import asin, exp
+from math import sqrt as math_sqrt
 from statistics import mean, median, stdev
 from typing import Any
 
@@ -592,7 +593,7 @@ class BacktestService:
         await self.db.commit()
 
     def calculate_kelly_criterion(
-        self, win_rate: float, avg_odds: float, total_bets: int
+        self, win_rate: float, avg_odds: float
     ) -> KellyCriterion:
         """Calculate Kelly Criterion for optimal stake sizing.
 
@@ -605,7 +606,6 @@ class BacktestService:
         Args:
             win_rate: Win rate as percentage (0-100)
             avg_odds: Average decimal odds
-            total_bets: Total number of bets placed
 
         Returns:
             KellyCriterion with calculated values
@@ -857,7 +857,7 @@ class BacktestService:
         Returns:
             AdvancedMetrics with all calculated values
         """
-        kelly = self.calculate_kelly_criterion(win_rate, avg_odds, total_bets)
+        kelly = self.calculate_kelly_criterion(win_rate, avg_odds)
         ev = self.calculate_expected_value(win_rate, avg_odds, total_bets)
         ci = self.calculate_confidence_interval(win_rate, total_bets)
         significance = self.calculate_statistical_significance(win_rate, total_bets)

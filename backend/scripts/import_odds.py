@@ -18,7 +18,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import pandas as pd
+import pandas as pd  # type: ignore
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
@@ -41,8 +41,8 @@ class OddsImporter:
             pool_pre_ping=True,
         )
         self.async_session = sessionmaker(
-            self.engine, class_=AsyncSession, expire_on_commit=False
-        )
+            bind=self.engine, class_=AsyncSession, expire_on_commit=False
+        )  # type: ignore
         self.stats = {"total": 0, "updated": 0, "skipped": 0, "errors": 0}
 
     async def import_from_csv(

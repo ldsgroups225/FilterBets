@@ -1,10 +1,10 @@
 """Tests for odds import script."""
 
-import pytest
-import pandas as pd
+import sys
 from pathlib import Path
 
-import sys
+import pandas as pd  # type: ignore
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
@@ -75,8 +75,8 @@ class TestBacktestWithOdds:
 
     def test_calculate_odds_stats(self):
         """Test odds statistics calculation."""
-        from app.services.backtest import BacktestService
         from app.schemas.backtest import OddsStats
+        from app.services.backtest import BacktestService
 
         service = BacktestService(None)
 
@@ -98,8 +98,8 @@ class TestBacktestWithOdds:
 
     def test_calculate_odds_stats_default_odds(self):
         """Test odds stats when using default odds (2.0)."""
-        from app.services.backtest import BacktestService
         from app.schemas.backtest import OddsStats
+        from app.services.backtest import BacktestService
 
         service = BacktestService(None)
 

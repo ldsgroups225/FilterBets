@@ -1,6 +1,5 @@
 """Tests for advanced backtest metrics calculations."""
 
-import pytest
 from app.services.backtest import BacktestService
 
 

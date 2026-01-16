@@ -8,8 +8,8 @@ from typing import Any
 
 import redis.asyncio as aioredis
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import selectinload
 from telegram import Bot
 from telegram.error import TelegramError
 
@@ -341,7 +341,7 @@ async def _send_filter_alert_async(
     retry_backoff=True,
     max_retries=3,
 )
-def send_backtest_report(self: Any, job_id: str) -> dict[str, Any]:
+def send_backtest_report(_self: Any, job_id: str) -> dict[str, Any]:
     """Send backtest report to user via Telegram."""
     return asyncio.run(_send_backtest_report_async(job_id))
 
@@ -386,7 +386,7 @@ async def _send_backtest_report_async(job_id: str) -> dict[str, Any]:
 
             # Extract result data
             res_data = job.result or {}
-            
+
             # Format message
             message = format_backtest_report(
                 filter_name=filter_obj.name,
@@ -431,7 +431,7 @@ async def _send_backtest_report_async(job_id: str) -> dict[str, Any]:
     max_retries=3,
 )
 def send_backtest_report_manual(
-    self: Any,
+    _self: Any,
     user_id: int,
     filter_id: int,
     bet_type: str,

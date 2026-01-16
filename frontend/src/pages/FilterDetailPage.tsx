@@ -254,29 +254,29 @@ export function FilterDetailPage() {
               <AnimatePresence mode="wait">
                 {backtestResult
                   ? (
-                    <motion.div
-                      key="results"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="space-y-6"
-                    >
-                      <BacktestResults result={backtestResult} />
-                      <Button variant="ghost" onClick={() => setBacktestResult(null)} className="rounded-xl font-bold text-primary hover:bg-primary/10">
-                        <IconHistory className="mr-2 h-4 w-4" />
-                        Run New Simulation
-                      </Button>
-                    </motion.div>
-                  )
+                      <motion.div
+                        key="results"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="space-y-6"
+                      >
+                        <BacktestResults result={backtestResult} />
+                        <Button variant="ghost" onClick={() => setBacktestResult(null)} className="rounded-xl font-bold text-primary hover:bg-primary/10">
+                          <IconHistory className="mr-2 h-4 w-4" />
+                          Run New Simulation
+                        </Button>
+                      </motion.div>
+                    )
                   : (
-                    <motion.div
-                      key="form"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                    >
-                      <BacktestForm onSubmit={handleRunBacktest} isLoading={isRunningBacktest} />
-                    </motion.div>
-                  )}
+                      <motion.div
+                        key="form"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                      >
+                        <BacktestForm onSubmit={handleRunBacktest} isLoading={isRunningBacktest} rulesCount={filter.rules.length} />
+                      </motion.div>
+                    )}
               </AnimatePresence>
             </CardContent>
           </Card>
