@@ -11,6 +11,8 @@ export async function getFixtures(filters?: FixtureFilters): Promise<FixtureList
     params.append('date_to', filters.date_to)
   if (filters?.league_id)
     params.append('league_id', filters.league_id.toString())
+  if (filters?.tier)
+    params.append('tier', filters.tier.toString())
   if (filters?.status_id)
     params.append('status_id', filters.status_id.toString())
   if (filters?.page)
@@ -39,5 +41,11 @@ export async function getUpcomingFixtures(days: number = 7): Promise<FixtureList
 // Get single fixture by ID
 export async function getFixture(id: number): Promise<Fixture> {
   const response = await apiClient.get<Fixture>(`/api/v1/fixtures/${id}`)
+  return response.data
+}
+
+// Get fixtures for specific tier
+export async function getFixturesByTier(tier: 1 | 2 | 3): Promise<FixtureListResponse> {
+  const response = await apiClient.get<FixtureListResponse>(`/api/v1/fixtures?tier=${tier}`)
   return response.data
 }
