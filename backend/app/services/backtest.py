@@ -1,6 +1,7 @@
 """Backtest service for evaluating filter strategies against historical data."""
 
 from datetime import datetime, timedelta
+from math import asin, exp, sqrt as math_sqrt
 from statistics import mean, median, stdev
 from typing import Any
 
@@ -11,15 +12,20 @@ from app.models.backtest_result import BacktestResult
 from app.models.filter import Filter
 from app.models.fixture import Fixture
 from app.schemas.backtest import (
+    AdvancedMetrics,
     BacktestAnalytics,
     BacktestRequest,
     BacktestResponse,
     BetType,
+    ConfidenceInterval,
     DrawdownInfo,
     EnhancedBacktestResponse,
+    ExpectedValue,
+    KellyCriterion,
     MonthlyBreakdown,
     OddsStats,
     ProfitPoint,
+    StatisticalSignificance,
     StreakInfo,
 )
 from app.services.filter_engine import FilterEngine
@@ -75,9 +81,17 @@ class BacktestService:
 
         if include_analytics:
             analytics = self._generate_analytics(results, fixtures)
+            avg_odds = response.avg_odds if response.avg_odds else 2.0
+            advanced_metrics = self.calculate_advanced_metrics(
+                win_rate=response.win_rate,
+                avg_odds=avg_odds,
+                total_bets=response.wins + response.losses,
+                roi=response.roi_percentage,
+            )
             enhanced_response = EnhancedBacktestResponse(
                 **response.model_dump(),
                 analytics=analytics,
+                advanced_metrics=advanced_metrics,
             )
             return enhanced_response
 
@@ -576,3 +590,299 @@ class BacktestService:
             delete(BacktestResult).where(BacktestResult.filter_id == filter_id)
         )
         await self.db.commit()
+
+    def calculate_kelly_criterion(
+        self, win_rate: float, avg_odds: float, total_bets: int
+    ) -> KellyCriterion:
+        """Calculate Kelly Criterion for optimal stake sizing.
+
+        Kelly Formula: Kelly % = W - (1-W)/Odds
+
+        Where:
+            W = probability of winning (as decimal, e.g., 0.52 for 52%)
+            Odds = decimal odds
+
+        Args:
+            win_rate: Win rate as percentage (0-100)
+            avg_odds: Average decimal odds
+            total_bets: Total number of bets placed
+
+        Returns:
+            KellyCriterion with calculated values
+        """
+        W = win_rate / 100.0
+        odds = avg_odds
+
+        expected_value = (W * odds) - 1
+
+        full_kelly = W - ((1 - W) / odds)
+
+        if expected_value <= 0:
+            full_kelly = max(0.0, -abs(full_kelly))
+        else:
+            full_kelly = max(0.0, min(1.0, full_kelly))
+
+        half_kelly = full_kelly / 2 if full_kelly > 0 else 0.0
+        quarter_kelly = full_kelly / 4 if full_kelly > 0 else 0.0
+
+        is_positive_edge = expected_value > 0
+
+        if expected_value > 0.05:
+            kelly_description = (
+                "High Kelly - strategy shows strong positive edge. "
+                "Consider using fractional Kelly for reduced volatility."
+            )
+        elif expected_value > 0:
+            kelly_description = (
+                "Moderate Kelly - positive edge detected. "
+                "Fractional Kelly (1/2 or 1/4) recommended for stability."
+            )
+        elif expected_value == 0:
+            kelly_description = (
+                "No edge - at breakeven point. Kelly is zero."
+            )
+        else:
+            kelly_description = (
+                "Negative edge - Kelly is negative. "
+                "Strategy does not have mathematical advantage at current odds."
+            )
+
+        return KellyCriterion(
+            kelly_fraction=round(full_kelly, 4),
+            half_kelly=round(half_kelly, 4),
+            quarter_kelly=round(quarter_kelly, 4),
+            recommended_stake=round(half_kelly * 100, 2),
+            is_positive_edge=is_positive_edge,
+            kelly_description=kelly_description,
+        )
+
+    def calculate_expected_value(
+        self, win_rate: float, avg_odds: float, total_bets: int
+    ) -> ExpectedValue:
+        """Calculate Expected Value metrics.
+
+        EV = (Win Rate * Odds - 1) per unit staked
+
+        Args:
+            win_rate: Win rate as percentage (0-100)
+            avg_odds: Average decimal odds
+            total_bets: Total number of bets placed
+
+        Returns:
+            ExpectedValue with calculated metrics
+        """
+        W = win_rate / 100.0
+        odds = avg_odds
+
+        ev_per_bet = (W * odds) - 1
+        ev_percentage = ev_per_bet * 100
+        total_ev = ev_per_bet * total_bets
+
+        breakeven_rate = (1 / odds) * 100
+        edge = win_rate - breakeven_rate
+
+        if ev_per_bet > 0:
+            z_score = ev_per_bet / max(0.01, (1 / total_bets) ** 0.5)
+            prob_profit = 0.5 * (1 + self._erf(z_score / (2 ** 0.5)))
+        else:
+            prob_profit = max(0.0, 1 - (abs(ev_per_bet) / 2))
+
+        return ExpectedValue(
+            expected_value_per_bet=round(ev_per_bet, 4),
+            expected_value_percentage=round(ev_percentage, 2),
+            total_expected_profit=round(total_ev, 2),
+            edge_over_breakeven=round(edge, 2),
+            probability_of_profit=round(min(1.0, max(0.0, prob_profit)), 2),
+        )
+
+    def _erf(self, x: float) -> float:
+        """Approximate error function for normal CDF calculation."""
+        sign = 1 if x >= 0 else -1
+        x = abs(x)
+        a1 = 0.254829592
+        a2 = -0.284496736
+        a3 = 1.421413741
+        a4 = -1.453152027
+        a5 = 1.061405429
+        p = 0.3275911
+
+        t = 1.0 / (1.0 + p * x)
+        y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * exp(-x * x)
+        return sign * y
+
+    def calculate_confidence_interval(
+        self, win_rate: float, total_bets: int, confidence: float = 0.95
+    ) -> ConfidenceInterval:
+        """Calculate confidence interval for win rate.
+
+        Uses normal approximation with standard error.
+
+        Args:
+            win_rate: Win rate as percentage (0-100)
+            total_bets: Total number of bets evaluated
+            confidence: Confidence level (default 0.95 for 95%)
+
+        Returns:
+            ConfidenceInterval with bounds
+        """
+
+        p = win_rate / 100.0
+        n = total_bets
+
+        if n == 0 or p == 0 or p == 1:
+            return ConfidenceInterval(
+                lower=win_rate, upper=win_rate, confidence_level=confidence
+            )
+
+        se = math_sqrt((p * (1 - p)) / n)
+        z = self._get_z_score(confidence)
+
+        margin = z * se * 100
+        lower = max(0.0, win_rate - margin)
+        upper = min(100.0, win_rate + margin)
+
+        return ConfidenceInterval(
+            lower=round(lower, 2),
+            upper=round(upper, 2),
+            confidence_level=confidence,
+        )
+
+    def _get_z_score(self, confidence: float) -> float:
+        """Get z-score for confidence level."""
+        if confidence >= 0.99:
+            return 2.576
+        elif confidence >= 0.95:
+            return 1.96
+        elif confidence >= 0.90:
+            return 1.645
+        return 1.96
+
+    def calculate_statistical_significance(
+        self, win_rate: float, total_bets: int, expected_win_rate: float = 50.0
+    ) -> StatisticalSignificance:
+        """Calculate statistical significance of win rate.
+
+        Tests if observed win rate is significantly different from
+        the expected rate (default 50% for even-money bets).
+
+        Args:
+            win_rate: Observed win rate as percentage
+            total_bets: Number of bets evaluated
+            expected_win_rate: Expected win rate under null hypothesis
+
+        Returns:
+            StatisticalSignificance with test results
+        """
+
+        n = total_bets
+        if n < 30:
+            return StatisticalSignificance(
+                p_value=1.0,
+                is_significant=False,
+                significance_level=0.05,
+                effect_size=None,
+                interpretation="Insufficient sample size for statistical testing (need 30+ bets)",
+            )
+
+        p_observed = win_rate / 100.0
+        p_expected = expected_win_rate / 100.0
+
+        if p_observed == p_expected:
+            return StatisticalSignificance(
+                p_value=1.0,
+                is_significant=False,
+                significance_level=0.05,
+                effect_size=0.0,
+                interpretation="Win rate equals expected rate",
+            )
+
+        se = math_sqrt((p_expected * (1 - p_expected)) / n)
+        if se == 0:
+            return StatisticalSignificance(
+                p_value=0.0,
+                is_significant=True,
+                significance_level=0.05,
+                effect_size=1.0,
+                interpretation="Perfect win rate - statistically significant",
+            )
+
+        z_score = (p_observed - p_expected) / se
+
+        p_value = 2 * (1 - self._normal_cdf(abs(z_score)))
+
+        effect_size = 2 * (asin(math_sqrt(p_observed)) - asin(math_sqrt(p_expected)))
+
+        is_significant = p_value < 0.05
+
+        if is_significant:
+            if p_observed > p_expected:
+                interpretation = (
+                    f"Statistically significant positive result (p={p_value:.4f}). "
+                    f"Win rate {win_rate:.1f}% exceeds expected {expected_win_rate:.1f}%."
+                )
+            else:
+                interpretation = (
+                    f"Statistically significant negative result (p={p_value:.4f}). "
+                    f"Win rate {win_rate:.1f}% below expected {expected_win_rate:.1f}%."
+                )
+        else:
+            interpretation = (
+                f"Result not statistically significant (p={p_value:.4f}). "
+                f"Cannot conclude win rate differs from {expected_win_rate:.1f}%."
+            )
+
+        return StatisticalSignificance(
+            p_value=round(p_value, 4),
+            is_significant=is_significant,
+            significance_level=0.05,
+            effect_size=round(abs(effect_size), 3),
+            interpretation=interpretation,
+        )
+
+    def _normal_cdf(self, x: float) -> float:
+        """Calculate cumulative distribution function of normal distribution."""
+        return 0.5 * (1 + self._erf(x / math_sqrt(2)))
+
+    def calculate_advanced_metrics(
+        self, win_rate: float, avg_odds: float, total_bets: int, roi: float
+    ) -> AdvancedMetrics:
+        """Calculate all advanced metrics for backtest results.
+
+        Args:
+            win_rate: Win rate as percentage (0-100)
+            avg_odds: Average decimal odds
+            total_bets: Total number of bets placed
+            roi: Return on investment percentage
+
+        Returns:
+            AdvancedMetrics with all calculated values
+        """
+        kelly = self.calculate_kelly_criterion(win_rate, avg_odds, total_bets)
+        ev = self.calculate_expected_value(win_rate, avg_odds, total_bets)
+        ci = self.calculate_confidence_interval(win_rate, total_bets)
+        significance = self.calculate_statistical_significance(win_rate, total_bets)
+
+        min_sample = max(30, int(100 / max(0.01, (win_rate / 100) * (1 - win_rate / 100))))
+        sample_sufficient = total_bets >= min_sample
+
+        risk_of_ruin = None
+        if kelly.kelly_fraction > 0:
+            risk_of_ruin = max(0.0, (1 - kelly.kelly_fraction) ** total_bets)
+
+        sharpe_ratio = None
+        sortino_ratio = None
+        if roi > 0 and total_bets > 0:
+            returns_std = max(0.01, abs(roi) / math_sqrt(total_bets))
+            sharpe_ratio = round(roi / (returns_std * math_sqrt(100)), 2) if returns_std > 0 else 0
+
+        return AdvancedMetrics(
+            kelly_criterion=kelly,
+            expected_value=ev,
+            win_rate_confidence_interval=ci,
+            statistical_significance=significance,
+            sample_size_sufficient=sample_sufficient,
+            minimum_sample_recommended=min_sample,
+            risk_of_ruin=round(risk_of_ruin, 4) if risk_of_ruin else None,
+            sharpe_ratio=sharpe_ratio,
+            sortino_ratio=sortino_ratio,
+        )

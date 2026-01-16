@@ -2,17 +2,23 @@
 
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import Any
+from typing import Any, Annotated
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi_mcp import FastApiMCP  # type: ignore[import-untyped]
+from fastapi_mcp.types import AuthConfig
+from jose import JWTError
 
 from app.api.v1 import api_router
 from app.config import get_settings
 from app.database import check_database_connection
+from app.utils.security import decode_token
 
 settings = get_settings()
+
+security = HTTPBearer()
 
 
 # OpenAPI tags metadata for endpoint grouping
@@ -119,12 +125,62 @@ app.add_middleware(
 # Include API v1 router
 app.include_router(api_router, prefix="/api/v1")
 
+
+async def authenticate_mcp_request(
+    request: Request,
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(security)] = None,
+) -> bool:
+    """Authentication dependency for MCP endpoints.
+
+    Validates JWT bearer tokens for MCP access.
+
+    Args:
+        request: The incoming request
+        credentials: HTTP authorization credentials
+
+    Returns:
+        True if authentication successful
+
+    Raises:
+        HTTPException: 401 if authentication fails
+    """
+    if credentials is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    try:
+        token = credentials.credentials
+        payload = decode_token(token)
+        user_id: int | None = payload.get("user_id")
+        token_type: str | None = payload.get("type")
+
+        if user_id is None or token_type != "access":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return True
+
+
 # Create and mount the MCP server
 # Best practices from official docs:
 # - Use descriptive name and description for LLM context
 # - Exclude dangerous operations (PUT/DELETE) for safety
 # - Include full response schemas for better LLM understanding
 # - Use HTTP transport (recommended over SSE)
+# - Add JWT authentication via auth_config
+
 mcp = FastApiMCP(
     app,
     name="FilterBets API",
@@ -143,6 +199,10 @@ mcp = FastApiMCP(
         "update_filter",
         "toggle_filter_alerts",
     ],
+    # JWT authentication configuration
+    auth_config=AuthConfig(
+        dependencies=[Depends(authenticate_mcp_request)],
+    ),
 )
 mcp.mount_http()
 

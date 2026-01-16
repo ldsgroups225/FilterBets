@@ -7,7 +7,6 @@ metrics like Kelly Criterion and Expected Value.
 
 from datetime import datetime
 from enum import Enum
-from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -138,9 +137,117 @@ class BacktestAnalytics(BaseModel):
     )
 
 
+class KellyCriterion(BaseModel):
+    """Kelly Criterion calculation for optimal stake sizing.
+
+    The Kelly Criterion maximizes expected logarithmic growth of bankroll.
+    Formula: Kelly % = W - (1-W)/Odds
+
+    Where:
+        W = probability of winning (win rate)
+        Odds = decimal odds
+    """
+
+    kelly_fraction: float = Field(
+        ..., ge=0, le=1, description="Full Kelly fraction (0-1)"
+    )
+    half_kelly: float = Field(
+        ..., ge=0, le=1, description="Half Kelly (more conservative)"
+    )
+    quarter_kelly: float = Field(
+        ..., ge=0, le=1, description="Quarter Kelly (most conservative)"
+    )
+    recommended_stake: float = Field(
+        ..., description="Recommended stake as percentage of bankroll"
+    )
+    is_positive_edge: bool = Field(
+        ..., description="Whether strategy has positive expected value"
+    )
+    kelly_description: str = Field(
+        ..., description="Human-readable interpretation of Kelly result"
+    )
+
+
+class ConfidenceInterval(BaseModel):
+    """Statistical confidence interval for a metric."""
+
+    lower: float = Field(..., description="Lower bound of confidence interval")
+    upper: float = Field(..., description="Upper bound of confidence interval")
+    confidence_level: float = Field(
+        ..., description="Confidence level (e.g., 0.95 for 95%)"
+    )
+
+
+class StatisticalSignificance(BaseModel):
+    """Statistical significance test results."""
+
+    p_value: float = Field(
+        ..., description="P-value from statistical test"
+    )
+    is_significant: bool = Field(
+        ..., description="Whether result is statistically significant (p < 0.05)"
+    )
+    significance_level: float = Field(
+        default=0.05, description="Significance threshold used"
+    )
+    effect_size: float | None = Field(
+        None, description="Cohen's h effect size for win rate difference"
+    )
+    interpretation: str = Field(
+        ..., description="Human-readable interpretation of significance test"
+    )
+
+
+class ExpectedValue(BaseModel):
+    """Expected Value analysis for betting strategy."""
+
+    expected_value_per_bet: float = Field(
+        ..., description="Expected value in stake units per bet"
+    )
+    expected_value_percentage: float = Field(
+        ..., description="Expected value as percentage of stake"
+    )
+    total_expected_profit: float = Field(
+        ..., description="Expected total profit over all bets"
+    )
+    edge_over_breakeven: float = Field(
+        ..., description="Edge over breakeven point"
+    )
+    probability_of_profit: float = Field(
+        ..., description="Estimated probability of being profitable"
+    )
+
+
+class AdvancedMetrics(BaseModel):
+    """Advanced statistical metrics for backtest results."""
+
+    kelly_criterion: KellyCriterion
+    expected_value: ExpectedValue
+    win_rate_confidence_interval: ConfidenceInterval
+    statistical_significance: StatisticalSignificance
+    sample_size_sufficient: bool = Field(
+        ..., description="Whether sample size is sufficient for statistical validity"
+    )
+    minimum_sample_recommended: int = Field(
+        ..., description="Minimum matches recommended for statistical significance"
+    )
+    risk_of_ruin: float | None = Field(
+        None, description="Estimated risk of ruin with infinite play"
+    )
+    sharpe_ratio: float | None = Field(
+        None, description="Risk-adjusted return metric"
+    )
+    sortino_ratio: float | None = Field(
+        None, description="Downside risk-adjusted return metric"
+    )
+
+
 class EnhancedBacktestResponse(BacktestResponse):
-    """Enhanced backtest response with analytics."""
+    """Enhanced backtest response with analytics and advanced metrics."""
 
     analytics: BacktestAnalytics | None = Field(
         None, description="Detailed analytics (optional)"
+    )
+    advanced_metrics: AdvancedMetrics | None = Field(
+        None, description="Advanced statistical metrics (Kelly Criterion, EV, etc.)"
     )
