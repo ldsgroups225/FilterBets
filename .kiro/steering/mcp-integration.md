@@ -197,6 +197,54 @@ The MCP tools are automatically generated from FastAPI endpoints. To see all ava
 4. Test MCP tools before deploying to production
 5. Require authentication for all MCP access
 
+## Known Issues
+
+### fastapi-mcp 0.4.0 Issues
+
+**Lifespan Events**
+- The MCP server may fail to start if lifespan event handlers are not properly configured
+- Workaround: Ensure all lifespan handlers are async and complete quickly
+
+**Accept Header Requirements**
+- Some MCP clients may not send proper `Accept: text/event-stream` headers
+- The server may return JSON errors instead of SSE stream
+- Workaround: Set explicit `Accept` header in client configuration
+
+**Connection Timeouts**
+- Long-running MCP sessions may timeout due to idle connection limits
+- Workaround: Implement periodic ping/pong or reconnect logic in client
+
+### Common Errors
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `401 Unauthorized` | Missing/invalid JWT token | Include `Authorization: Bearer <token>` header |
+| `404 Not Found` | Invalid endpoint path | Verify MCP server is mounted at `/mcp` |
+| `500 Internal Server Error` | Server startup failure | Check backend logs for details |
+| Empty response | SSE stream not configured | Ensure `Accept: text/event-stream` header |
+
+### Debugging Tips
+
+1. **Check server logs:**
+   ```bash
+   docker logs filterbets-backend --tail 50
+   ```
+
+2. **Test MCP endpoint directly:**
+   ```bash
+   curl -H "Accept: text/event-stream" http://localhost:8000/mcp
+   ```
+
+3. **Verify authentication:**
+   ```bash
+   curl -H "Authorization: Bearer $TOKEN" http://localhost:8000/api/v1/me
+   ```
+
+4. **Check process status:**
+   ```bash
+   docker ps | grep backend
+   ```
+
 ## References
 
 - [FastAPI-MCP Documentation](../fastapi_mcp/docs/)

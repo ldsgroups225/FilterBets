@@ -5,9 +5,43 @@ A football betting analytics platform with AI-powered predictions, backtesting, 
 ## Features
 
 - **Pre-Match Scanner** - Automated match analysis with customizable filter strategies
-- **Backtesting Engine** - Test strategies against historical data
+- **Backtesting Engine** - Test strategies against historical data with advanced metrics
 - **Telegram Notifications** - Real-time alerts when matches meet filter criteria
 - **Value Bet Detection** - AI-powered identification of betting opportunities
+- **MCP Integration** - API accessible via Model Context Protocol for AI assistants
+
+## Current Status
+
+### Latest Changes (v1.2.0)
+
+**Phase 1: Data Quality**
+- ✅ Added look-ahead bias prevention with `POST_MATCH_FIELDS` validation
+- ✅ Added real odds support with `OddsStats` schema
+- ✅ Created odds import script (`backend/scripts/import_odds.py`)
+
+**Phase 2: Bug Fixes**
+- ✅ Fixed Greenlet/Session errors with eager loading
+- ✅ Fixed Celery worker and Telegram bot container health
+
+**Phase 3: Features**
+- ✅ Added JWT authentication to FastAPI-MCP
+- ✅ Added advanced backtest metrics (Kelly Criterion, EV, Confidence Intervals, Statistical Significance)
+- ✅ Added filter validation endpoint (`POST /api/v1/filters/validate`)
+- ✅ New documentation: `docs/backtest-metrics.md`
+
+**Phase 4: In Progress**
+- 🔄 Premier League data import script
+- 🔄 Integration tests
+- 📋 Documentation updates
+
+### Quick Stats
+
+| Metric | Value |
+|--------|-------|
+| Fixtures in DB | 66,836 |
+| Available in CSV | 83,185 |
+| Premier League matches | 3,148 |
+| Test Coverage | 44% |
 
 ## Tech Stack
 
