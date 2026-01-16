@@ -222,7 +222,7 @@ export function FilterDetailPage() {
             <CardContent className="space-y-4">
               <div className="grid gap-3">
                 {filter.rules.map((rule, idx) => (
-                  <div key={rule.value.toString()} className="group p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/20 transition-all flex items-center gap-4">
+                  <div key={rule.field} className="group p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/20 transition-all flex items-center gap-4">
                     <div className="h-8 w-8 rounded-xl bg-white/5 flex items-center justify-center text-[10px] font-black opacity-30 border border-white/5">
                       {idx + 1}
                     </div>
@@ -274,7 +274,7 @@ export function FilterDetailPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                       >
-                        <BacktestForm onSubmit={handleRunBacktest} isLoading={isRunningBacktest} />
+                        <BacktestForm onSubmit={handleRunBacktest} isLoading={isRunningBacktest} rulesCount={filter.rules.length} />
                       </motion.div>
                     )}
               </AnimatePresence>

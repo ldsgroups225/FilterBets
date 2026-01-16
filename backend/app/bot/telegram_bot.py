@@ -4,8 +4,7 @@ import logging
 from typing import Any
 
 from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
@@ -20,7 +19,7 @@ settings = get_settings()
 
 # Create async database session factory for bot
 async_engine = create_async_engine(settings.database_url, echo=False)
-AsyncSessionLocal = sessionmaker(
+AsyncSessionLocal = async_sessionmaker(
     async_engine, class_=AsyncSession, expire_on_commit=False
 )
 
@@ -28,7 +27,7 @@ AsyncSessionLocal = sessionmaker(
 async def get_db() -> AsyncSession:
     """Get database session for bot handlers."""
     session = AsyncSessionLocal()
-    return session  # type: ignore[return-value]  # noqa: PGH003
+    return session
 
 
 async def start_with_token(

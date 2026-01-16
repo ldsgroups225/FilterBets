@@ -14,6 +14,36 @@ The MCP server is configured in `backend/app/main.py` with the following best pr
 - Mounted at `/mcp` endpoint
 - Provides better session management and connection handling
 
+### Authentication
+
+The MCP server requires JWT authentication for all requests:
+
+```python
+auth_config=AuthConfig(
+    dependencies=[Depends(authenticate_mcp_request)],
+)
+```
+
+**Authentication Requirements:**
+- Include `Authorization: Bearer <token>` header in MCP requests
+- Tokens must be valid JWT access tokens from `/api/v1/auth/login`
+- Unauthorized requests receive 401 response
+
+**Example MCP Client Configuration:**
+
+```json
+{
+  "mcpServers": {
+    "filterbets": {
+      "url": "http://localhost:8000/mcp",
+      "headers": {
+        "Authorization": "Bearer your-jwt-token-here"
+      }
+    }
+  }
+}
+```
+
 ### Server Metadata
 
 ```python
@@ -103,11 +133,29 @@ Benefits:
 
 ## Testing the MCP Server
 
+### Authentication
+
+All MCP requests require JWT authentication:
+
+```bash
+# Get a token first
+TOKEN=$(curl -s -X POST "http://localhost:8000/api/v1/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"your-password"}' | jq -r '.access_token')
+
+# Use token in MCP requests
+curl -H "Authorization: Bearer $TOKEN" \
+  -H "Accept: text/event-stream" \
+  http://localhost:8000/mcp
+```
+
 ### Check MCP Endpoint
 
 ```bash
 curl -H "Accept: text/event-stream" http://localhost:8000/mcp
 ```
+
+Without authentication, requests will receive 401 Unauthorized.
 
 ### View Available Tools
 
@@ -132,6 +180,7 @@ The MCP tools are automatically generated from FastAPI endpoints. To see all ava
 1. Use the MCP server for testing endpoints after implementing features
 2. Rely on the read-only tools for data retrieval and analysis
 3. Use the API directly for write operations (outside MCP)
+4. Always include JWT token in MCP client configuration
 
 ### For Development
 
@@ -146,6 +195,55 @@ The MCP tools are automatically generated from FastAPI endpoints. To see all ava
 2. Exclude sensitive endpoints (auth, admin operations)
 3. Use `describe_all_responses=True` to document error cases
 4. Test MCP tools before deploying to production
+5. Require authentication for all MCP access
+
+## Known Issues
+
+### fastapi-mcp 0.4.0 Issues
+
+**Lifespan Events**
+- The MCP server may fail to start if lifespan event handlers are not properly configured
+- Workaround: Ensure all lifespan handlers are async and complete quickly
+
+**Accept Header Requirements**
+- Some MCP clients may not send proper `Accept: text/event-stream` headers
+- The server may return JSON errors instead of SSE stream
+- Workaround: Set explicit `Accept` header in client configuration
+
+**Connection Timeouts**
+- Long-running MCP sessions may timeout due to idle connection limits
+- Workaround: Implement periodic ping/pong or reconnect logic in client
+
+### Common Errors
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `401 Unauthorized` | Missing/invalid JWT token | Include `Authorization: Bearer <token>` header |
+| `404 Not Found` | Invalid endpoint path | Verify MCP server is mounted at `/mcp` |
+| `500 Internal Server Error` | Server startup failure | Check backend logs for details |
+| Empty response | SSE stream not configured | Ensure `Accept: text/event-stream` header |
+
+### Debugging Tips
+
+1. **Check server logs:**
+   ```bash
+   docker logs filterbets-backend --tail 50
+   ```
+
+2. **Test MCP endpoint directly:**
+   ```bash
+   curl -H "Accept: text/event-stream" http://localhost:8000/mcp
+   ```
+
+3. **Verify authentication:**
+   ```bash
+   curl -H "Authorization: Bearer $TOKEN" http://localhost:8000/api/v1/me
+   ```
+
+4. **Check process status:**
+   ```bash
+   docker ps | grep backend
+   ```
 
 ## References
 

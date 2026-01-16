@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFixtures } from '@/hooks/useFixtures'
+import { TIER_STATS } from '@/lib/leagueTiers'
 
 export function FixturesPage() {
   const navigate = useNavigate()
@@ -39,7 +40,7 @@ export function FixturesPage() {
     setFilters({ page: 1, per_page: 20 })
   }
 
-  const hasActiveFilters = filters.date_from || filters.date_to || filters.league_id || filters.status_id
+  const hasActiveFilters = filters.date_from || filters.date_to || filters.league_id || filters.tier || filters.status_id
 
   return (
     <div className="space-y-10">
@@ -50,6 +51,14 @@ export function FixturesPage() {
           </h1>
           <p className="text-muted-foreground mt-2 font-medium">
             Analyze upcoming matches and explore historical performance.
+          </p>
+          <p className="text-xs text-muted-foreground/60 mt-1">
+            {TIER_STATS.tier1Count}
+            {' '}
+            Top 5 +
+            {TIER_STATS.tier2Count}
+            {' '}
+            Major + Other leagues worldwide
           </p>
         </div>
         {hasActiveFilters && (
@@ -67,7 +76,7 @@ export function FixturesPage() {
       {/* Filters Card */}
       <Card className="border-white/5 bg-white/2">
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             <div className="space-y-2.5">
               <Label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground opacity-70 ml-1">Date From</Label>
               <Input
@@ -85,6 +94,38 @@ export function FixturesPage() {
                 onChange={e => setFilters(prev => ({ ...prev, date_to: e.target.value || undefined, page: 1 }))}
                 className="rounded-xl border-white/10 bg-white/5 focus:ring-primary/20"
               />
+            </div>
+            <div className="space-y-2.5">
+              <Label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground opacity-70 ml-1">Tier</Label>
+              <Select
+                value={filters.tier?.toString() || 'all'}
+                onValueChange={v => setFilters(prev => ({ ...prev, tier: v === 'all' ? undefined : Number(v) as 1 | 2 | 3, page: 1 }))}
+              >
+                <SelectTrigger className="rounded-xl border-white/10 bg-white/5">
+                  <SelectValue placeholder="All Tiers" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-white/10 glass-dark">
+                  <SelectItem value="all">All Tiers</SelectItem>
+                  <SelectItem value="1">
+                    <span className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-linear-to-r from-amber-500 to-orange-500" />
+                      Top 5 European
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="2">
+                    <span className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-linear-to-r from-blue-500 to-cyan-500" />
+                      Major Leagues
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="3">
+                    <span className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-white/30" />
+                      Other Leagues
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2.5">
               <Label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground opacity-70 ml-1">League</Label>
@@ -114,7 +155,7 @@ export function FixturesPage() {
                   <SelectItem value="all">All Statuses</SelectItem>
                   <SelectItem value="1">Scheduled</SelectItem>
                   <SelectItem value="2">Live</SelectItem>
-                  <SelectItem value="3">Finished</SelectItem>
+                  <SelectItem value="28">Finished</SelectItem>
                 </SelectContent>
               </Select>
             </div>

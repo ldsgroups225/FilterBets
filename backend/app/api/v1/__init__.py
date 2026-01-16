@@ -8,6 +8,7 @@ from app.api.v1 import (
     filters,
     fixtures,
     leagues,
+    live_scanner,
     notifications,
     scanner,
     teams,
@@ -26,3 +27,4 @@ api_router.include_router(filters.router)
 api_router.include_router(backtest.router)
 api_router.include_router(notifications.router)
 api_router.include_router(scanner.router)
+api_router.include_router(live_scanner.router)

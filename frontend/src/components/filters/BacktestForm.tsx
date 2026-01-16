@@ -1,6 +1,7 @@
 import type { BacktestRequest, BetType } from '@/types/backtest'
-import { IconChartBar } from '@tabler/icons-react'
+import { IconAlertTriangle, IconChartBar } from '@tabler/icons-react'
 import { useState } from 'react'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -16,7 +17,10 @@ import {
 interface BacktestFormProps {
   onSubmit: (data: BacktestRequest) => void
   isLoading?: boolean
+  rulesCount?: number // Number of rules in the filter
 }
+
+const MIN_RULES_FOR_BACKTEST = 3
 
 const BET_TYPES: Array<{ value: BetType, label: string }> = [
   { value: 'home_win', label: 'Home Win' },
@@ -28,11 +32,13 @@ const BET_TYPES: Array<{ value: BetType, label: string }> = [
 
 const AVAILABLE_SEASONS = [2020, 2021, 2022, 2023, 2024, 2025]
 
-export function BacktestForm({ onSubmit, isLoading = false }: BacktestFormProps) {
+export function BacktestForm({ onSubmit, isLoading = false, rulesCount = 0 }: BacktestFormProps) {
   const [betType, setBetType] = useState<BetType>('home_win')
   const [selectedSeasons, setSelectedSeasons] = useState<number[]>([2024, 2025])
   const [stake, setStake] = useState<number>(10)
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const hasEnoughRules = rulesCount >= MIN_RULES_FOR_BACKTEST
 
   const handleSeasonToggle = (season: number) => {
     if (selectedSeasons.includes(season)) {
@@ -54,6 +60,10 @@ export function BacktestForm({ onSubmit, isLoading = false }: BacktestFormProps)
 
     if (stake <= 0) {
       newErrors.stake = 'Stake must be greater than 0'
+    }
+
+    if (!hasEnoughRules) {
+      newErrors.rules = `Minimum ${MIN_RULES_FOR_BACKTEST} rules required for backtesting`
     }
 
     setErrors(newErrors)
@@ -86,6 +96,36 @@ export function BacktestForm({ onSubmit, isLoading = false }: BacktestFormProps)
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {/* Minimum rules warning */}
+        {!hasEnoughRules && (
+          <Alert variant="destructive" className="mb-6 border-amber-500/30 bg-amber-500/10">
+            <IconAlertTriangle className="h-4 w-4 text-amber-500" />
+            <AlertTitle className="text-amber-500 font-bold">Minimum Rules Required</AlertTitle>
+            <AlertDescription className="text-amber-500/80">
+              Backtesting requires at least
+              {' '}
+              <strong>
+                {MIN_RULES_FOR_BACKTEST}
+                {' '}
+                rules
+              </strong>
+              {' '}
+              for meaningful analysis.
+              Your filter currently has
+              {' '}
+              <strong>
+                {rulesCount}
+                {' '}
+                rule
+                {rulesCount !== 1 ? 's' : ''}
+              </strong>
+              .
+              <br />
+              Please add more conditions to your filter before running a backtest.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Bet Type */}
           <div className="space-y-2">
@@ -168,8 +208,16 @@ export function BacktestForm({ onSubmit, isLoading = false }: BacktestFormProps)
           </div>
 
           {/* Submit Button */}
-          <Button type="submit" disabled={isLoading} className="w-full">
-            {isLoading ? 'Running Backtest...' : 'Run Backtest'}
+          <Button
+            type="submit"
+            disabled={isLoading || !hasEnoughRules}
+            className="w-full"
+          >
+            {isLoading
+              ? 'Running Backtest...'
+              : !hasEnoughRules
+                  ? `Add ${MIN_RULES_FOR_BACKTEST - rulesCount} More Rule${MIN_RULES_FOR_BACKTEST - rulesCount !== 1 ? 's' : ''}`
+                  : 'Run Backtest'}
           </Button>
         </form>
       </CardContent>

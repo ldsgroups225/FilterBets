@@ -13,22 +13,21 @@ import argparse
 import asyncio
 import sys
 from pathlib import Path
-from typing import List
 
-import pandas as pd
+# Add backend to path before other imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+import pandas as pd  # type: ignore
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-# Add backend to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
 from app.config import get_settings
-
-settings = get_settings()
 from app.models.fixture import Fixture
 from app.models.league import League
 from app.models.team import Team
+
+settings = get_settings()
 
 
 class DataImporter:
@@ -37,15 +36,15 @@ class DataImporter:
     def __init__(self, db_url: str, max_workers: int = 5):
         # Create engine with pool settings optimized for concurrent operations
         self.engine = create_async_engine(
-            db_url, 
+            db_url,
             echo=False,
             pool_size=max_workers + 2,  # Extra connections for overhead
             max_overflow=max_workers * 2,
             pool_pre_ping=True,
         )
         self.async_session = sessionmaker(
-            self.engine, class_=AsyncSession, expire_on_commit=False
-        )
+            bind=self.engine, class_=AsyncSession, expire_on_commit=False
+        )  # type: ignore
         self.data_dir = Path(__file__).parent.parent.parent / "data" / "processed"
         self.max_workers = max_workers
 
@@ -94,20 +93,20 @@ class DataImporter:
         # Process batches concurrently
         semaphore = asyncio.Semaphore(self.max_workers)
         tasks = []
-        
+
         async def process_with_semaphore(batch_idx, batch_data):
             async with semaphore:
                 return await self._process_batch(batch_idx, batch_data, dry_run, len(df))
-        
+
         for batch_idx, batch_data in batches:
             task = asyncio.create_task(process_with_semaphore(batch_idx, batch_data))
             tasks.append(task)
 
         # Wait for all tasks to complete and aggregate results
         batch_results = await asyncio.gather(*tasks, return_exceptions=True)
-        
+
         for result in batch_results:
-            if isinstance(result, Exception):
+            if isinstance(result, BaseException):
                 print(f"❌ Batch processing error: {result}")
                 stats["errors"] += 1
             else:
@@ -129,22 +128,22 @@ class DataImporter:
         try:
             async with self.async_session() as session:
                 # Pre-load all teams and leagues needed for this batch to reduce queries
-                team_ids = set(batch["homeTeamId"].dropna().astype(int).tolist() + 
+                team_ids = set(batch["homeTeamId"].dropna().astype(int).tolist() +
                              batch["awayTeamId"].dropna().astype(int).tolist())
                 league_ids = set(batch["leagueId"].dropna().astype(int).tolist())
-                
+
                 # Fetch teams
                 teams_result = await session.execute(
                     select(Team).where(Team.id.in_(team_ids))
                 )
                 teams = {team.id: team for team in teams_result.scalars().all()}
-                
+
                 # Fetch leagues
                 leagues_result = await session.execute(
                     select(League).where(League.id.in_(league_ids))
                 )
                 leagues = {league.id: league for league in leagues_result.scalars().all()}
-                
+
                 # Fetch existing fixtures in this batch
                 event_ids = batch["eventId"].dropna().astype(int).tolist()
                 fixtures_result = await session.execute(
@@ -156,7 +155,7 @@ class DataImporter:
                 for _, row in batch.iterrows():
                     try:
                         event_id = int(row["eventId"])
-                        
+
                         if event_id in existing_fixtures:
                             # Update existing fixture
                             fixture = existing_fixtures[event_id]
@@ -250,7 +249,7 @@ class DataImporter:
 
             return fixture
 
-        except (KeyError, ValueError, TypeError) as e:
+        except (KeyError, ValueError, TypeError):
             return None
 
     def _extract_features(self, row: pd.Series) -> dict:
@@ -373,12 +372,12 @@ async def main():
         # Run import
         import time
         start_time = time.time()
-        
+
         stats = await importer.import_from_csv(
             batch_size=args.batch_size,
             dry_run=args.dry_run
         )
-        
+
         elapsed_time = time.time() - start_time
 
         # Print results
@@ -400,7 +399,7 @@ async def main():
 
             # Get final stats
             db_stats = await importer.get_import_stats()
-            print(f"\n📈 Database Stats:")
+            print("\n📈 Database Stats:")
             print(f"   Total fixtures: {db_stats['total_fixtures']:,}")
             print(f"   With features: {db_stats['fixtures_with_features']:,}")
             print(f"   Coverage: {db_stats['coverage_pct']}%")

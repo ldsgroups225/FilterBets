@@ -3,16 +3,18 @@
 import asyncio
 import logging
 import time
+from datetime import datetime
 from typing import Any
 
 import redis.asyncio as aioredis
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import selectinload
 from telegram import Bot
 from telegram.error import TelegramError
 
 from app.config import get_settings
+from app.models.backtest_job import BacktestJob
 from app.models.filter import Filter
 from app.models.filter_match import FilterMatch
 from app.models.fixture import Fixture
@@ -25,7 +27,7 @@ settings = get_settings()
 
 # Create async database session factory for tasks
 async_engine = create_async_engine(settings.database_url, echo=False)
-AsyncSessionLocal = sessionmaker(
+AsyncSessionLocal = async_sessionmaker(
     async_engine, class_=AsyncSession, expire_on_commit=False
 )
 
@@ -53,7 +55,7 @@ class RateLimiter:
         Returns:
             True if token acquired, False if rate limited
         """
-        redis = await aioredis.from_url(
+        redis = await aioredis.from_url(  # type: ignore[no-untyped-call]
             self.redis_url, encoding="utf-8", decode_responses=True
         )
 
@@ -131,7 +133,43 @@ def format_notification_message(
     return "\n".join(message_lines)
 
 
-@celery_app.task(
+def format_backtest_report(
+    filter_name: str,
+    total_matches: int,
+    win_rate: float,
+    roi: float,
+    total_profit: float,
+    wins: int,
+    losses: int,
+    pushes: int,
+    bet_type: str,
+    seasons: str,
+) -> str:
+    """Format backtest results into Telegram notification message."""
+    win_rate_color = "🟢" if win_rate >= 50 else "🟡" if win_rate >= 40 else "🔴"
+    roi_color = "📈" if roi > 0 else "📉"
+
+    message_lines = [
+        "📊 *FilterBets Backtest Report*\n",
+        f"Strategy: *{filter_name}*",
+        f"Bet Type: `{bet_type}`",
+        f"Seasons: `{seasons}`\n",
+        "🏁 *Overall Results:*",
+        f"• Total matches: {total_matches}",
+        f"{win_rate_color} Win rate: {win_rate:.1f}%",
+        f"{roi_color} ROI: {roi:+.2f}%",
+        f"• Total Profit: {total_profit:+.2f} units\n",
+        "⚖️ *Distribution:*",
+        f"✅ Wins: {wins}",
+        f"❌ Losses: {losses}",
+        f"🔄 Pushes: {pushes}\n",
+        "🔗 [View Full Analytics](https://filterbets.com/filters)",
+    ]
+
+    return "\n".join(message_lines)
+
+
+@celery_app.task(  # type: ignore[untyped-decorator]
     name="app.tasks.notification_tasks.send_filter_alert",
     bind=True,
     autoretry_for=(TelegramError, ConnectionError),
@@ -186,9 +224,11 @@ async def _send_filter_alert_async(
                 logger.info(f"Notification already sent for FilterMatch {filter_match_id}")
                 return {"status": "skipped", "message": "Already sent"}
 
-            # Get related filter
+            # Get related filter with user eagerly loaded
             filter_result = await db.execute(
-                select(Filter).where(Filter.id == filter_match.filter_id)
+                select(Filter)
+                .where(Filter.id == filter_match.filter_id)
+                .options(selectinload(Filter.user))
             )
             filter_obj = filter_result.scalar_one_or_none()
 
@@ -247,7 +287,7 @@ async def _send_filter_alert_async(
                 filter_name=filter_obj.name,
                 home_team=home_team.name,
                 away_team=away_team.name,
-                league_name=league.name,
+                league_name=league.league_name,
                 match_date=fixture.match_date.strftime("%b %d, %Y at %H:%M UTC"),
                 match_url=match_url,
             )
@@ -263,7 +303,7 @@ async def _send_filter_alert_async(
 
             # Update filter_match as sent
             filter_match.notification_sent = True
-            filter_match.notification_sent_at = asyncio.get_event_loop().time()
+            filter_match.notification_sent_at = datetime.utcnow()
             await db.commit()
 
             logger.info(
@@ -291,4 +331,176 @@ async def _send_filter_alert_async(
             if filter_match:
                 filter_match.notification_error = str(e)[:500]
                 await db.commit()
+            return {"status": "error", "message": str(e)}
+
+
+@celery_app.task(  # type: ignore[untyped-decorator]
+    name="app.tasks.notification_tasks.send_backtest_report",
+    bind=True,
+    autoretry_for=(TelegramError, ConnectionError),
+    retry_backoff=True,
+    max_retries=3,
+)
+def send_backtest_report(_self: Any, job_id: str) -> dict[str, Any]:
+    """Send backtest report to user via Telegram."""
+    return asyncio.run(_send_backtest_report_async(job_id))
+
+
+async def _send_backtest_report_async(job_id: str) -> dict[str, Any]:
+    """Async implementation of backtest report notification."""
+    from uuid import UUID
+
+    async with AsyncSessionLocal() as db:
+        try:
+            # Get job with user eagerly loaded
+            job_uuid = UUID(job_id)
+            result = await db.execute(
+                select(BacktestJob)
+                .where(BacktestJob.job_id == job_uuid)
+                .options(selectinload(BacktestJob.user))
+            )
+            job = result.scalar_one_or_none()
+
+            if not job:
+                return {"status": "error", "message": "Job not found"}
+
+            if job.status != "completed":
+                return {"status": "error", "message": "Job not completed"}
+
+            # Get user and filter
+            from app.models.user import User
+
+            user_result = await db.execute(select(User).where(User.id == job.user_id))
+            user = user_result.scalar_one_or_none()
+
+            filter_result = await db.execute(
+                select(Filter).where(Filter.id == job.filter_id)
+            )
+            filter_obj = filter_result.scalar_one_or_none()
+
+            if not user or not user.telegram_chat_id or not user.telegram_verified:
+                return {"status": "skipped", "message": "Telegram not linked"}
+
+            if not filter_obj:
+                return {"status": "error", "message": "Filter not found"}
+
+            # Extract result data
+            res_data = job.result or {}
+
+            # Format message
+            message = format_backtest_report(
+                filter_name=filter_obj.name,
+                total_matches=res_data.get("total_matches", 0),
+                win_rate=res_data.get("win_rate", 0),
+                roi=res_data.get("roi_percentage", 0),
+                total_profit=res_data.get("total_profit", 0),
+                wins=res_data.get("wins", 0),
+                losses=res_data.get("losses", 0),
+                pushes=res_data.get("pushes", 0),
+                bet_type=job.bet_type,
+                seasons=job.seasons,
+            )
+
+            # Rate limiting
+            rate_limiter = RateLimiter(settings.redis_url)
+            if not await rate_limiter.acquire():
+                await asyncio.sleep(2.0)
+                await rate_limiter.acquire()
+
+            # Send via Telegram
+            bot = Bot(token=settings.telegram_bot_token)
+            await bot.send_message(
+                chat_id=user.telegram_chat_id,
+                text=message,
+                parse_mode="Markdown",
+            )
+
+            logger.info(f"Sent backtest report for job {job_id} to user {user.id}")
+            return {"status": "success"}
+
+        except Exception as e:
+            logger.error(f"Error sending backtest report: {e}")
+            return {"status": "error", "message": str(e)}
+
+
+@celery_app.task(  # type: ignore[untyped-decorator]
+    name="app.tasks.notification_tasks.send_backtest_report_manual",
+    bind=True,
+    autoretry_for=(TelegramError, ConnectionError),
+    retry_backoff=True,
+    max_retries=3,
+)
+def send_backtest_report_manual(
+    _self: Any,
+    user_id: int,
+    filter_id: int,
+    bet_type: str,
+    seasons: list[int],
+    result_data: dict[str, Any],
+) -> dict[str, Any]:
+    """Send backtest report to user via Telegram (manual trigger)."""
+    return asyncio.run(
+        _send_backtest_report_manual_async(
+            user_id, filter_id, bet_type, seasons, result_data
+        )
+    )
+
+
+async def _send_backtest_report_manual_async(
+    user_id: int,
+    filter_id: int,
+    bet_type: str,
+    seasons: list[int],
+    result_data: dict[str, Any],
+) -> dict[str, Any]:
+    """Async implementation of manual backtest report notification."""
+    async with AsyncSessionLocal() as db:
+        try:
+            from app.models.user import User
+
+            user_result = await db.execute(select(User).where(User.id == user_id))
+            user = user_result.scalar_one_or_none()
+
+            filter_result = await db.execute(select(Filter).where(Filter.id == filter_id))
+            filter_obj = filter_result.scalar_one_or_none()
+
+            if not user or not user.telegram_chat_id or not user.telegram_verified:
+                return {"status": "skipped", "message": "Telegram not linked"}
+
+            if not filter_obj:
+                return {"status": "error", "message": "Filter not found"}
+
+            # Format message
+            message = format_backtest_report(
+                filter_name=filter_obj.name,
+                total_matches=result_data.get("total_matches", 0),
+                win_rate=result_data.get("win_rate", 0),
+                roi=result_data.get("roi_percentage", 0),
+                total_profit=result_data.get("total_profit", 0),
+                wins=result_data.get("wins", 0),
+                losses=result_data.get("losses", 0),
+                pushes=result_data.get("pushes", 0),
+                bet_type=bet_type,
+                seasons=", ".join(map(str, seasons)),
+            )
+
+            # Rate limiting
+            rate_limiter = RateLimiter(settings.redis_url)
+            if not await rate_limiter.acquire():
+                await asyncio.sleep(2.0)
+                await rate_limiter.acquire()
+
+            # Send via Telegram
+            bot = Bot(token=settings.telegram_bot_token)
+            await bot.send_message(
+                chat_id=user.telegram_chat_id,
+                text=message,
+                parse_mode="Markdown",
+            )
+
+            logger.info(f"Sent manual backtest report for filter {filter_id} to user {user_id}")
+            return {"status": "success"}
+
+        except Exception as e:
+            logger.error(f"Error sending manual backtest report: {e}")
             return {"status": "error", "message": str(e)}

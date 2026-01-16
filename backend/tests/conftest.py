@@ -27,10 +27,10 @@ test_engine = create_async_engine(
 
 # Create test session maker
 TestSessionLocal = sessionmaker(
-    test_engine,
+    bind=test_engine,
     class_=AsyncSession,
     expire_on_commit=False,
-)
+)  # type: ignore
 
 
 @pytest.fixture(scope="session")

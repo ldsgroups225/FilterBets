@@ -5,8 +5,7 @@ import logging
 from typing import Any
 
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.config import get_settings
 from app.models.filter_match import FilterMatch
@@ -19,12 +18,12 @@ settings = get_settings()
 
 # Create async database session factory for tasks
 async_engine = create_async_engine(settings.database_url, echo=False)
-AsyncSessionLocal = sessionmaker(
+AsyncSessionLocal = async_sessionmaker(
     async_engine, class_=AsyncSession, expire_on_commit=False
 )
 
 
-@celery_app.task(name="app.tasks.scanner_tasks.run_pre_match_scanner", bind=True)
+@celery_app.task(name="app.tasks.scanner_tasks.run_pre_match_scanner", bind=True)  # type: ignore[untyped-decorator]
 def run_pre_match_scanner(_self: Any) -> dict[str, Any]:
     """Run the pre-match scanner and queue notifications.
 

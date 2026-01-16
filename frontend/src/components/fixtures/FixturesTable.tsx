@@ -1,7 +1,10 @@
+import type { LeagueTier } from '@/lib/leagueTiers'
 import type { Fixture } from '@/types/fixture'
 import { format } from 'date-fns'
 import { useMemo } from 'react'
 import { Button } from '@/components/ui/button'
+import { TierBadge } from '@/components/ui/tier-badge'
+import { getLeagueTier } from '@/lib/leagueTiers'
 import { cn } from '@/lib/utils'
 import { CachedImage } from '../ui/cached-image'
 
@@ -10,39 +13,56 @@ interface FixturesTableProps {
   onRowClick?: (fixture: Fixture) => void
 }
 
+interface LeagueGroup {
+  leagueName: string
+  leagueLogo?: string | null
+  leagueCode?: string
+  tier: LeagueTier
+  fixtures: Fixture[]
+}
+
 export function FixturesTable({ fixtures, onRowClick }: FixturesTableProps) {
-  // Group fixtures by league
+  // Group fixtures by league and sort by tier
   const groupedFixtures = useMemo(() => {
-    const groups: Record<number, { leagueName: string; leagueLogo?: string | null; fixtures: Fixture[] }> = {}
+    const groups: Record<number, LeagueGroup> = {}
 
     fixtures.forEach((fixture) => {
       if (!groups[fixture.league_id]) {
+        // Determine tier from fixture or lookup by code
+        const tier = fixture.tier ?? (fixture.league_code ? getLeagueTier(fixture.league_code) : 3)
         groups[fixture.league_id] = {
           leagueName: fixture.league_name,
           leagueLogo: fixture.league_logo,
-          fixtures: []
+          leagueCode: fixture.league_code,
+          tier,
+          fixtures: [],
         }
       }
       groups[fixture.league_id].fixtures.push(fixture)
     })
 
     // Sort fixtures within groups by date
-    Object.values(groups).forEach(group => {
+    Object.values(groups).forEach((group) => {
       group.fixtures.sort((a, b) => new Date(a.match_date).getTime() - new Date(b.match_date).getTime())
     })
 
-    return groups
+    // Sort groups by tier (Tier 1 first) then by name
+    return Object.values(groups).sort((a, b) => {
+      if (a.tier !== b.tier)
+        return a.tier - b.tier
+      return a.leagueName.localeCompare(b.leagueName)
+    })
   }, [fixtures])
 
   return (
     <div className="space-y-6">
-      {Object.values(groupedFixtures).length === 0 && (
+      {groupedFixtures.length === 0 && (
         <div className="flex flex-col items-center justify-center py-12 rounded-2xl border border-white/5 bg-white/2">
           <p className="text-muted-foreground font-medium">No fixtures found.</p>
         </div>
       )}
 
-      {Object.values(groupedFixtures).map((group) => (
+      {groupedFixtures.map(group => (
         <div key={group.leagueName} className="rounded-2xl border border-white/5 bg-[#0A0A0A]/40 overflow-hidden shadow-sm">
           {/* League Header */}
           <div className="flex items-center gap-3 px-4 py-3 bg-white/3 border-b border-white/5 backdrop-blur-sm">
@@ -53,31 +73,38 @@ export function FixturesTable({ fixtures, onRowClick }: FixturesTableProps) {
               fallback={<div className="h-5 w-5 rounded-full bg-primary/20 shrink-0" />}
             />
             <h3 className="text-sm font-bold text-foreground/90 tracking-tight">{group.leagueName}</h3>
+            <TierBadge tier={group.tier} size="sm" />
             <span className="text-[10px] font-medium text-muted-foreground ml-auto bg-white/5 px-2 py-0.5 rounded-full">
-              {group.fixtures.length} matches
+              {group.fixtures.length}
+              {' '}
+              matches
             </span>
           </div>
 
           {/* Fixtures List */}
           <div className="divide-y divide-white/5">
-            {group.fixtures.map((fixture) => (
+            {group.fixtures.map(fixture => (
               <div
                 key={fixture.id}
                 onClick={() => onRowClick?.(fixture)}
                 className={cn(
-                  "grid grid-cols-[auto_1fr_auto] gap-4 items-center px-4 py-3 hover:bg-white/4 transition-all duration-200 group",
-                  onRowClick && "cursor-pointer"
+                  'grid grid-cols-[auto_1fr_auto] gap-4 items-center px-4 py-3 hover:bg-white/4 transition-all duration-200 group',
+                  onRowClick && 'cursor-pointer',
                 )}
               >
                 {/* Time / Status Column */}
                 <div className="flex flex-col items-center justify-center w-12 shrink-0 border-r border-white/5 pr-4 mr-0">
-                  {fixture.status_id === 2 ? (
-                    <span className="text-[10px] font-black text-destructive animate-pulse">LIVE</span>
-                  ) : fixture.status_id === 3 || fixture.status_id === 28 ? (
-                    <span className="text-[10px] font-black text-primary">FT</span>
-                  ) : (
-                    <span className="text-xs font-bold text-muted-foreground">{format(new Date(fixture.match_date), 'HH:mm')}</span>
-                  )}
+                  {fixture.status_id === 2
+                    ? (
+                        <span className="text-[10px] font-black text-destructive animate-pulse">LIVE</span>
+                      )
+                    : fixture.status_id === 3 || fixture.status_id === 28
+                      ? (
+                          <span className="text-[10px] font-black text-primary">FT</span>
+                        )
+                      : (
+                          <span className="text-xs font-bold text-muted-foreground">{format(new Date(fixture.match_date), 'HH:mm')}</span>
+                        )}
                 </div>
 
                 {/* Teams Column */}
@@ -92,9 +119,16 @@ export function FixturesTable({ fixtures, onRowClick }: FixturesTableProps) {
                           <div className="h-4 w-4 rounded-full bg-white/5 flex items-center justify-center text-[7px] font-black">{fixture.home_team_name?.[0]}</div>
                         }
                       />
-                      <span className={cn("text-xs font-medium truncate", fixture.home_score !== null && fixture.home_score > (fixture.away_score || 0) && "text-primary font-bold")}>
+                      <span className={cn('text-xs font-medium truncate', fixture.home_score !== null && fixture.home_score > (fixture.away_score || 0) && 'text-primary font-bold')}>
                         {fixture.home_team_name}
                       </span>
+                      {/* Show form if available */}
+                      {fixture.home_form_points_5 !== undefined && (
+                        <span className="hidden md:inline-flex text-[8px] font-bold text-muted-foreground/50 bg-white/5 px-1.5 py-0.5 rounded">
+                          {fixture.home_form_points_5}
+                          pts
+                        </span>
+                      )}
                     </div>
                     {fixture.home_score !== null && (
                       <span className="text-xs font-black">{fixture.home_score}</span>
@@ -111,9 +145,16 @@ export function FixturesTable({ fixtures, onRowClick }: FixturesTableProps) {
                           <div className="h-4 w-4 rounded-full bg-white/5 flex items-center justify-center text-[7px] font-black">{fixture.away_team_name?.[0]}</div>
                         }
                       />
-                      <span className={cn("text-xs font-medium truncate", fixture.away_score !== null && fixture.away_score > (fixture.home_score || 0) && "text-primary font-bold")}>
+                      <span className={cn('text-xs font-medium truncate', fixture.away_score !== null && fixture.away_score > (fixture.home_score || 0) && 'text-primary font-bold')}>
                         {fixture.away_team_name}
                       </span>
+                      {/* Show form if available */}
+                      {fixture.away_form_points_5 !== undefined && (
+                        <span className="hidden md:inline-flex text-[8px] font-bold text-muted-foreground/50 bg-white/5 px-1.5 py-0.5 rounded">
+                          {fixture.away_form_points_5}
+                          pts
+                        </span>
+                      )}
                     </div>
                     {fixture.away_score !== null && (
                       <span className="text-xs font-black">{fixture.away_score}</span>

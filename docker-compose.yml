@@ -44,8 +44,14 @@ services:
       - DATABASE_URL=postgresql+asyncpg://filterbets:filterbets@db:5432/filterbets
       - DATABASE_URL_SYNC=postgresql://filterbets:filterbets@db:5432/filterbets
       - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
       - DEBUG=true
       - ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000,http://frontend:80
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     ports:
       - "8000:8000"
     depends_on:
@@ -73,13 +79,18 @@ services:
       dockerfile: Dockerfile
     container_name: filterbets-celery-worker
     restart: unless-stopped
-    command: poetry run celery -A app.tasks.celery_app worker --loglevel=info
+    command: celery -A app.tasks.celery_app worker --loglevel=info -Q stats,backtest,scanner,notifications,celery
     environment:
       - DATABASE_URL=postgresql+asyncpg://filterbets:filterbets@db:5432/filterbets
       - DATABASE_URL_SYNC=postgresql://filterbets:filterbets@db:5432/filterbets
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/1
       - CELERY_RESULT_BACKEND=redis://redis:6379/2
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_BOT_USERNAME=${TELEGRAM_BOT_USERNAME:-filterbet_prematch_spy_bot}
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     depends_on:
       db:
         condition: service_healthy
@@ -93,13 +104,17 @@ services:
       dockerfile: Dockerfile
     container_name: filterbets-celery-beat
     restart: unless-stopped
-    command: poetry run celery -A app.tasks.celery_app beat --loglevel=info
+    command: celery -A app.tasks.celery_app beat --loglevel=info
     environment:
       - DATABASE_URL=postgresql+asyncpg://filterbets:filterbets@db:5432/filterbets
       - DATABASE_URL_SYNC=postgresql://filterbets:filterbets@db:5432/filterbets
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/1
       - CELERY_RESULT_BACKEND=redis://redis:6379/2
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     depends_on:
       db:
         condition: service_healthy
@@ -113,15 +128,37 @@ services:
       dockerfile: Dockerfile
     container_name: filterbets-telegram-bot
     restart: unless-stopped
-    command: poetry run python -m app.bot.run_bot
+    command: python -m app.bot.run_bot
     environment:
       - DATABASE_URL=postgresql+asyncpg://filterbets:filterbets@db:5432/filterbets
       - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - TELEGRAM_BOT_USERNAME=${TELEGRAM_BOT_USERNAME:filterbet_prematch_spy_bot}
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Celery Monitoring (Flower)
+  flower:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: filterbets-flower
+    restart: unless-stopped
+    command: celery -A app.tasks.celery_app flower --port=5555
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+    ports:
+      - "5555:5555"
+    depends_on:
       redis:
         condition: service_healthy
 

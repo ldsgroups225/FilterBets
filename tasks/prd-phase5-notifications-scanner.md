@@ -99,7 +99,7 @@ The system consists of three main components:
 ### FR-2: Deep Link Account Linking
 
 1. System must generate unique, time-limited tokens (UUID, 30-minute expiry)
-2. Deep link format: `https://web.t.me/filterbet_prematch_spy_bot?start={token}`
+2. Deep link format: `https://t.me/filterbet_prematch_spy_bot?start={token}`
 3. When user starts bot with token, system must:
    - Validate token exists and is not expired
    - Link the Telegram chat_id to the user account
@@ -203,7 +203,7 @@ Your filter "High-Scoring Home Favorites" matched:
 
 1. User clicks "Link to Telegram" → Frontend calls `POST /auth/telegram/generate-link`
 2. Backend generates UUID token, stores in Redis with 30-min TTL, returns deep link URL
-3. Frontend redirects to `https://web.t.me/filterbet_prematch_spy_bot?start={token}`
+3. Frontend redirects to `https://t.me/filterbet_prematch_spy_bot?start={token}`
 4. Telegram opens, user clicks "Start"
 5. Bot receives `/start {token}`, validates, links account
 6. Bot sends confirmation, frontend polls `/auth/telegram/status` to update UI
