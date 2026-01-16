@@ -5,7 +5,7 @@ from typing import Any
 
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import aliased
+from sqlalchemy.orm import aliased, selectinload
 
 from app.models.fixture import Fixture
 from app.models.team_computed_stats import TeamComputedStats
@@ -23,6 +23,7 @@ class FilterEngine:
         date_from: date | None = None,
         date_to: date | None = None,
         limit: int = 100,
+        eager_load_relations: bool = True,
     ) -> list[Fixture]:
         """
         Find fixtures that match all filter conditions.
@@ -32,16 +33,14 @@ class FilterEngine:
             date_from: Optional start date filter
             date_to: Optional end date filter
             limit: Maximum number of results
+            eager_load_relations: Whether to eagerly load related entities
 
         Returns:
             List of matching fixtures
         """
-        # Check if we need to join with team_computed_stats
         needs_stats_join = self._needs_stats_join(rules)
 
-        # Build base query
         if needs_stats_join:
-            # Create aliases for home and away team stats
             home_stats = aliased(TeamComputedStats)
             away_stats = aliased(TeamComputedStats)
 
@@ -67,14 +66,12 @@ class FilterEngine:
             home_stats = None
             away_stats = None
 
-        # Add date range filters
         conditions = []
         if date_from:
             conditions.append(Fixture.match_date >= date_from)
         if date_to:
             conditions.append(Fixture.match_date <= date_to)
 
-        # Parse and apply filter rules
         for rule in rules:
             field = rule["field"]
             operator = rule["operator"]
@@ -86,11 +83,16 @@ class FilterEngine:
             if condition is not None:
                 conditions.append(condition)
 
-        # Apply all conditions
         if conditions:
             query = query.where(and_(*conditions))
 
-        # Execute query
+        if eager_load_relations:
+            query = query.options(
+                selectinload(Fixture.home_team),
+                selectinload(Fixture.away_team),
+                selectinload(Fixture.league),
+            )
+
         query = query.limit(limit)
         result = await self.db.execute(query)
         return list(result.scalars().all())

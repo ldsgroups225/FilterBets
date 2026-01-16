@@ -8,6 +8,7 @@ from typing import Any
 
 import redis.asyncio as aioredis
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from telegram import Bot
 from telegram.error import TelegramError
@@ -223,9 +224,11 @@ async def _send_filter_alert_async(
                 logger.info(f"Notification already sent for FilterMatch {filter_match_id}")
                 return {"status": "skipped", "message": "Already sent"}
 
-            # Get related filter
+            # Get related filter with user eagerly loaded
             filter_result = await db.execute(
-                select(Filter).where(Filter.id == filter_match.filter_id)
+                select(Filter)
+                .where(Filter.id == filter_match.filter_id)
+                .options(selectinload(Filter.user))
             )
             filter_obj = filter_result.scalar_one_or_none()
 
@@ -349,10 +352,12 @@ async def _send_backtest_report_async(job_id: str) -> dict[str, Any]:
 
     async with AsyncSessionLocal() as db:
         try:
-            # Get job with user
+            # Get job with user eagerly loaded
             job_uuid = UUID(job_id)
             result = await db.execute(
-                select(BacktestJob).where(BacktestJob.job_id == job_uuid)
+                select(BacktestJob)
+                .where(BacktestJob.job_id == job_uuid)
+                .options(selectinload(BacktestJob.user))
             )
             job = result.scalar_one_or_none()
 
