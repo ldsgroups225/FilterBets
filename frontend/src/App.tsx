@@ -15,6 +15,7 @@ import { Home } from './pages/Home'
 import { Login } from './pages/Login'
 import { NotFound } from './pages/NotFound'
 import { RegisterPage } from './pages/RegisterPage'
+import SettingsPage from './pages/SettingsPage'
 
 function App() {
   return (
@@ -93,6 +94,16 @@ function App() {
                 <ProtectedRoute>
                   <Layout>
                     <FilterEditPage />
+                  </Layout>
+                </ProtectedRoute>
+              )}
+            />
+            <Route
+              path="/settings"
+              element={(
+                <ProtectedRoute>
+                  <Layout>
+                    <SettingsPage />
                   </Layout>
                 </ProtectedRoute>
               )}

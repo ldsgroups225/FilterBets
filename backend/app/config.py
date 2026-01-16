@@ -59,7 +59,7 @@ class Settings(BaseSettings):
 
     # Telegram Bot
     telegram_bot_token: str = ""
-    telegram_bot_username: str = "FilterBetsBot"
+    telegram_bot_username: str = "filterbet_prematch_spy_bot"
     telegram_link_token_ttl: int = 1800  # 30 minutes in seconds
 
     # Scanner Configuration

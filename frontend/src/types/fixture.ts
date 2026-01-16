@@ -1,5 +1,7 @@
 // Fixture types
 
+import type { PaginatedResponse } from './common'
+
 export interface Fixture {
   id: number
   match_date: string
@@ -18,13 +20,7 @@ export interface Fixture {
   away_odds: number | null
 }
 
-export interface FixtureListResponse {
-  items: Fixture[]
-  total: number
-  page: number
-  per_page: number
-  pages: number
-}
+export type FixtureListResponse = PaginatedResponse<Fixture>
 
 export interface FixtureFilters {
   date_from?: string

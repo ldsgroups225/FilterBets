@@ -2,12 +2,10 @@ import type { ColumnDef, SortingState } from '@tanstack/react-table'
 import type { Fixture } from '@/types/fixture'
 import { IconArrowsSort } from '@tabler/icons-react'
 import {
-
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-
   useReactTable,
 } from '@tanstack/react-table'
 import { format } from 'date-fns'
@@ -22,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { cn } from '@/lib/utils'
 
 interface FixturesTableProps {
   fixtures: Fixture[]
@@ -35,51 +34,68 @@ export function FixturesTable({ fixtures, onRowClick }: FixturesTableProps) {
     () => [
       {
         accessorKey: 'match_date',
-        header: ({ column }) => {
-          return (
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            >
-              Date
-              <IconArrowsSort className="ml-2 h-4 w-4" />
-            </Button>
-          )
-        },
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="-ml-3 h-8 data-[state=open]:bg-accent font-black uppercase text-[10px] tracking-widest text-muted-foreground"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            Match Time
+            <IconArrowsSort className="ml-2 h-3 w-3" />
+          </Button>
+        ),
         cell: ({ row }) => {
           const date = new Date(row.original.match_date)
           return (
-            <div className="flex flex-col">
-              <span className="font-medium">{format(date, 'MMM dd, yyyy')}</span>
-              <span className="text-xs text-muted-foreground">{format(date, 'HH:mm')}</span>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-xl bg-white/5 border border-white/5 group-hover:bg-primary/10 group-hover:border-primary/20 transition-colors">
+                <span className="text-[10px] font-black uppercase leading-none opacity-50">{format(date, 'MMM')}</span>
+                <span className="text-sm font-black mt-0.5">{format(date, 'dd')}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs font-bold">{format(date, 'HH:mm')}</span>
+                <span className="text-[10px] font-medium text-muted-foreground opacity-60 uppercase tracking-tighter">Live Odds</span>
+              </div>
             </div>
           )
         },
       },
       {
         accessorKey: 'league_name',
-        header: 'League',
+        header: () => <span className="font-black uppercase text-[10px] tracking-widest text-muted-foreground">League</span>,
         cell: ({ row }) => (
-          <Badge variant="outline" className="font-normal">
-            {row.original.league_name}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-primary" />
+            <span className="text-xs font-bold truncate max-w-[140px]">{row.original.league_name}</span>
+          </div>
         ),
       },
       {
-        id: 'match',
-        header: 'Match',
+        id: 'teams',
+        header: () => <span className="font-black uppercase text-[10px] tracking-widest text-muted-foreground">Matchup</span>,
         cell: ({ row }) => (
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <span className="font-medium">{row.original.home_team_name}</span>
+          <div className="flex flex-col gap-2 min-w-[200px]">
+            <div className="flex items-center justify-between group/team">
+              <div className="flex items-center gap-2.5">
+                <div className="h-5 w-5 rounded-md bg-white/5 flex items-center justify-center border border-white/5 group-hover/team:border-primary/30 transition-colors">
+                  <span className="text-[8px] font-black">{row.original.home_team_name[0]}</span>
+                </div>
+                <span className="text-sm font-bold tracking-tight">{row.original.home_team_name}</span>
+              </div>
               {row.original.home_score !== null && (
-                <Badge variant="secondary">{row.original.home_score}</Badge>
+                <span className="text-sm font-black text-primary">{row.original.home_score}</span>
               )}
             </div>
-            <div className="flex items-center gap-2">
-              <span className="font-medium">{row.original.away_team_name}</span>
+            <div className="flex items-center justify-between group/team">
+              <div className="flex items-center gap-2.5">
+                <div className="h-5 w-5 rounded-md bg-white/5 flex items-center justify-center border border-white/5 group-hover/team:border-primary/30 transition-colors">
+                  <span className="text-[8px] font-black">{row.original.away_team_name[0]}</span>
+                </div>
+                <span className="text-sm font-bold tracking-tight">{row.original.away_team_name}</span>
+              </div>
               {row.original.away_score !== null && (
-                <Badge variant="secondary">{row.original.away_score}</Badge>
+                <span className="text-sm font-black text-primary">{row.original.away_score}</span>
               )}
             </div>
           </div>
@@ -87,36 +103,45 @@ export function FixturesTable({ fixtures, onRowClick }: FixturesTableProps) {
       },
       {
         id: 'odds',
-        header: 'Odds (H / D / A)',
+        header: () => <span className="font-black uppercase text-[10px] tracking-widest text-muted-foreground">Market Odds</span>,
         cell: ({ row }) => {
           const { home_odds, draw_odds, away_odds } = row.original
-          if (!home_odds || !draw_odds || !away_odds) {
-            return <span className="text-muted-foreground">N/A</span>
-          }
+          if (!home_odds || !draw_odds || !away_odds)
+            return <span className="text-[10px] font-bold opacity-30 uppercase">N/A</span>
           return (
-            <div className="flex gap-2 font-mono text-sm">
-              <span>{home_odds.toFixed(2)}</span>
-              <span className="text-muted-foreground">/</span>
-              <span>{draw_odds.toFixed(2)}</span>
-              <span className="text-muted-foreground">/</span>
-              <span>{away_odds.toFixed(2)}</span>
+            <div className="flex gap-1.5">
+              <div className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg bg-white/5 border border-white/5 min-w-[42px] group-hover:bg-white/10 transition-colors">
+                <span className="text-[8px] font-black text-muted-foreground uppercase leading-none">1</span>
+                <span className="text-xs font-black">{home_odds.toFixed(2)}</span>
+              </div>
+              <div className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg bg-white/5 border border-white/5 min-w-[42px] group-hover:bg-white/10 transition-colors">
+                <span className="text-[8px] font-black text-muted-foreground uppercase leading-none">X</span>
+                <span className="text-xs font-black">{draw_odds.toFixed(2)}</span>
+              </div>
+              <div className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg bg-white/5 border border-white/5 min-w-[42px] group-hover:bg-white/10 transition-colors">
+                <span className="text-[8px] font-black text-muted-foreground uppercase leading-none">2</span>
+                <span className="text-xs font-black">{away_odds.toFixed(2)}</span>
+              </div>
             </div>
           )
         },
       },
       {
         accessorKey: 'status_id',
-        header: 'Status',
+        header: () => <span className="font-black uppercase text-[10px] tracking-widest text-muted-foreground">Status</span>,
         cell: ({ row }) => {
           const statusId = row.original.status_id
-          const statusMap: Record<number, { label: string, variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-            1: { label: 'Scheduled', variant: 'default' },
-            2: { label: 'Live', variant: 'destructive' },
-            3: { label: 'Finished', variant: 'secondary' },
-            4: { label: 'Postponed', variant: 'outline' },
+          const statuses: Record<number, { label: string, color: string }> = {
+            1: { label: 'Scheduled', color: 'bg-muted/20 text-muted-foreground' },
+            2: { label: 'Live', color: 'bg-destructive/20 text-destructive border-destructive/20 animate-pulse' },
+            3: { label: 'Finished', color: 'bg-primary/20 text-primary border-primary/20' },
           }
-          const status = statusMap[statusId] || { label: 'Unknown', variant: 'outline' }
-          return <Badge variant={status.variant}>{status.label}</Badge>
+          const s = statuses[statusId] || { label: 'Unknown', color: 'bg-muted/20 text-muted-foreground' }
+          return (
+            <Badge variant="outline" className={cn('px-2 py-0.5 rounded-lg font-black text-[10px] uppercase tracking-widest border-transparent', s.color)}>
+              {s.label}
+            </Badge>
+          )
         },
       },
     ],
@@ -130,28 +155,20 @@ export function FixturesTable({ fixtures, onRowClick }: FixturesTableProps) {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
-    state: {
-      sorting,
-    },
-    initialState: {
-      pagination: {
-        pageSize: 20,
-      },
-    },
+    state: { sorting },
+    initialState: { pagination: { pageSize: 20 } },
   })
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border">
+      <div className="rounded-2xl border border-white/5 bg-transparent overflow-hidden">
         <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map(headerGroup => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
+          <TableHeader className="bg-white/2 border-b border-white/5 h-12">
+            {table.getHeaderGroups().map(hg => (
+              <TableRow key={hg.id} className="hover:bg-transparent border-none">
+                {hg.headers.map(h => (
+                  <TableHead key={h.id} className="text-muted-foreground px-6">
+                    {h.isPlaceholder ? null : flexRender(h.column.columnDef.header, h.getContext())}
                   </TableHead>
                 ))}
               </TableRow>
@@ -164,10 +181,13 @@ export function FixturesTable({ fixtures, onRowClick }: FixturesTableProps) {
                     <TableRow
                       key={row.id}
                       onClick={() => onRowClick?.(row.original)}
-                      className={onRowClick ? 'cursor-pointer hover:bg-muted/50' : ''}
+                      className={cn(
+                        'group border-white/5 px-6 transition-all duration-200',
+                        onRowClick ? 'cursor-pointer hover:bg-white/[0.04]' : '',
+                      )}
                     >
                       {row.getVisibleCells().map(cell => (
-                        <TableCell key={cell.id}>
+                        <TableCell key={cell.id} className="py-4 px-6 border-none">
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}
@@ -176,8 +196,8 @@ export function FixturesTable({ fixtures, onRowClick }: FixturesTableProps) {
                 )
               : (
                   <TableRow>
-                    <TableCell colSpan={columns.length} className="h-24 text-center">
-                      No fixtures found.
+                    <TableCell colSpan={columns.length} className="h-32 text-center text-muted-foreground/30 font-bold italic border-none">
+                      No fixtures match your criteria.
                     </TableCell>
                   </TableRow>
                 )}
@@ -185,38 +205,30 @@ export function FixturesTable({ fixtures, onRowClick }: FixturesTableProps) {
         </Table>
       </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
-          Showing
+      <div className="flex items-center justify-between px-2">
+        <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-50">
+          Page
           {' '}
-          {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}
-          {' '}
-          to
-          {' '}
-          {Math.min(
-            (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
-            fixtures.length,
-          )}
+          {table.getState().pagination.pageIndex + 1}
           {' '}
           of
           {' '}
-          {fixtures.length}
-          {' '}
-          fixtures
+          {table.getPageCount()}
         </div>
         <div className="flex items-center gap-2">
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
+            className="rounded-xl h-8 text-[10px] font-black uppercase tracking-widest hover:bg-white/5"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            Previous
+            Prev
           </Button>
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
+            className="rounded-xl h-8 text-[10px] font-black uppercase tracking-widest hover:bg-white/5"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >

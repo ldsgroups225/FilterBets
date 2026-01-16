@@ -1,30 +1,15 @@
-/**
- * Button component for linking Telegram account
- */
-
-import { IconLoader2 } from '@tabler/icons-react'
+import { IconBrandTelegram, IconLoader2 } from '@tabler/icons-react'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { generateTelegramLink } from '@/services/api/telegram'
 
 export interface TelegramLinkButtonProps {
-  /**
-   * Callback when link is generated and user is redirected
-   */
   onLinkGenerated?: () => void
-  /**
-   * Button variant
-   */
   variant?: 'default' | 'outline' | 'secondary' | 'ghost' | 'link'
-  /**
-   * Button size
-   */
   size?: 'default' | 'sm' | 'lg' | 'icon'
-  /**
-   * Custom class name
-   */
   className?: string
 }
 
@@ -39,40 +24,36 @@ export function TelegramLinkButton({
   const linkMutation = useMutation({
     mutationFn: generateTelegramLink,
     onSuccess: (data) => {
-      // Open Telegram deep link in new window/tab
       window.open(data.deep_link_url, '_blank')
-
       setIsRedirecting(true)
-
-      toast.success('Opening Telegram...', {
-        description: `Link expires in ${Math.floor(data.expires_in_seconds / 60)} minutes. Complete the linking in Telegram.`,
-      })
-
+      toast.success('Opening Telegram')
       onLinkGenerated?.()
     },
     onError: (error: Error) => {
       toast.error('Failed to generate link', {
-        description: (error as { response?: { data?: { detail?: string } } }).response?.data?.detail || 'Please try again later.',
+        description: (error as any).response?.data?.detail || 'Please try again later.',
       })
     },
   })
-
-  const handleClick = () => {
-    linkMutation.mutate()
-  }
 
   const isLoading = linkMutation.isPending || isRedirecting
 
   return (
     <Button
-      onClick={handleClick}
+      onClick={() => linkMutation.mutate()}
       disabled={isLoading}
       variant={variant}
       size={size}
-      className={className}
+      className={cn('gap-2.5 font-black uppercase tracking-widest', className)}
     >
-      {isLoading && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
-      {isLoading ? 'Opening Telegram...' : 'Link Telegram'}
+      {isLoading
+        ? (
+            <IconLoader2 className="h-4 w-4 animate-spin" />
+          )
+        : (
+            <IconBrandTelegram className="h-5 w-5" />
+          )}
+      {isLoading ? 'SECURE LINKING...' : 'CONNECT TELEGRAM'}
     </Button>
   )
 }

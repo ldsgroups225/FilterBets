@@ -5,15 +5,18 @@ import {
   IconBellOff,
   IconChartBar,
   IconEdit,
-  IconFilter,
+  IconHistory,
+  IconSettings,
   IconToggleLeft,
   IconToggleRight,
   IconTrash,
 } from '@tabler/icons-react'
 import { format } from 'date-fns'
+import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
+
 import { BacktestForm } from '@/components/filters/BacktestForm'
 import { BacktestResults } from '@/components/filters/BacktestResults'
 import {
@@ -32,6 +35,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton'
 import { useDeleteFilter, useFilter, useToggleFilterAlerts, useUpdateFilter } from '@/hooks/useFilters'
 import { useTelegramStatus } from '@/hooks/useTelegramStatus'
+import { cn } from '@/lib/utils'
 import { runBacktest } from '@/services/backtest'
 
 export function FilterDetailPage() {
@@ -52,12 +56,11 @@ export function FilterDetailPage() {
   const handleDelete = async () => {
     try {
       await deleteMutation.mutateAsync(filterId)
-      toast.success('Filter deleted successfully')
+      toast.success('Strategy deleted')
       navigate('/filters')
     }
-    catch (err) {
-      toast.error('Failed to delete filter')
-      console.error('Delete error:', err)
+    catch {
+      toast.error('Failed to delete strategy')
     }
     setShowDeleteDialog(false)
   }
@@ -70,39 +73,29 @@ export function FilterDetailPage() {
         id: filterId,
         data: { is_active: !filter.is_active },
       })
-      toast.success(`Filter ${!filter.is_active ? 'activated' : 'deactivated'}`)
+      toast.success(!filter.is_active ? 'Strategy activated' : 'Strategy paused')
     }
-    catch (err) {
-      toast.error('Failed to update filter')
-      console.error('Update error:', err)
+    catch {
+      toast.error('Failed to update strategy')
     }
   }
 
   const handleToggleAlerts = async () => {
     if (!filter)
       return
-
     if (!telegramStatus?.linked) {
-      toast.error('Please link your Telegram account first', {
-        description: 'Go to Settings to link your Telegram account and enable notifications.',
-        action: {
-          label: 'Go to Settings',
-          onClick: () => navigate('/settings'),
-        },
+      toast.error('Telegram not linked', {
+        description: 'Connect your account in Settings.',
+        action: { label: 'Settings', onClick: () => navigate('/settings') },
       })
       return
     }
-
     try {
-      await toggleAlertsMutation.mutateAsync({
-        id: filterId,
-        enabled: !filter.alerts_enabled,
-      })
-      toast.success(`Alerts ${!filter.alerts_enabled ? 'enabled' : 'disabled'}`)
+      await toggleAlertsMutation.mutateAsync({ id: filterId, enabled: !filter.alerts_enabled })
+      toast.success(!filter.alerts_enabled ? 'Alerts enabled' : 'Alerts disabled')
     }
-    catch (err) {
+    catch {
       toast.error('Failed to toggle alerts')
-      console.error('Toggle alerts error:', err)
     }
   }
 
@@ -111,11 +104,10 @@ export function FilterDetailPage() {
     try {
       const result = await runBacktest(filterId, data)
       setBacktestResult(result)
-      toast.success('Backtest completed successfully')
+      toast.success('Analysis complete')
     }
-    catch (err) {
-      toast.error('Failed to run backtest')
-      console.error('Backtest error:', err)
+    catch {
+      toast.error('Backtest failed')
     }
     finally {
       setIsRunningBacktest(false)
@@ -123,22 +115,22 @@ export function FilterDetailPage() {
   }
 
   const operatorLabels: Record<string, string> = {
-    '=': 'equals',
-    '!=': 'not equals',
-    '>': 'greater than',
-    '<': 'less than',
-    '>=': 'greater than or equal',
-    '<=': 'less than or equal',
-    'in': 'in',
-    'between': 'between',
+    '=': 'is equal to',
+    '!=': 'is not equal to',
+    '>': 'is greater than',
+    '<': 'is less than',
+    '>=': 'is at least',
+    '<=': 'is at most',
+    'in': 'is within',
+    'between': 'is between',
   }
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-10 w-48" />
-        <Skeleton className="h-64 w-full" />
-        <Skeleton className="h-48 w-full" />
+      <div className="space-y-8 animate-pulse">
+        <Skeleton className="h-10 w-48 rounded-xl" />
+        <Skeleton className="h-[300px] w-full rounded-2xl" />
+        <Skeleton className="h-[200px] w-full rounded-2xl" />
       </div>
     )
   }
@@ -146,220 +138,203 @@ export function FilterDetailPage() {
   if (error || !filter) {
     return (
       <div className="space-y-6">
-        <Button variant="ghost" onClick={() => navigate('/filters')}>
+        <Button variant="ghost" onClick={() => navigate('/filters')} className="rounded-xl font-bold">
           <IconArrowLeft className="mr-2 h-4 w-4" />
-          Back to Filters
+          Back to Strategies
         </Button>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center py-12">
-              <p className="text-destructive">Failed to load filter</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                {error instanceof Error ? error.message : 'Filter not found'}
-              </p>
-            </div>
-          </CardContent>
+        <Card className="border-destructive/20 bg-destructive/5 py-20 text-center">
+          <p className="text-destructive font-bold">Strategy not found</p>
+          <Button variant="outline" className="mt-4 rounded-xl" onClick={() => navigate('/filters')}>Retry</Button>
         </Card>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={() => navigate('/filters')}>
-          <IconArrowLeft className="mr-2 h-4 w-4" />
-          Back to Filters
-        </Button>
-        <div className="flex gap-2">
+    <div className="space-y-10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/filters')} className="rounded-xl h-10 w-10 hover:bg-white/5">
+            <IconArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-black tracking-tight text-glow">{filter.name}</h1>
+            <p className="text-muted-foreground text-sm font-medium opacity-60">Strategy Analytics & Controls</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-white/5 border border-white/5">
           <Button
-            variant="outline"
+            variant="ghost"
+            size="sm"
             onClick={handleToggleAlerts}
-            title={
-              !telegramStatus?.linked
-                ? 'Link Telegram first to enable alerts'
-                : filter.alerts_enabled
-                  ? 'Disable alerts'
-                  : 'Enable alerts'
-            }
+            className={cn(
+              'rounded-xl font-bold text-[10px] uppercase tracking-widest h-9 px-4 transition-all',
+              filter.alerts_enabled ? 'text-primary bg-primary/10' : 'text-muted-foreground',
+            )}
             disabled={!telegramStatus?.linked}
           >
-            {filter.alerts_enabled
-              ? (
-                  <>
-                    <IconBell className="mr-2 h-4 w-4" />
-                    Alerts On
-                  </>
-                )
-              : (
-                  <>
-                    <IconBellOff className="mr-2 h-4 w-4" />
-                    Alerts Off
-                  </>
-                )}
+            {filter.alerts_enabled ? <IconBell className="mr-2 h-3.5 w-3.5" /> : <IconBellOff className="mr-2 h-3.5 w-3.5" />}
+            Alerts
+            {' '}
+            {filter.alerts_enabled ? 'Active' : 'Muted'}
           </Button>
-          <Button variant="outline" onClick={handleToggleActive}>
-            {filter.is_active
-              ? (
-                  <>
-                    <IconToggleRight className="mr-2 h-4 w-4" />
-                    Deactivate
-                  </>
-                )
-              : (
-                  <>
-                    <IconToggleLeft className="mr-2 h-4 w-4" />
-                    Activate
-                  </>
-                )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleToggleActive}
+            className={cn(
+              'rounded-xl font-bold text-[10px] uppercase tracking-widest h-9 px-4 transition-all',
+              filter.is_active ? 'text-primary' : 'text-muted-foreground',
+            )}
+          >
+            {filter.is_active ? <IconToggleRight className="mr-2 h-4 w-4" /> : <IconToggleLeft className="mr-2 h-4 w-4" />}
+            {filter.is_active ? 'Running' : 'Paused'}
           </Button>
-          <Button variant="outline" onClick={() => navigate(`/filters/${filterId}/edit`)}>
-            <IconEdit className="mr-2 h-4 w-4" />
-            Edit
+          <div className="w-px h-6 bg-white/10 mx-1" />
+          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl" onClick={() => navigate(`/filters/${filterId}/edit`)}>
+            <IconEdit className="h-4 w-4" />
           </Button>
-          <Button variant="outline" onClick={() => setShowDeleteDialog(true)}>
-            <IconTrash className="mr-2 h-4 w-4 text-destructive" />
-            Delete
+          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-destructive/60 hover:text-destructive hover:bg-destructive/10" onClick={() => setShowDeleteDialog(true)}>
+            <IconTrash className="h-4 w-4" />
           </Button>
         </div>
       </div>
 
-      {/* Filter Info Card */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <IconFilter className="h-6 w-6 text-muted-foreground" />
-                <CardTitle className="text-2xl">{filter.name}</CardTitle>
-              </div>
-              {filter.description && <CardDescription>{filter.description}</CardDescription>}
-            </div>
-            <Badge variant={filter.is_active ? 'default' : 'secondary'} className="text-sm">
-              {filter.is_active ? 'Active' : 'Inactive'}
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <span className="text-sm text-muted-foreground">Rules Count</span>
-              <div className="font-medium mt-1">
-                {filter.rules.length}
-                {' '}
-                conditions
-              </div>
-            </div>
-            <div>
-              <span className="text-sm text-muted-foreground">Created</span>
-              <div className="font-medium mt-1">
-                {format(new Date(filter.created_at), 'MMM dd, yyyy')}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Filter Rules Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Filter Rules</CardTitle>
-          <CardDescription>
-            {filter.rules.length}
-            {' '}
-            condition
-            {filter.rules.length !== 1 ? 's' : ''}
-            {' '}
-            must be met
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {filter.rules.map((rule, index) => (
-              <div
-                key={rule.value.toString()}
-                className="flex items-center gap-3 p-3 rounded-lg border bg-muted/50"
-              >
-                <Badge variant="outline" className="font-mono">
-                  {index + 1}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-8">
+          {/* Strategy Definition */}
+          <Card className="border-white/5 bg-white/2">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-black uppercase tracking-[0.2em] text-muted-foreground opacity-50 flex items-center gap-2">
+                  <IconSettings className="h-4 w-4" />
+                  Definition
+                </CardTitle>
+                <Badge className="bg-primary/20 text-primary border-primary/20 rounded-lg">
+                  {filter.rules.length}
+                  {' '}
+                  Rules
                 </Badge>
-                <div className="flex-1">
-                  <div className="font-medium">{rule.field}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {operatorLabels[rule.operator] || rule.operator}
-                    {' '}
-                    <span className="font-mono">
-                      {Array.isArray(rule.value) ? rule.value.join(', ') : rule.value}
-                    </span>
-                  </div>
-                </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              {filter.description && <CardDescription className="text-sm font-medium italic mt-2 opacity-80">{filter.description}</CardDescription>}
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-3">
+                {filter.rules.map((rule, idx) => (
+                  <div key={rule.value.toString()} className="group p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/20 transition-all flex items-center gap-4">
+                    <div className="h-8 w-8 rounded-xl bg-white/5 flex items-center justify-center text-[10px] font-black opacity-30 border border-white/5">
+                      {idx + 1}
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-[10px] font-black uppercase tracking-widest opacity-40">{rule.field}</span>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-sm font-bold text-primary italic">{operatorLabels[rule.operator] || rule.operator}</span>
+                        <span className="text-sm font-black bg-white/5 px-2 py-0.5 rounded-lg">
+                          {Array.isArray(rule.value) ? rule.value.join(', ') : rule.value}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Backtest Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <IconChartBar className="h-5 w-5" />
-            Backtest
-          </CardTitle>
-          <CardDescription>
-            Test this filter against historical data to evaluate performance
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {backtestResult
-            ? (
-                <div className="space-y-4">
-                  <BacktestResults result={backtestResult} />
-                  <Button variant="outline" onClick={() => setBacktestResult(null)}>
-                    Run New Backtest
-                  </Button>
-                </div>
-              )
-            : (
-                <BacktestForm onSubmit={handleRunBacktest} isLoading={isRunningBacktest} />
-              )}
-        </CardContent>
-      </Card>
+          {/* Analysis Section */}
+          <Card className="border-white/5">
+            <CardHeader>
+              <CardTitle className="text-sm font-black uppercase tracking-[0.2em] text-muted-foreground opacity-50 flex items-center gap-2">
+                <IconChartBar className="h-4 w-4" />
+                Historical backtest
+              </CardTitle>
+              <CardDescription>Simulate this strategy against archived data sets.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AnimatePresence mode="wait">
+                {backtestResult
+                  ? (
+                      <motion.div
+                        key="results"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="space-y-6"
+                      >
+                        <BacktestResults result={backtestResult} />
+                        <Button variant="ghost" onClick={() => setBacktestResult(null)} className="rounded-xl font-bold text-primary hover:bg-primary/10">
+                          <IconHistory className="mr-2 h-4 w-4" />
+                          Run New Simulation
+                        </Button>
+                      </motion.div>
+                    )
+                  : (
+                      <motion.div
+                        key="form"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                      >
+                        <BacktestForm onSubmit={handleRunBacktest} isLoading={isRunningBacktest} />
+                      </motion.div>
+                    )}
+              </AnimatePresence>
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Matched Fixtures Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Matched Fixtures</CardTitle>
-          <CardDescription>
-            Fixtures that meet this filter's criteria
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            No matched fixtures yet. This feature will show fixtures that trigger this filter.
-          </div>
-        </CardContent>
-      </Card>
+        <div className="space-y-8">
+          <Card className="border-white/5 bg-white/2">
+            <CardHeader>
+              <CardTitle className="text-sm font-black uppercase tracking-[0.2em] text-muted-foreground opacity-50">Strategy metrics</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Created At</span>
+                <p className="text-sm font-black mt-1">{format(new Date(filter.created_at), 'MMMM dd, yyyy')}</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Total Triggers</span>
+                <p className="text-2xl font-black mt-1">
+                  0
+                  <span className="text-xs opacity-30">matches</span>
+                </p>
+              </div>
+              <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10">
+                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 opacity-60">Success Rate</span>
+                <p className="text-2xl font-black mt-1 text-emerald-500">N/A</p>
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Delete Confirmation Dialog */}
+          <Card className="border border-dashed border-white/10 bg-transparent">
+            <CardHeader>
+              <CardTitle className="text-sm font-black uppercase tracking-[0.2em] text-muted-foreground opacity-50">Live feed</CardTitle>
+            </CardHeader>
+            <CardContent className="py-20 text-center">
+              <p className="text-xs font-bold uppercase tracking-widest opacity-20 italic">Awaiting first trigger event...</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-4xl border-white/10 glass-dark">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Filter</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete "
-              {filter.name}
-              "? This action cannot be undone.
+            <AlertDialogTitle className="text-2xl font-black tracking-tight text-destructive">PURGE STRATEGY?</AlertDialogTitle>
+            <AlertDialogDescription className="text-md font-medium">
+              You're about to permanently delete
+              {' '}
+              <strong>{filter.name}</strong>
+              . All associated analytics and history will be wiped.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="mt-6 gap-3">
+            <AlertDialogCancel className="rounded-xl border-white/10 font-bold">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="rounded-xl bg-destructive hover:bg-destructive/90 text-white font-bold"
             >
-              Delete
+              Confirm Deletion
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

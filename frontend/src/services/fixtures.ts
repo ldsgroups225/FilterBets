@@ -25,14 +25,14 @@ export async function getFixtures(filters?: FixtureFilters): Promise<FixtureList
 }
 
 // Get today's fixtures
-export async function getTodayFixtures(): Promise<Fixture[]> {
-  const response = await apiClient.get<Fixture[]>('/api/v1/fixtures/today')
+export async function getTodayFixtures(): Promise<FixtureListResponse> {
+  const response = await apiClient.get<FixtureListResponse>('/api/v1/fixtures/today')
   return response.data
 }
 
 // Get upcoming fixtures
-export async function getUpcomingFixtures(days: number = 7): Promise<Fixture[]> {
-  const response = await apiClient.get<Fixture[]>(`/api/v1/fixtures/upcoming?days=${days}`)
+export async function getUpcomingFixtures(days: number = 7): Promise<FixtureListResponse> {
+  const response = await apiClient.get<FixtureListResponse>(`/api/v1/fixtures/upcoming?days=${days}`)
   return response.data
 }
 

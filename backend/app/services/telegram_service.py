@@ -150,7 +150,7 @@ class TelegramService:
         Returns:
             Deep link URL string
         """
-        return f"https://t.me/{settings.telegram_bot_username}?start={token}"
+        return f"https://web.t.me/{settings.telegram_bot_username}?start={token}"
 
     async def get_telegram_status(self, user_id: int) -> dict[str, Any]:
         """Get Telegram link status for a user.

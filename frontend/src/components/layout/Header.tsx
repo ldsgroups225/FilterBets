@@ -1,4 +1,5 @@
 import { IconActivity, IconLogout, IconMenu2 } from '@tabler/icons-react'
+import { motion } from 'motion/react'
 import { Link, NavLink } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
@@ -13,68 +14,76 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
   const { isAuthenticated, user, logout } = useAuth()
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center">
+    <header className="sticky top-0 z-50 w-full glass-dark border-b border-white/5">
+      <div className="container flex h-16 items-center">
         {/* Mobile menu button */}
         {isAuthenticated && onMobileMenuToggle && (
           <Button
             variant="ghost"
             size="sm"
-            className="mr-2 md:hidden"
+            className="mr-2 md:hidden hover:bg-white/5"
             onClick={onMobileMenuToggle}
           >
             <IconMenu2 className="h-5 w-5" />
           </Button>
         )}
 
-        <div className="mr-4 flex">
-          <Link to="/" className="mr-6 flex items-center space-x-2">
-            <IconActivity className="h-6 w-6 text-primary" />
-            <span className="font-bold">FilterBets</span>
+        <div className="mr-4 flex items-center">
+          <Link to="/" className="mr-8 flex items-center space-x-2 group">
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/20 blur-md rounded-full group-hover:bg-primary/40 transition-colors" />
+              <IconActivity className="relative h-6 w-6 text-primary animate-pulse" />
+            </div>
+            <span className="font-bold text-lg tracking-tight text-glow">FilterBets</span>
           </Link>
-          <ThemeToggle />
+
           {isAuthenticated && (
-            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-              <NavLink
-                to="/"
-                end
-                className={({ isActive }) =>
-                  cn(
-                    'transition-colors hover:text-foreground/80',
-                    isActive ? 'text-foreground' : 'text-foreground/60',
+            <nav className="hidden lg:flex items-center space-x-8 text-sm font-medium">
+              {[
+                { label: 'Dashboard', to: '/' },
+                { label: 'Fixtures', to: '/fixtures' },
+                { label: 'Filters', to: '/filters' },
+              ].map(item => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.to === '/'}
+                  className={({ isActive }) =>
+                    cn(
+                      'relative py-1 transition-all duration-300 hover:text-primary',
+                      isActive ? 'text-primary' : 'text-foreground/60',
+                    )}
+                >
+                  {({ isActive }) => (
+                    <>
+                      {item.label}
+                      {isActive && (
+                        <motion.div
+                          layoutId="nav-underline"
+                          className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary),0.5)]"
+                        />
+                      )}
+                    </>
                   )}
-              >
-                Dashboard
-              </NavLink>
-              <NavLink
-                to="/fixtures"
-                className={({ isActive }) =>
-                  cn(
-                    'transition-colors hover:text-foreground/80',
-                    isActive ? 'text-foreground' : 'text-foreground/60',
-                  )}
-              >
-                Fixtures
-              </NavLink>
-              <NavLink
-                to="/filters"
-                className={({ isActive }) =>
-                  cn(
-                    'transition-colors hover:text-foreground/80',
-                    isActive ? 'text-foreground' : 'text-foreground/60',
-                  )}
-              >
-                Filters
-              </NavLink>
+                </NavLink>
+              ))}
             </nav>
           )}
         </div>
-        <div className="flex flex-1 items-center justify-end space-x-2">
+        <div className="flex flex-1 items-center justify-end space-x-4">
+          <ThemeToggle />
           {isAuthenticated
             ? (
-                <div className="flex items-center gap-2 md:gap-4">
-                  <span className="hidden sm:inline text-sm text-muted-foreground">{user?.email}</span>
-                  <Button variant="outline" size="sm" onClick={logout}>
+                <div className="flex items-center gap-4">
+                  <span className="hidden sm:inline text-xs font-medium text-muted-foreground bg-white/5 px-2.5 py-1 rounded-full border border-white/5">
+                    {user?.email}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={logout}
+                    className="border-white/10 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20 transition-all font-semibold"
+                  >
                     <IconLogout className="h-4 w-4 md:mr-2" />
                     <span className="hidden md:inline">Logout</span>
                   </Button>
@@ -83,7 +92,7 @@ export function Header({ onMobileMenuToggle }: HeaderProps) {
             : (
                 <Link
                   to="/login"
-                  className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+                  className="inline-flex items-center justify-center rounded-lg text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-primary/20 bg-primary/10 text-primary shadow-sm hover:bg-primary hover:text-primary-foreground h-9 px-6"
                 >
                   Login
                 </Link>

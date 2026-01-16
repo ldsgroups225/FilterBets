@@ -76,6 +76,29 @@ services:
     depends_on:
       - backend
 
+  # Telegram Bot (Development Mode)
+  telegram-bot:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: filterbets-telegram-bot
+    restart: unless-stopped
+    command: poetry run python -m app.bot.run_bot
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://filterbets:filterbets@db:5432/filterbets
+      - REDIS_URL=redis://redis:6379/0
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_BOT_USERNAME=${TELEGRAM_BOT_USERNAME:-filterbet_prematch_spy_bot}
+      - PYTHONPATH=/app
+    volumes:
+      - ./backend:/app
+      - /app/.venv
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
 volumes:
   postgres_data:
   redis_data:

@@ -25,7 +25,7 @@ export interface TelegramUnlinkResponse {
  */
 export async function generateTelegramLink(): Promise<TelegramLinkResponse> {
   const response = await apiClient.post<TelegramLinkResponse>(
-    '/auth/telegram/generate-link',
+    '/api/v1/auth/telegram/generate-link',
   )
   return response.data
 }
@@ -35,7 +35,7 @@ export async function generateTelegramLink(): Promise<TelegramLinkResponse> {
  */
 export async function getTelegramStatus(): Promise<TelegramStatusResponse> {
   const response = await apiClient.get<TelegramStatusResponse>(
-    '/auth/telegram/status',
+    '/api/v1/auth/telegram/status',
   )
   return response.data
 }
@@ -45,7 +45,7 @@ export async function getTelegramStatus(): Promise<TelegramStatusResponse> {
  */
 export async function unlinkTelegram(): Promise<TelegramUnlinkResponse> {
   const response = await apiClient.delete<TelegramUnlinkResponse>(
-    '/auth/telegram/unlink',
+    '/api/v1/auth/telegram/unlink',
   )
   return response.data
 }

@@ -1,5 +1,7 @@
 // Filter types
 
+import type { PaginatedResponse } from './common'
+
 export interface FilterRule {
   field: string
   operator: '=' | '!=' | '>' | '<' | '>=' | '<=' | 'in' | 'between'
@@ -33,7 +35,4 @@ export interface UpdateFilterRequest {
   alerts_enabled?: boolean
 }
 
-export interface FilterListResponse {
-  items: Filter[]
-  total: number
-}
+export type FilterListResponse = PaginatedResponse<Filter>

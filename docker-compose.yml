@@ -118,7 +118,7 @@ services:
       - DATABASE_URL=postgresql+asyncpg://filterbets:filterbets@db:5432/filterbets
       - REDIS_URL=redis://redis:6379/0
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - TELEGRAM_BOT_USERNAME=${TELEGRAM_BOT_USERNAME:-FilterBetsBot}
+      - TELEGRAM_BOT_USERNAME=${TELEGRAM_BOT_USERNAME:filterbet_prematch_spy_bot}
     depends_on:
       db:
         condition: service_healthy
