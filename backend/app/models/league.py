@@ -34,6 +34,7 @@ class League(Base):
     midsize_name: Mapped[str] = mapped_column(String(100), nullable=True)
     league_name: Mapped[str] = mapped_column(String(255), nullable=False)
     league_short_name: Mapped[str] = mapped_column(String(100), nullable=True)
+    logo_url: Mapped[str] = mapped_column(String(500), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     # Relationships

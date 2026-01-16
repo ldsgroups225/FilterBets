@@ -100,6 +100,21 @@ class Fixture(Base):
     def league_name(self) -> str | None:
         """Get league name."""
         return self.league.name if self.league else None
+    
+    @property
+    def league_logo(self) -> str | None:
+        """Get league logo."""
+        return self.league.logo_url if self.league else None
+
+    @property
+    def home_team_logo(self) -> str | None:
+        """Get home team logo."""
+        return self.home_team.logo_url if self.home_team else None
+
+    @property
+    def away_team_logo(self) -> str | None:
+        """Get away team logo."""
+        return self.away_team.logo_url if self.away_team else None
 
     @property
     def home_score(self) -> int | None:

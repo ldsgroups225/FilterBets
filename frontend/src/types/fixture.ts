@@ -18,6 +18,9 @@ export interface Fixture {
   home_odds: number | null
   draw_odds: number | null
   away_odds: number | null
+  home_team_logo?: string | null
+  away_team_logo?: string | null
+  league_logo?: string | null
 }
 
 export type FixtureListResponse = PaginatedResponse<Fixture>

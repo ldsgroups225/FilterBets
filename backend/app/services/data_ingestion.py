@@ -156,27 +156,27 @@ class DataIngestionService:
                         "midsize_name": row["midsizeName"] if row["midsizeName"] else None,
                         "league_name": row["leagueName"],
                         "league_short_name": row["leagueShortName"] if row["leagueShortName"] else None,
+                        "logo_url": f"https://a.espncdn.com/i/leaguelogos/soccer/500/{league_id}.png",
                     }
 
         leagues_data = list(unique_leagues.values())
 
-        # Get existing league IDs
-        result = await self.session.execute(select(League.league_id))
-        existing_ids = {row[0] for row in result.fetchall()}
-
-        # Filter out existing leagues
-        new_leagues = [l for l in leagues_data if l["league_id"] not in existing_ids]
-        
-        if not new_leagues:
-            return 0
-
-        # Bulk insert
+        # Bulk upsert
         count = 0
-        for i in range(0, len(new_leagues), self.batch_size):
-            batch = new_leagues[i : i + self.batch_size]
+        for i in range(0, len(leagues_data), self.batch_size):
+            batch = leagues_data[i : i + self.batch_size]
             
             stmt = insert(League).values(batch)
-            stmt = stmt.on_conflict_do_nothing(index_elements=["league_id"])
+            stmt = stmt.on_conflict_do_update(
+                index_elements=["league_id", "season_type", "year"],
+                set_={
+                    "logo_url": stmt.excluded.logo_url,
+                    "league_name": stmt.excluded.league_name,
+                    "season_name": stmt.excluded.season_name,
+                    "midsize_name": stmt.excluded.midsize_name,
+                    "league_short_name": stmt.excluded.league_short_name,
+                }
+            )
             await self.session.execute(stmt)
             count += len(batch)
 
@@ -227,23 +227,23 @@ class DataIngestionService:
                     "slug": row["slug"] if row["slug"] else None,
                 })
 
-        # Get existing team IDs
-        result = await self.session.execute(select(Team.team_id))
-        existing_ids = {row[0] for row in result.fetchall()}
-
-        # Filter out existing teams
-        new_teams = [t for t in teams_data if t["team_id"] not in existing_ids]
-        
-        if not new_teams:
-            return 0
-
-        # Bulk insert
+        # Bulk upsert
         count = 0
-        for i in range(0, len(new_teams), self.batch_size):
-            batch = new_teams[i : i + self.batch_size]
+        for i in range(0, len(teams_data), self.batch_size):
+            batch = teams_data[i : i + self.batch_size]
             
             stmt = insert(Team).values(batch)
-            stmt = stmt.on_conflict_do_nothing(index_elements=["team_id"])
+            stmt = stmt.on_conflict_do_update(
+                index_elements=["team_id"],
+                set_={
+                    "name": stmt.excluded.name,
+                    "display_name": stmt.excluded.display_name,
+                    "logo_url": stmt.excluded.logo_url,
+                    "color": stmt.excluded.color,
+                    "alternate_color": stmt.excluded.alternate_color,
+                    "venue_id": stmt.excluded.venue_id,
+                }
+            )
             await self.session.execute(stmt)
             count += len(batch)
 
