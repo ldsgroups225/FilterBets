@@ -1,3 +1,0 @@
-[submodule "docs/fastapi_mcp"]
-	path = docs/fastapi_mcp
-	url = https://github.com/davidegenerali/fastapi-mcp
