@@ -1,7 +1,13 @@
-"""Backtest schemas for request/response validation."""
+"""Backtest schemas for request/response validation.
+
+This module contains schemas for backtesting filter strategies against
+historical match data. Includes support for real odds data and advanced
+metrics like Kelly Criterion and Expected Value.
+"""
 
 from datetime import datetime
 from enum import Enum
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -29,8 +35,27 @@ class BacktestRequest(BaseModel):
     stake: float = Field(default=1.0, gt=0, description="Flat stake amount per bet")
 
 
+class OddsStats(BaseModel):
+    """Statistics about odds used in backtest."""
+
+    avg_odds: float = Field(..., description="Average odds across all bets")
+    min_odds: float = Field(..., description="Minimum odds encountered")
+    max_odds: float = Field(..., description="Maximum odds encountered")
+    median_odds: float | None = Field(None, description="Median odds")
+    std_dev: float | None = Field(None, description="Standard deviation of odds")
+    has_real_odds: bool = Field(
+        default=False, description="Whether real historical odds were used"
+    )
+    coverage_pct: float = Field(
+        default=0.0, description="Percentage of matches with odds data"
+    )
+
+
 class BacktestResponse(BaseModel):
-    """Schema for backtest response."""
+    """Schema for backtest response.
+
+    Contains the core metrics for evaluating a filter strategy's performance.
+    """
 
     filter_id: int
     bet_type: str
@@ -45,6 +70,9 @@ class BacktestResponse(BaseModel):
     avg_odds: float | None = Field(None, description="Average odds (if available)")
     cached: bool = Field(default=False, description="Whether result was from cache")
     run_at: datetime = Field(..., description="When backtest was run")
+    odds_stats: OddsStats | None = Field(
+        None, description="Detailed odds statistics (if odds available)"
+    )
 
     model_config = {"from_attributes": True}
 

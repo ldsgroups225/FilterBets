@@ -1,6 +1,7 @@
 """Backtest service for evaluating filter strategies against historical data."""
 
 from datetime import datetime, timedelta
+from statistics import mean, median, stdev
 from typing import Any
 
 from sqlalchemy import and_, delete, extract, select
@@ -17,6 +18,7 @@ from app.schemas.backtest import (
     DrawdownInfo,
     EnhancedBacktestResponse,
     MonthlyBreakdown,
+    OddsStats,
     ProfitPoint,
     StreakInfo,
 )
@@ -26,7 +28,6 @@ from app.services.filter_engine import FilterEngine
 class BacktestService:
     """Service for running backtests on filter strategies."""
 
-    # Cache TTL in hours
     CACHE_TTL_HOURS = 24
 
     def __init__(self, db: AsyncSession):
@@ -36,18 +37,7 @@ class BacktestService:
     async def run_backtest(
         self, filter_obj: Filter, request: BacktestRequest, include_analytics: bool = False
     ) -> BacktestResponse:
-        """
-        Run a backtest for a filter against historical data.
-
-        Args:
-            filter_obj: Filter to backtest
-            request: Backtest parameters
-            include_analytics: Whether to include detailed analytics
-
-        Returns:
-            BacktestResponse or EnhancedBacktestResponse with results
-        """
-        # Check for cached result
+        """Run a backtest for a filter against historical data."""
         cached_result = await self._get_cached_result(
             filter_obj.id, request.bet_type, request.seasons
         )
@@ -66,18 +56,23 @@ class BacktestService:
                 avg_odds=cached_result.avg_odds,
                 cached=True,
                 run_at=cached_result.run_at,
+                odds_stats=None,
             )
 
-        # Get matching fixtures for the filter
-        fixtures = await self._get_historical_fixtures(filter_obj.rules, request.seasons)  # type: ignore[arg-type]
+        rules_raw = filter_obj.rules
+        if isinstance(rules_raw, dict) and "rules" in rules_raw:
+            rules_list = rules_raw["rules"]
+        elif isinstance(rules_raw, dict):
+            rules_list = list(rules_raw.values())
+        else:
+            rules_list = rules_raw
 
-        # Evaluate bets
+        fixtures = await self._get_historical_fixtures(rules_list, request.seasons)
+
         results = self._evaluate_bets(fixtures, request.bet_type, request.stake)
 
-        # Calculate metrics
         response = self._calculate_metrics(filter_obj.id, request, results)
 
-        # Add analytics if requested
         if include_analytics:
             analytics = self._generate_analytics(results, fixtures)
             enhanced_response = EnhancedBacktestResponse(
@@ -86,7 +81,6 @@ class BacktestService:
             )
             return enhanced_response
 
-        # Cache the result
         await self._cache_result(filter_obj.id, request, response)
 
         return response
@@ -103,7 +97,6 @@ class BacktestService:
         result = await self.run_backtest(filter_obj, request, include_analytics=include_analytics)
         if isinstance(result, EnhancedBacktestResponse):
             return result
-        # Fallback
         return EnhancedBacktestResponse(**result.model_dump())
 
     async def get_quick_pre_match_analytics(
@@ -113,8 +106,6 @@ class BacktestService:
     ) -> dict[str, Any]:
         """Get quick pre-match analytics for a filter."""
         seasons_to_use = seasons or [2024, 2025]
-
-        # Default to OVER_2_5 for quick analytics
         request = BacktestRequest(bet_type=BetType.OVER_2_5, seasons=seasons_to_use)
         result = await self.run_backtest(filter_obj, request, include_analytics=True)
 
@@ -155,15 +146,13 @@ class BacktestService:
         self, rules: list[dict[str, Any]], seasons: list[int]
     ) -> list[Fixture]:
         """Get historical fixtures matching filter rules."""
-        # Build query for finished matches in specified seasons (by year)
         query = select(Fixture).where(
             and_(
-                Fixture.status_id == 28,  # Full Time
+                Fixture.status_id == 28,
                 extract('year', Fixture.match_date).in_(seasons),
             )
         )
 
-        # Apply filter rules
         for rule in rules:
             condition = self.filter_engine._build_condition(
                 rule["field"], rule["operator"], rule["value"]
@@ -174,33 +163,57 @@ class BacktestService:
         result = await self.db.execute(query)
         return list(result.scalars().all())
 
+    def _get_fixture_odds(self, fixture: Fixture, bet_type: BetType) -> float:
+        """Get odds for a fixture based on bet type.
+
+        Returns real odds if available, otherwise falls back to default 2.0.
+        """
+        features = fixture.features_metadata or {}
+        odds_data = features.get("odds")
+
+        if odds_data:
+            if bet_type == BetType.HOME_WIN:
+                return odds_data.get("home_odds", 2.0)
+            elif bet_type == BetType.AWAY_WIN:
+                return odds_data.get("away_odds", 2.0)
+            elif bet_type == BetType.DRAW:
+                return odds_data.get("draw_odds", 3.0)
+            elif bet_type in (BetType.OVER_2_5, BetType.UNDER_2_5):
+                over_odds = odds_data.get("over_2_5_odds")
+                if over_odds:
+                    return over_odds
+
+        return 2.0  # Default odds if not available
+
     def _evaluate_bets(
         self, fixtures: list[Fixture], bet_type: BetType, stake: float
     ) -> list[dict[str, Any]]:
-        """Evaluate bet outcomes for each fixture."""
+        """Evaluate bet outcomes for each fixture with real odds."""
         results = []
 
         for fixture in fixtures:
             outcome = self._evaluate_single_bet(fixture, bet_type)
+            odds = self._get_fixture_odds(fixture, bet_type)
+
             results.append({
                 "fixture_id": fixture.id,
-                "outcome": outcome,  # "win", "loss", or "push"
+                "outcome": outcome,
                 "stake": stake,
-                "profit": self._calculate_profit(outcome, stake),
+                "odds": odds,
+                "profit": self._calculate_profit(outcome, stake, odds),
+                "match_date": fixture.match_date,
             })
 
         return results
 
     def _evaluate_single_bet(self, fixture: Fixture, bet_type: BetType) -> str:
-        """
-        Evaluate a single bet outcome.
+        """Evaluate a single bet outcome.
 
         Returns: "win", "loss", or "push"
         """
         home_score = fixture.home_team_score
         away_score = fixture.away_team_score
 
-        # Handle missing scores
         if home_score is None or away_score is None:
             return "push"
 
@@ -208,36 +221,67 @@ class BacktestService:
 
         if bet_type == BetType.HOME_WIN:
             return "win" if home_score > away_score else "loss"
-
         elif bet_type == BetType.AWAY_WIN:
             return "win" if away_score > home_score else "loss"
-
         elif bet_type == BetType.DRAW:
             return "win" if home_score == away_score else "loss"
-
         elif bet_type == BetType.OVER_2_5:
             return "win" if total_goals > 2.5 else "loss"
-
         elif bet_type == BetType.UNDER_2_5:
             return "win" if total_goals < 2.5 else "loss"
 
         return "push"
 
-    def _calculate_profit(self, outcome: str, stake: float) -> float:
-        """
-        Calculate profit for a bet outcome.
+    def _calculate_profit(self, outcome: str, stake: float, odds: float) -> float:
+        """Calculate profit using real odds.
 
-        Using flat stake with assumed odds of 2.0 (even money) for simplicity.
-        In a real system, this would use actual odds data.
+        Args:
+            outcome: "win", "loss", or "push"
+            stake: Amount wagered
+            odds: Decimal odds for the bet
         """
-        assumed_odds = 2.0
-
         if outcome == "win":
-            return stake * (assumed_odds - 1)  # Net profit
+            return stake * (odds - 1)
         elif outcome == "loss":
             return -stake
-        else:  # push
-            return 0.0
+        return 0.0
+
+    def _calculate_odds_stats(self, results: list[dict[str, Any]]) -> OddsStats:
+        """Calculate statistics about odds used in the backtest."""
+        odds_values = [r["odds"] for r in results if r["outcome"] != "push"]
+        fixtures_with_odds = sum(
+            1 for r in results
+            if r.get("odds", 2.0) != 2.0 or r.get("outcome") != "push"
+        )
+
+        if not odds_values:
+            return OddsStats(
+                avg_odds=2.0,
+                min_odds=2.0,
+                max_odds=2.0,
+                median_odds=None,
+                std_dev=None,
+                has_real_odds=False,
+                coverage_pct=0.0,
+            )
+
+        has_real_odds = any(o != 2.0 for o in odds_values)
+        avg_odds = mean(odds_values)
+        min_odds = min(odds_values)
+        max_odds = max(odds_values)
+        median_odds = median(odds_values)
+        std_dev = stdev(odds_values) if len(odds_values) > 1 else None
+        coverage_pct = (fixtures_with_odds / len(results)) * 100 if results else 0.0
+
+        return OddsStats(
+            avg_odds=round(avg_odds, 3),
+            min_odds=round(min_odds, 3),
+            max_odds=round(max_odds, 3),
+            median_odds=round(median_odds, 3) if median_odds else None,
+            std_dev=round(std_dev, 3) if std_dev else None,
+            has_real_odds=has_real_odds,
+            coverage_pct=round(coverage_pct, 2),
+        )
 
     def _calculate_metrics(
         self,
@@ -245,20 +289,21 @@ class BacktestService:
         request: BacktestRequest,
         results: list[dict[str, Any]],
     ) -> BacktestResponse:
-        """Calculate backtest metrics from results."""
+        """Calculate backtest metrics from results with real odds."""
         total_matches = len(results)
         wins = sum(1 for r in results if r["outcome"] == "win")
         losses = sum(1 for r in results if r["outcome"] == "loss")
         pushes = sum(1 for r in results if r["outcome"] == "push")
 
-        # Calculate win rate (excluding pushes)
         evaluated = wins + losses
         win_rate = (wins / evaluated * 100) if evaluated > 0 else 0.0
 
-        # Calculate total profit and ROI
         total_profit = sum(r["profit"] for r in results)
         total_staked = sum(r["stake"] for r in results if r["outcome"] != "push")
         roi_percentage = (total_profit / total_staked * 100) if total_staked > 0 else 0.0
+
+        odds_stats = self._calculate_odds_stats(results)
+        avg_odds = odds_stats.avg_odds if odds_stats.has_real_odds else 2.0
 
         return BacktestResponse(
             filter_id=filter_id,
@@ -271,16 +316,16 @@ class BacktestService:
             win_rate=round(win_rate, 2),
             total_profit=round(total_profit, 2),
             roi_percentage=round(roi_percentage, 2),
-            avg_odds=2.0,  # Assumed odds
+            avg_odds=avg_odds,
             cached=False,
             run_at=datetime.utcnow(),
+            odds_stats=odds_stats,
         )
 
     async def _cache_result(
         self, filter_id: int, request: BacktestRequest, response: BacktestResponse
     ) -> None:
         """Cache backtest result."""
-        # Delete any existing cache for this filter/bet_type/seasons combo
         seasons_str = ",".join(str(s) for s in sorted(request.seasons))
 
         await self.db.execute(
@@ -293,7 +338,6 @@ class BacktestService:
             )
         )
 
-        # Create new cache entry
         cache_entry = BacktestResult(
             filter_id=filter_id,
             bet_type=request.bet_type.value,
