@@ -26,6 +26,16 @@ class FixtureResponse(BaseModel):
     status_id: int = Field(..., description="Match status ID")
     update_time: datetime | None = Field(None, description="Last update timestamp")
     created_at: datetime = Field(..., description="Record creation timestamp")
+    
+    # Flattened fields for frontend
+    home_team_name: str | None = Field(None, description="Home team name")
+    away_team_name: str | None = Field(None, description="Away team name")
+    league_name: str | None = Field(None, description="League name")
+    home_score: int | None = Field(None, description="Home score")
+    away_score: int | None = Field(None, description="Away score")
+    home_odds: float | None = Field(None, description="Home odds")
+    draw_odds: float | None = Field(None, description="Draw odds")
+    away_odds: float | None = Field(None, description="Away odds")
 
     class Config:
         from_attributes = True

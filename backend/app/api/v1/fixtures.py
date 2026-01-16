@@ -5,6 +5,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import and_, select
+from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_db
@@ -63,7 +64,11 @@ async def get_fixtures(
     if filters:
         query = query.where(and_(*filters))
 
-    query = query.order_by(Fixture.match_date.desc())
+    query = query.options(
+        joinedload(Fixture.home_team),
+        joinedload(Fixture.away_team),
+        joinedload(Fixture.league),
+    ).order_by(Fixture.match_date.desc())
 
     items, meta = await paginate(db, query, page, per_page)
 
@@ -99,6 +104,11 @@ async def get_today_fixtures(
                 Fixture.match_date >= today,
                 Fixture.match_date < tomorrow,
             )
+        )
+        .options(
+            joinedload(Fixture.home_team),
+            joinedload(Fixture.away_team),
+            joinedload(Fixture.league),
         )
         .order_by(Fixture.match_date)
     )
@@ -139,6 +149,11 @@ async def get_upcoming_fixtures(
                 Fixture.match_date >= now,
                 Fixture.match_date <= future_date,
             )
+        )
+        .options(
+            joinedload(Fixture.home_team),
+            joinedload(Fixture.away_team),
+            joinedload(Fixture.league),
         )
         .order_by(Fixture.match_date)
     )

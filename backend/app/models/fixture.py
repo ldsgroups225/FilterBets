@@ -86,5 +86,45 @@ class Fixture(Base):
         away = self.away_team_score or 0
         return home + away
 
+    @property
+    def home_team_name(self) -> str | None:
+        """Get home team name."""
+        return self.home_team.name if self.home_team else None
+
+    @property
+    def away_team_name(self) -> str | None:
+        """Get away team name."""
+        return self.away_team.name if self.away_team else None
+
+    @property
+    def league_name(self) -> str | None:
+        """Get league name."""
+        return self.league.name if self.league else None
+
+    @property
+    def home_score(self) -> int | None:
+        """Get home team score (alias)."""
+        return self.home_team_score
+
+    @property
+    def away_score(self) -> int | None:
+        """Get away team score (alias)."""
+        return self.away_team_score
+
+    @property
+    def home_odds(self) -> float | None:
+        """Get home odds (placeholder)."""
+        return None
+
+    @property
+    def draw_odds(self) -> float | None:
+        """Get draw odds (placeholder)."""
+        return None
+
+    @property
+    def away_odds(self) -> float | None:
+        """Get away odds (placeholder)."""
+        return None
+
     def __repr__(self) -> str:
         return f"<Fixture(id={self.id}, event_id={self.event_id})>"
